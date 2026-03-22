@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · chimie organique</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;--ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;--sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;--line:rgba(26,24,20,0.08);}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2rem;font-weight:300;text-align:center;max-width:440px;line-height:1.6;}
+.chap-list{max-width:520px;width:100%;display:flex;flex-direction:column;}
+.chap-section{margin-bottom:1.5rem;}
+.chap-section-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.chap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.5;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:20px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-level{font-size:10px;color:var(--ink3);padding:1px 8px;border-radius:999px;border:1px solid var(--line);}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.topbar{display:flex;align-items:center;gap:10px;padding:0.7rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.btnback:hover{color:var(--ink);}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+.dots-row{display:flex;gap:3px;padding:0.4rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .r{color:#c85a5a;}
+.cbody .b{color:#5a7ec8;}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);}
+.cbody .why{display:block;background:rgba(168,158,200,0.1);border:1px solid rgba(168,158,200,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#4a4470;line-height:1.6;}
+.qbadge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:inline-block;margin-bottom:6px;}
+.qbadge.open{border-color:rgba(168,158,200,0.4);color:#4a4470;background:rgba(168,158,200,0.08);}
+.qbadge.qcm{border-color:rgba(122,158,135,0.4);color:#3d6b4f;background:rgba(122,158,135,0.08);}
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.open-wrap{display:flex;gap:7px;align-items:center;}
+.open-input{flex:1;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);outline:none;}
+.open-input:focus{border-color:var(--lav);}
+.open-btn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:8px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.open-btn:hover{opacity:0.75;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;}
+.btnhint:hover{color:var(--ink2);}
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;overflow-y:auto;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:480px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · sciences exactes</div>
+  <div class="home-title">chimie organique</div>
+  <div class="home-sub">modules 11–14 · nomenclature · réactivité · stéréochimie · aromatiques<br>5 questions par notion · du débutant au niveau L2</div>
+  <div class="chap-list" id="chap-list"></div>
+</div>
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← chimie organique</button>
+    <span style="color:var(--ink3);font-size:12px;">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div>
+        <div class="qbadge" id="g-qbadge"></div>
+        <div class="qtext" id="g-q"></div>
+      </div>
+      <div class="choices" id="g-choices"></div>
+      <div class="open-wrap" id="g-open" style="display:none;">
+        <input class="open-input" id="g-input" placeholder="tape ta réponse..." onkeydown="if(event.key==='Enter')checkOpen()">
+        <button class="open-btn" onclick="checkOpen()">→</button>
+      </div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+const CHAPTERS = [
+
+
+// ══════════════════════════════════════════════════════
+// MODULE 0 — INTRODUCTION (niveau zéro)
+// ══════════════════════════════════════════════════════
+{id:"o0",sec:"module 0 · introduction",num:"0",name:"pourquoi la chimie organique ?",level:"zéro",
+takeaway:["La chimie organique = chimie du carbone (C)","Le carbone fait 4 liaisons — il peut enchaîner des millions de structures","Organique ≠ naturel : les plastiques sont organiques, le sel (NaCl) ne l'est pas","Les molécules de la vie (ADN, protéines, lipides) sont toutes organiques","Comprendre la structure = comprendre la réactivité et la fonction"],
+questions:[
+{c:"notion · définition",type:"qcm",
+code:`<span class="cm">// chimie organique = chimie du carbone</span>
+<span class="hl">carbone</span> : Z=6, fait <span class="hl">4 liaisons</span>
+<span class="ex">méthane CH₄  : C + 4H
+éthane C₂H₆  : C−C + 6H
+glucose C₆H₁₂O₆ : molécule de la vie</span>
+<span class="why">// ~10 millions de composés organiques connus
+// vs ~500 000 composés inorganiques</span>`,
+q:"Quelle propriété du carbone explique la diversité immense des molécules organiques ?",
+ch:["Il est très abondant dans l'univers","Il peut former 4 liaisons et s'enchaîner avec lui-même indéfiniment","Il est le plus léger de tous les éléments","Il ne réagit jamais avec d'autres atomes"],
+ok:1,hint:"compte les liaisons du carbone dans CH₄ : 4 liaisons → possibilités infinies d'enchaînements",
+fb_ok:"// correct — 4 liaisons + enchaînements C−C sans limite → millions de structures.",
+fb_no:"// le carbone fait 4 liaisons ET peut s'enchaîner C−C → diversité structurale immense.",
+mv:{dx:1,dy:0}},
+
+{c:"notion · organique vs inorganique",type:"qcm",
+code:`<span class="cm">// organique = contient C lié à H</span>
+<span class="hl">organique</span>  : éthanol, aspirine, plastique, ADN
+<span class="r">inorganique</span> : NaCl, H₂O, Fe, SiO₂, NaOH
+<span class="why">// "organique" ≠ "naturel" !
+// polystyrène = organique synthétique
+// sel marin = inorganique naturel</span>`,
+q:"Lequel de ces composés est organique ?",
+ch:["NaCl — sel de table","H₂O — eau","C₂H₅OH — éthanol","Fe₂O₃ — rouille"],
+ok:2,hint:"organique = contient du carbone lié à de l'hydrogène",
+fb_ok:"// correct — éthanol C₂H₅OH contient C lié à H → organique.",
+fb_no:"// organique = C lié à H. NaCl, H₂O, Fe₂O₃ ne contiennent pas ce lien C−H.",
+mv:{dx:0,dy:-1}},
+
+{c:"notion · types de liaisons C−C",type:"qcm",
+code:`<span class="cm">// liaisons entre carbones</span>
+<span class="hl">simple</span>  C−C  : 1 paire e⁻ partagée (σ)
+<span class="hl">double</span>  C=C  : 2 paires e⁻ (σ + π)
+<span class="hl">triple</span>  C≡C  : 3 paires e⁻ (σ + 2π)
+<span class="why">// la liaison π est exposée → réactive
+// alcanes (C−C) peu réactifs
+// alcènes (C=C) et alcynes (C≡C) : réactifs</span>`,
+q:"Pourquoi les alcènes (C=C) sont-ils plus réactifs que les alcanes (C−C) ?",
+ch:["Ils sont plus grands","Leur liaison π (pi) est accessible aux réactifs","Ils contiennent plus de carbone","Leur liaison σ est plus forte"],
+ok:1,hint:"la liaison π se trouve au-dessus et en-dessous du plan → exposée aux attaques",
+fb_ok:"// correct — la liaison π est accessible → site d'addition pour nucléophiles et électrophiles.",
+fb_no:"// la liaison π (composante de C=C) est exposée → réactive. C−C n'a que σ → moins accessible.",
+mv:{dx:1,dy:0}},
+
+{c:"notion · représentation squelettique",type:"qcm",
+code:`<span class="cm">// formule topologique (squelette)</span>
+<span class="why">// chaque sommet/extrémité = 1 carbone
+// les H ne sont pas dessinés
+// liaisons = traits</span>
+<span class="ex">butane : CH₃−CH₂−CH₂−CH₃
+→ zigzag de 3 traits
+→ 4 carbones (2 extrémités + 2 milieux)</span>`,
+q:"Dans une formule squelettique (zigzag), que représente chaque sommet et extrémité ?",
+ch:["Un atome d'hydrogène","Un atome de carbone (avec ses H implicites)","Une liaison double","Un atome d'oxygène"],
+ok:1,hint:"les H sont implicites — le carbone a toujours 4 liaisons au total",
+fb_ok:"// correct — chaque nœud = carbone. Les H sont déduits (4 liaisons − liaisons tracées = H implicites).",
+fb_no:"// chaque sommet = carbone. H implicites = 4 liaisons totales − liaisons dessinées.",
+mv:{dx:0,dy:-1}},
+
+{c:"application · compter les carbones",type:"qcm",
+code:`<span class="cm">// lire une formule topologique</span>
+<span class="ex">propane : zigzag 2 traits → 3 sommets = 3C
+   → CH₃−CH₂−CH₃
+pentane : zigzag 4 traits → 5 sommets = 5C
+   → CH₃−CH₂−CH₂−CH₂−CH₃</span>
+<span class="why">// nombre de C = nombre de sommets + extrémités
+// dans un zigzag linéaire : n traits = n+1 carbones</span>`,
+q:"Un zigzag a 5 traits (segments). Combien de carbones compte-t-il ?",
+ch:["5","6","4","7"],
+ok:1,hint:"n traits = n+1 carbones : 5 traits → 6 carbones",
+fb_ok:"// correct — 5 traits → 6 sommets/extrémités → 6 carbones.",
+fb_no:"// n traits = n+1 carbones. 5 traits → 6 carbones.",
+mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 11 — NOMENCLATURE ET FONCTIONS
+// ══════════════════════════════════════════════════════
+{id:"o1a",sec:"module 11 · nomenclature et fonctions",num:"11",name:"hydrocarbures — alcanes, alcènes, alcynes",level:"débutant",
+takeaway:["Alcanes CₙH₂ₙ₊₂ : liaisons simples, saturés, peu réactifs","Alcènes CₙH₂ₙ : une double liaison C=C","Alcynes CₙH₂ₙ₋₂ : une triple liaison C≡C","Préfixes : meth(1), eth(2), prop(3), but(4), pent(5), hex(6)","Isomères de constitution : même formule, enchaînement différent"],
+questions:[
+{c:"notion · alcanes — formule",type:"qcm",
+code:`<span class="cm">// alcanes CₙH₂ₙ₊₂ — liaisons simples</span>
+<span class="ex">n=1 méthane  CH₄
+n=2 éthane   C₂H₆
+n=3 propane  C₃H₈
+n=4 butane   C₄H₁₀</span>
+<span class="cm">// saturés = liaisons simples uniquement</span>
+<span class="why">// peu réactifs sauf combustion et halogénation radicalaire
+// utilisés comme combustibles (gaz naturel = méthane)</span>`,
+q:"Formule de l'hexane (n=6) ?",
+ch:["C₆H₁₂","C₆H₁₄","C₆H₁₆","C₆H₁₀"],ok:1,
+hint:"CₙH₂ₙ₊₂ : 2×6+2=14",
+fb_ok:"// correct — hexane : C₆H₁₄.",
+fb_no:"// CₙH₂ₙ₊₂ : n=6 → 2(6)+2=14 → C₆H₁₄.",mv:{dx:1,dy:0}},
+
+{c:"notion · alcènes et alcynes",type:"qcm",
+code:`<span class="cm">// alcènes et alcynes</span>
+<span class="kw">alcène</span>  CₙH₂ₙ   : 1 double liaison C=C  (éthylène C₂H₄)
+<span class="kw">alcyne</span>  CₙH₂ₙ₋₂ : 1 triple liaison C≡C  (acétylène C₂H₂)
+<span class="why">// double liaison = site réactif → additions
+// acétylène utilisé pour le soudage (très énergétique)
+// éthylène = matière première plastiques (polyéthylène)</span>`,
+q:"Le propène (propylène) a une double liaison. Sa formule moléculaire ?",
+ch:["C₃H₈","C₃H₆","C₃H₄","C₃H₁₀"],ok:1,
+hint:"alcène CₙH₂ₙ : n=3 → 2×3=6",
+fb_ok:"// correct — propène : C₃H₆ (alcène).",
+fb_no:"// alcène CₙH₂ₙ : n=3 → C₃H₆.",mv:{dx:0,dy:-1}},
+
+{c:"calcul · degrés d'insaturation",type:"qcm",
+code:`<span class="cm">// degrés d'insaturation (DI)</span>
+DI = (2C + 2 − H) / 2   (pour CₓHᵧ)
+<span class="hl">DI=1</span> : 1 double liaison ou 1 cycle
+<span class="hl">DI=2</span> : 1 triple liaison ou 2 doubles ou 1 double + 1 cycle
+<span class="ex">benzène C₆H₆ : DI = (12+2−6)/2 = 4 (3 doubles + 1 cycle)</span>`,
+q:"Benzène C₆H₆ : DI = ?",
+ch:["2","3","4","6"],ok:2,
+hint:"DI = (2×6 + 2 − 6) / 2",
+fb_ok:"// correct — DI = (12+2−6)/2 = 4. 3 doubles liaisons + 1 cycle = 4.",
+fb_no:"// DI = (2×6+2−6)/2 = 8/2 = 4.",mv:{dx:1,dy:0}},
+
+{c:"application · isomérie de constitution",type:"qcm",
+code:`<span class="cm">// isomères de constitution — même formule, structure différente</span>
+C₄H₁₀ → butane (chaîne droite) ou isobutane (ramifié)
+<span class="ex">butane   : CH₃−CH₂−CH₂−CH₃
+isobutane: CH₃−CH(CH₃)−CH₃</span>
+<span class="why">// propriétés physiques différentes (Tébullition, etc.)
+// indice d'octane de l'isobutane > butane → meilleur carburant</span>`,
+q:"Le butanol (C₄H₉OH) peut exister sous plusieurs formes. Ces formes sont des :",
+ch:["Isotopes","Isomères de constitution","Énantiomères uniquement","Conformères"],ok:1,
+hint:"même formule moléculaire, structure différente = isomères de constitution",
+fb_ok:"// correct — isomères de constitution : même formule moléculaire, enchaînements d'atomes différents.",
+fb_no:"// même formule C₄H₉OH mais groupes −OH en positions différentes = isomères de constitution.",mv:{dx:0,dy:-1}},
+
+{c:"piège · nomenclature IUPAC",type:"qcm",
+code:`<span class="cm">// nomenclature IUPAC — règles de base</span>
+1. Trouver la chaîne principale la plus longue
+2. Numéroter pour donner le plus petit locant aux substituants
+3. Nommer : locant-substituant + nom chaîne principale
+<span class="ex">CH₃−CH(CH₃)−CH₂−CH₃ :
+  chaîne principale = 4C → butane
+  méthyle en C2 → <span class="hl">2-méthylbutane</span></span>`,
+q:"CH₃−CH₂−CH(CH₃)−CH₃ : quel est le nom IUPAC ?",
+ch:["2-méthylpropane","2-méthylbutane","3-méthylbutane","méthylbutane"],ok:1,
+hint:"chaîne principale = 4C (butane). Méthyle sur quel carbone en numérotant par le plus court côté ?",
+fb_ok:"// correct — 4C = butane. Méthyle en C2 (numéroter du côté ramification) → 2-méthylbutane.",
+fb_no:"// chaîne la plus longue = 4C (butane). Méthyle sur C2 → 2-méthylbutane.",mv:{dx:1,dy:0}},
+]},
+
+{id:"o1b",sec:"module 11 · nomenclature et fonctions",num:"12",name:"groupes fonctionnels",level:"débutant",
+takeaway:["Alcool −OH : polaire, liaisons H, acide faible (pKa~16)","Aldéhyde −CHO et cétone C=O : carbonyle, électrophile","Acide carboxylique −COOH : pKa 4-5, le plus acide des fonctions organiques","Amine −NH₂ : basique (pKb~4), nucléophile","Ester −COO− et amide −CONH− : produits de condensation"],
+questions:[
+{c:"notion · alcool",type:"qcm",
+code:`<span class="cm">// alcool — groupe hydroxyle −OH</span>
+<span class="kw">primaire</span>  : −OH sur C lié à 1 C (ex: éthanol CH₃CH₂OH)
+<span class="kw">secondaire</span>: −OH sur C lié à 2 C
+<span class="kw">tertiaire</span> : −OH sur C lié à 3 C
+<span class="why">// polarité O−H → liaisons H → miscible avec eau
+// déshydratation → alcène · oxydation → aldéhyde ou cétone
+// éthanol : alcool de fermentation, antiseptique (70%)</span>`,
+q:"L'éthanol CH₃−CH₂−OH est un alcool :",
+ch:["Tertiaire","Secondaire","Primaire","Phénol"],ok:2,
+hint:"le C portant −OH est lié à combien d'autres C ?",
+fb_ok:"// correct — le C portant −OH (CH₂) n'est lié qu'à 1 autre C → alcool primaire.",
+fb_no:"// C portant −OH lié à 1 autre C → primaire.",mv:{dx:1,dy:0}},
+
+{c:"notion · carbonyle — aldéhyde vs cétone",type:"qcm",
+code:`<span class="cm">// carbonyle C=O</span>
+<span class="kw">aldéhyde</span> : −<span class="hl">CHO</span> (C=O en bout de chaîne)
+  ex: formaldéhyde HCHO · acétaldéhyde CH₃CHO
+<span class="kw">cétone</span>   : −<span class="hl">CO</span>− (C=O en milieu de chaîne)
+  ex: acétone (CH₃)₂CO
+<span class="why">// C carbonylique = électrophile → attaqué par nucléophiles
+// test de Fehling/Tollens : aldéhyde s'oxyde (réducteur), cétone non</span>`,
+q:"Dans le glucose (CHO en bout de chaîne), le groupe carbonyle est :",
+ch:["Une cétone","Un aldéhyde","Un acide carboxylique","Un alcool"],ok:1,
+hint:"C=O en bout de chaîne = aldéhyde",
+fb_ok:"// correct — glucose = aldohexose. CHO en C1 = aldéhyde → réducteur (test Fehling positif).",
+fb_no:"// C=O en bout de chaîne = aldéhyde. Le glucose est un aldéhyde (aldohexose).",mv:{dx:0,dy:-1}},
+
+{c:"notion · acide carboxylique",type:"qcm",
+code:`<span class="cm">// acide carboxylique −COOH</span>
+<span class="kw">pKa</span> ≈ 4-5   (acide faible mais le plus acide des fonctions organiques)
+<span class="ex">acide acétique CH₃COOH   pKa=4.76
+acide formique HCOOH     pKa=3.75
+acide benzoïque C₆H₅COOH pKa=4.20</span>
+<span class="why">// groupement −COOH omniprésent en biologie
+// acides aminés (−NH₂ et −COOH), acides gras, prostaglandines
+// aspirine = acide acétylsalicylique (COOH + ester)</span>`,
+q:"L'aspirine contient un groupe −COOH (pKa=3.5). C'est :",
+ch:["Un alcool","Une amine","Un acide carboxylique","Un aldéhyde"],ok:2,
+hint:"−COOH = groupe carboxyle = acide carboxylique",
+fb_ok:"// correct — COOH = acide carboxylique. D'où le nom 'acide' acétylsalicylique.",
+fb_no:"// −COOH = groupe carboxyle = acide carboxylique.",mv:{dx:1,dy:0}},
+
+{c:"application · amine basique",type:"qcm",
+code:`<span class="cm">// amine −NH₂ — propriétés</span>
+<span class="kw">basique</span>  : NH₂ + H₂O ⇌ NH₃⁺ + OH⁻  (pKb~4)
+<span class="kw">nucléophile</span> : paire libre sur N → attaque les électrophiles
+<span class="ex">histamine : −NH₂ (libérée lors d'allergies)
+dopamine  : −NH₂ (neurotransmetteur)
+adrénaline: −NH− (secondaire)</span>
+<span class="why">// les antihistaminiques bloquent les récepteurs H1
+// ils contiennent souvent eux-mêmes un groupe amine</span>`,
+q:"L'histamine libérée lors d'une réaction allergique contient −NH₂. Ce groupe est :",
+ch:["Électrophile — attire les électrons","Acide — libère H⁺","Nucléophile et basique — paire libre sur N","Inerte"],ok:2,
+hint:"N avec paire libre = nucléophile ET basique (accepte H⁺)",
+fb_ok:"// correct — NH₂ : paire libre sur N → nucléophile (donne e⁻) ET basique (accepte H⁺).",
+fb_no:"// NH₂ : N a une paire libre → nucléophile. Aussi basique (accepte H⁺ → NH₃⁺).",mv:{dx:0,dy:-1}},
+
+{c:"piège · ester vs acide carboxylique",type:"qcm",
+code:`<span class="cm">// ester vs acide carboxylique</span>
+<span class="kw">acide</span> : R−<span class="hl">COOH</span>    (H libre)
+<span class="kw">ester</span> : R−<span class="hl">COO</span>−R'  (H remplacé par alkyle)
+ester = produit de la réaction acide + alcool
+<span class="ex">acide acétique + éthanol → acétate d'éthyle + H₂O
+CH₃COOH + CH₃CH₂OH → CH₃COOC₂H₅ + H₂O</span>
+<span class="why">// esters = arômes fruités (banane, poire, ananas)
+// lipides (triglycérides) = triesters du glycérol
+// l'aspirine contient un groupe ester (acétate) ET COOH</span>`,
+q:"L'huile d'olive est un triester du glycérol (triglycéride). L'hydrolyse d'un triglycéride donne :",
+ch:["3 acides aminés + glycérol","3 acides gras + glycérol","3 alcools + acide gras","6 acides gras"],ok:1,
+hint:"ester + eau → acide + alcool (ici glycérol = alcool triol)",
+fb_ok:"// correct — hydrolyse triglycéride → 3 acides gras + glycérol. Réaction de saponification.",
+fb_no:"// ester + H₂O → acide + alcool. Triglycéride → 3 acides gras + glycérol.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 12 — RÉACTIVITÉ EN CHIMIE ORGANIQUE
+// ══════════════════════════════════════════════════════
+{id:"o2a",sec:"module 12 · réactivité organique",num:"13",name:"nucléophiles, électrophiles et mécanismes",level:"intermédiaire",
+takeaway:["Nucléophile = riche en électrons, attaque les sites δ+ (N, O, C⁻, halogénures)","Électrophile = pauvre en électrons, attaque les sites δ− (H⁺, carbonyle, carbocation)","SN2 : inversion de configuration (Walden), C° primaire, nucléophile fort","SN1 : carbocation intermédiaire, racémisation, C° tertiaire","L'addition sur alcènes suit la règle de Markovnikov"],
+questions:[
+{c:"notion · nucléophile vs électrophile",type:"qcm",
+code:`<span class="cm">// nucléophile vs électrophile</span>
+<span class="hl">nucléophile</span> = riche en e⁻, attaque site δ+
+  exemples : OH⁻, NH₃, CN⁻, I⁻, H₂O
+<span class="hl">électrophile</span> = pauvre en e⁻, attaque site δ−
+  exemples : H⁺, BF₃, carbocations R⁺, C=O
+<span class="why">// "nucléo" = aime le noyau (positif)
+// "électro" = aime les électrons
+// toute réaction organique = nucléophile attaque électrophile</span>`,
+q:"HO⁻ (ion hydroxyde) est :",
+ch:["Électrophile — porte une charge négative","Nucléophile — paire libre sur O, attaque les sites δ+","Ni l'un ni l'autre","Ambiphile"],ok:1,
+hint:"charge négative + paire libre = nucléophile",
+fb_ok:"// correct — HO⁻ : O a des paires libres + charge − → nucléophile fort.",
+fb_no:"// HO⁻ : paires libres sur O, charge − → riche en e⁻ → nucléophile.",mv:{dx:1,dy:0}},
+
+{c:"application · SN2 — inversion",type:"qcm",
+code:`<span class="cm">// SN2 — substitution nucléophile bimoléculaire</span>
+mécanisme en <span class="hl">un seul step</span>
+Nu⁻ + R−X → Nu−R + X⁻
+<span class="hl">inversion de configuration</span> (effet Walden)
+favorisé : C° primaire · Nu fort · solvant aprotique
+v = k[substrat][Nu]   (ordre 2)
+<span class="why">// encombrement stérique bloque SN2 sur C° tertiaire
+// l'attaque se fait à 180° du groupe partant
+// inversion = comme un parapluie qui se retourne</span>`,
+q:"CH₃Br + HO⁻ → CH₃OH + Br⁻. Mécanisme SN2. Quelle est la stéréochimie du produit ?",
+ch:["Rétention de configuration","Inversion de configuration (Walden)","Racémisation","Pas de stéréochimie (CH₃ est achiral)"],ok:3,
+hint:"CH₃Br n'a pas de carbone asymétrique → pas de stéréochimie",
+fb_ok:"// correct — CH₃ n'a pas de C asymétrique → pas de stéréochimie. L'inversion de Walden s'applique aux C asymétriques.",
+fb_no:"// CH₃Br : carbone central lié à 3H et 1Br → pas de C asymétrique → pas de stéréochimie.",mv:{dx:0,dy:-1}},
+
+{c:"application · SN1 — carbocation",type:"qcm",
+code:`<span class="cm">// SN1 — substitution nucléophile unimoléculaire</span>
+mécanisme en <span class="hl">2 steps</span> :
+  1. départ du groupe partant → <span class="hl">carbocation</span>
+  2. attaque du nucléophile des 2 faces → <span class="r">racémisation</span>
+favorisé : C° tertiaire · solvant polaire protique
+v = k[substrat]   (ordre 1)
+<span class="why">// carbocation tertiaire stabilisé par hyperconjugaison
+// SN1 impossible sur C° primaire (carbocation trop instable)
+// SN2 impossible sur C° tertiaire (trop encombré)</span>`,
+q:"(CH₃)₃C−Br dans l'eau + HO⁻. Mécanisme prévisible ?",
+ch:["SN2 — HO⁻ est un bon nucléophile","SN1 — C° tertiaire trop encombré pour SN2","E2 — élimination favorisée","SN2 car l'eau est polaire"],ok:1,
+hint:"C° tertiaire = trop encombré pour SN2 → carbocation tertiaire stable → SN1",
+fb_ok:"// correct — C° tertiaire : SN2 bloqué par l'encombrement → SN1 via carbocation tertiaire.",
+fb_no:"// C° tertiaire → trop encombré pour SN2 (attaque frontale impossible) → SN1.",mv:{dx:1,dy:0}},
+
+{c:"application · addition sur alcènes",type:"qcm",
+code:`<span class="cm">// addition électrophile sur alcènes</span>
+<span class="hl">règle de Markovnikov</span> :
+H s'ajoute sur le C le plus riche en H
+(ou : l'électrophile va sur le C le plus substitué)
+<span class="ex">propène + HBr :
+  CH₃−CH=CH₂ + HBr → CH₃−CH(Br)−CH₃
+  Br va sur C2 (plus substitué), pas C1</span>
+<span class="why">// le carbocation le plus stable (tertiaire > secondaire > primaire)
+// se forme sur le C le plus substitué → détermine le produit majoritaire</span>`,
+q:"But-1-ène (CH₂=CH−CH₂−CH₃) + HBr. Produit majoritaire selon Markovnikov ?",
+ch:["1-bromobutane (Br sur C1)","2-bromobutane (Br sur C2)","Mélange 50/50","3-bromobutane"],ok:1,
+hint:"H va sur C1 (plus de H), Br sur C2 (plus substitué) → carbocation secondaire",
+fb_ok:"// correct — H sur C1 → Br sur C2 → 2-bromobutane (carbocation secondaire plus stable).",
+fb_no:"// Markovnikov : H sur C le plus riche en H (C1), Br sur C2 → 2-bromobutane.",mv:{dx:0,dy:-1}},
+
+{c:"piège · élimination vs substitution",type:"qcm",
+code:`<span class="cm">// compétition SN vs E</span>
+<span class="kw">nucléophile fort, T basse</span>   → SN2 favorisée
+<span class="kw">base forte, T élevée</span>        → E2 favorisée (élimination)
+<span class="kw">C° tertiaire + base faible</span>  → SN1/E1
+<span class="ex">tert-butanol + H₂SO₄, Δ → isobutène (E1)
+tert-butanol + NaBr → tert-butyl bromure (SN1)</span>
+<span class="why">// en synthèse pharmaceutique : contrôler SN vs E
+// est crucial pour l'obtention du bon produit</span>`,
+q:"(CH₃)₃CBr + KOH(conc.) à 80°C. Produit principal attendu ?",
+ch:["(CH₃)₃COH (substitution SN1)","(CH₃)₂C=CH₂ (élimination E2)","(CH₃)₃CBr reste inchangé","Mélange SN1 + E1 uniquement"],ok:1,
+hint:"base forte (KOH conc.) + T élevée + C° tertiaire → élimination favorisée",
+fb_ok:"// correct — KOH fort + haute T + C° tertiaire → E2 → isobutène (2-méthylpropène).",
+fb_no:"// base forte + T élevée → élimination (E2). C° tertiaire + KOH conc. → alcène.",mv:{dx:1,dy:0}},
+]},
+
+{id:"o2b",sec:"module 12 · réactivité organique",num:"14",name:"réactions des carbonyles",level:"intermédiaire",
+takeaway:["Addition nucléophile sur aldéhydes et cétones : Nu attaque C carbonylique δ+","Aldéhyde + alcool → hémiacétal → acétal (protection en synthèse)","Condensation aldolique : α-carbone acide → carbanion → addition intramol.","Hydrolyse des esters en milieu basique (saponification) : irréversible","Réaction acide-base des acides carboxyliques : pKa 4-5"],
+questions:[
+{c:"notion · addition nucléophile au carbonyle",type:"qcm",
+code:`<span class="cm">// addition nucléophile sur C=O</span>
+le carbone carbonylique est <span class="hl">δ+</span> (O très électronégatif)
+→ attaqué par les nucléophiles
+<span class="ex">RCHO + HCN → RCH(OH)CN  (cyanohydrine)
+RCHO + RMgX → alcool secondaire (Grignard)</span>
+<span class="why">// aldéhyde plus réactif que cétone (moins encombré)
+// en biochimie : glucose forme un hémiacétal cyclique
+// (forme furanose/pyranose → base de la chimie des sucres)</span>`,
+q:"Le formaldéhyde (H₂C=O) réagit avec HO⁻. Quelle est la première étape ?",
+ch:["HO⁻ prend un H du formaldéhyde","HO⁻ (nucléophile) attaque le C carbonylique δ+","H₂C=O s'oxyde","Aucune réaction possible"],ok:1,
+hint:"C carbonylique est δ+ → cible des nucléophiles",
+fb_ok:"// correct — HO⁻ attaque le C=O δ+ → addition nucléophile.",
+fb_no:"// C=O : le C est δ+ → attaqué par HO⁻ (nucléophile) → addition nucléophile.",mv:{dx:1,dy:0}},
+
+{c:"application · formation d'hémiacétal",type:"qcm",
+code:`<span class="cm">// hémiacétal et acétal</span>
+RCHO + ROH → <span class="hl">hémiacétal</span> RCH(OH)(OR')
+hémiacétal + ROH → <span class="hl">acétal</span> RCH(OR')₂ + H₂O
+<span class="kw">réversible</span> en milieu acide
+<span class="why">// glucose en solution : 38% α-D-glucopyranose (hémiacétal)
+//                     62% β-D-glucopyranose (hémiacétal)
+//                      < 1% forme ouverte (aldéhyde libre)
+// cette cyclisation protège le groupe aldéhyde de la réactivité</span>`,
+q:"Le glucose en solution forme principalement des hémiacétals cycliques (> 99%). Pourquoi ?",
+ch:["Car les hémiacétals sont moins solubles","La cyclisation est thermodynamiquement favorable — forme des cycles à 6 chaînons stables","Car l'aldéhyde libre est toxique","Car la cyclisation est irréversible"],ok:1,
+hint:"cycles à 6 chaînons (pyranose) = très stables thermodynamiquement",
+fb_ok:"// correct — cyclisation favorisée : cycle à 6 chaînons (pyranose) énergétiquement stable.",
+fb_no:"// cycle à 6 chaînons = stable (tension minimale) → cyclisation thermodynamiquement favorisée.",mv:{dx:0,dy:-1}},
+
+{c:"application · saponification des esters",type:"qcm",
+code:`<span class="cm">// hydrolyse basique (saponification)</span>
+R−COO−R' + OH⁻ → R−COO⁻ + R'OH
+<span class="hl">irréversible</span> (formation de carboxylate stabilisé)
+<span class="ex">triglycéride + 3 NaOH → 3 savon(RCOO⁻Na⁺) + glycérol
+(saponification = fabrication de savon)</span>
+<span class="why">// savon = tensioactif : tête polaire (−COO⁻) + queue apolaire (chaîne C)
+// émulsification des graisses → nettoyage
+// diff. hydrolyse acide : réversible → equilibre côté ester</span>`,
+q:"L'hydrolyse basique des esters (saponification) est irréversible. Pourquoi ?",
+ch:["Car NaOH est un réactif fort","Car le carboxylate RCOO⁻ formé ne peut pas réagir avec l'alcool en milieu basique","Car la réaction libère de l'énergie","Car l'alcool est volatile"],ok:1,
+hint:"RCOO⁻ (carboxylate) est une base faible → ne réagit pas avec R'OH en milieu basique",
+fb_ok:"// correct — RCOO⁻ est très stable (résonance) → n'est pas électrophile → irréversible.",
+fb_no:"// RCOO⁻ stabilisé par résonance → pas réactif vers R'OH → hydrolyse basique irréversible.",mv:{dx:1,dy:0}},
+
+{c:"application · acidité des α-H",type:"qcm",
+code:`<span class="cm">// α-carbones — acidité et condensation aldolique</span>
+les H sur le carbone α (adjacent à C=O) sont <span class="hl">acides</span>
+pKa ≈ 20 pour aldéhyde · pKa ≈ 20 pour cétone
+<span class="why">// le carbanion α est stabilisé par résonance avec C=O
+// → anion énolate
+// condensation aldolique : énolate + autre carbonyle → aldol
+// → base de la biosynthèse des acides gras et terpènes</span>`,
+q:"Dans CH₃−CHO (acétaldéhyde), les H du groupe CH₃ sont plus acides que les H d'un alcane. Pourquoi ?",
+ch:["Car le CH₃ est adjacent au C=O : le carbanion résultant est stabilisé par résonance","Car l'oxygène repousse les électrons","Car les alcanes n'ont pas d'H acides","Par pur effet inductif du carbonyle"],ok:0,
+hint:"carbanion α → résonance avec C=O → stabilisation → acidité accrue",
+fb_ok:"// correct — carbanion stabilisé par résonance → énolate. pKa~20 au lieu de ~50 pour alcane.",
+fb_no:"// CH₃ adjacent au C=O : carbanion stabilisé par résonance → énolate. D'où l'acidité des α-H.",mv:{dx:0,dy:-1}},
+
+{c:"piège · réactivité aldéhyde vs cétone",type:"qcm",
+code:`<span class="cm">// aldéhyde plus réactif que cétone</span>
+aldéhyde : H−<span class="hl">CHO</span>  → moins encombré → plus électrophile
+cétone   : R−<span class="hl">CO</span>−R → plus encombré
+aussi : aldéhyde plus oxydable (Tollens, Fehling)
+<span class="ex">test de Tollens : aldéhyde + Ag⁺ → Ag° (miroir d'argent)
+  cétone ne réagit pas</span>`,
+q:"On veut distinguer le pentanal (aldéhyde) de la pentan-3-one (cétone). Quel test utiliser ?",
+ch:["Test de pH — les aldéhydes sont plus acides","Test de Tollens — aldéhyde réduit Ag⁺ en Ag° (miroir d'argent), cétone non","Réaction avec HCN — spécifique des cétones","Solubilité dans l'eau"],ok:1,
+hint:"le test de Tollens distingue aldéhydes (réducteurs) des cétones (non réducteurs)",
+fb_ok:"// correct — Tollens : aldéhyde → Ag° (miroir). Cétone → pas de réaction.",
+fb_no:"// test Tollens : aldéhyde s'oxyde → Ag⁺ réduit en Ag° (miroir d'argent). Cétone = non réducteur.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 13 — STÉRÉOCHIMIE
+// ══════════════════════════════════════════════════════
+{id:"o3a",sec:"module 13 · stéréochimie",num:"15",name:"chiralité et énantiomères",level:"intermédiaire",
+takeaway:["Carbone asymétrique = lié à 4 groupes différents (centre chiral)","Énantiomères = images miroir non superposables","Configurations R/S selon la règle de Cahn-Ingold-Prelog (CIP)","Énantiomères : propriétés physiques identiques SAUF rotation de la lumière polarisée","En biologie : les récepteurs sont chiraux → un seul énantiomère est actif"],
+questions:[
+{c:"notion · carbone asymétrique",type:"qcm",
+code:`<span class="cm">// carbone asymétrique (stéréocentre)</span>
+C lié à <span class="hl">4 groupes différents</span> → chiral
+→ peut exister en 2 configurations non superposables
+<span class="ex">acide lactique : CH₃−C*(OH)(H)−COOH
+  C* lié à CH₃, OH, H, COOH → 4 différents → chiral</span>
+<span class="why">// 1 centre chiral → 2 énantiomères
+// n centres chiraux → jusqu'à 2ⁿ stéréoisomères
+// acides aminés : 1 centre chiral → L (naturel) ou D</span>`,
+q:"Le glycérol HOCH₂−CH(OH)−CH₂OH a-t-il un carbone asymétrique ?",
+ch:["Oui — le C central est lié à 4 groupes différents","Non — le C central est lié à 2 groupes −CH₂OH identiques","Oui — tous les carbones sont asymétriques","Non — les alcools ne sont pas chiraux"],ok:1,
+hint:"le C central est lié à : OH, H, CH₂OH, CH₂OH — deux groupes identiques",
+fb_ok:"// correct — C central : H, OH, CH₂OH, CH₂OH → 2 groupes identiques → pas de C asymétrique.",
+fb_no:"// C central de HOCH₂−CH(OH)−CH₂OH : lié à H, OH, −CH₂OH, −CH₂OH → 2 groupes identiques → achiral.",mv:{dx:1,dy:0}},
+
+{c:"notion · énantiomères et propriétés",type:"qcm",
+code:`<span class="cm">// énantiomères — propriétés</span>
+<span class="hl">identiques</span> : point de fusion · point d'ébullition · solubilité
+            · Rf en chromatographie · spectre IR et RMN
+<span class="hl">différentes</span> : rotation de la lumière polarisée (polarimétrie)
+             → (+) dextrogyre · (−) lévogyre
+<span class="why">// en biologie : récepteurs chiraux → activité biologique différente
+// (+)-ibuprofène actif · (−)-ibuprofène peu actif
+// L-adrénaline active · D-adrénaline inactive sur récepteurs</span>`,
+q:"Le (R)-ibuprofène et le (S)-ibuprofène ont le même point de fusion. C'est attendu car :",
+ch:["Ibuprofène n'est pas chiral","Les énantiomères ont les mêmes propriétés physiques (sauf rotation optique)","Ils ont la même formule moléculaire seulement","C'est une coïncidence"],ok:1,
+hint:"énantiomères = mêmes propriétés physiques sauf activité optique",
+fb_ok:"// correct — énantiomères : mêmes propriétés physiques. Seule la rotation de la lumière diffère.",
+fb_no:"// énantiomères : propriétés physiques identiques (Tfusion, Tébullition, solubilité). Seule l'activité optique diffère.",mv:{dx:0,dy:-1}},
+
+{c:"application · règle CIP (R/S)",type:"qcm",
+code:`<span class="cm">// règle CIP — priorités et configuration R/S</span>
+1. Classer les 4 substituants par priorité (Z ↑ → priorité ↑)
+2. Orienter : groupe de plus faible priorité <span class="hl">loin de soi</span>
+3. Sens des 3 autres : horaire = <span class="hl">R</span> · antihoraire = <span class="hl">S</span>
+<span class="ex">acide lactique : OH > COOH > CH₃ > H
+  si H loin et rotation OH→COOH→CH₃ : antihoraire → S</span>`,
+q:"Pour attribuer la configuration R ou S, quelle est la dernière étape ?",
+ch:["Compter le nombre de carbones","Orienter le groupe de plus faible priorité vers soi et regarder le sens","Orienter le groupe de plus faible priorité loin de soi, puis regarder si les 3 autres sont R ou S","Mesurer la rotation optique"],ok:2,
+hint:"le groupe de plus faible priorité doit pointer LOIN de l'observateur",
+fb_ok:"// correct — groupe faible priorité = loin. Sens des 3 autres (1→2→3) : horaire=R, antihoraire=S.",
+fb_no:"// CIP : priorité faible = loin. Sens de rotation 1→2→3 : horaire=R, antihoraire=S.",mv:{dx:1,dy:0}},
+
+{c:"application · activité biologique des énantiomères",type:"qcm",
+code:`<span class="cm">// importance clinique de la chiralité</span>
+récepteurs biologiques = protéines = chiraux
+→ ne reconnaissent souvent qu'<span class="hl">un seul énantiomère</span>
+<span class="ex">thalidomide : R = sédatif · S = tératogène (1957-1962)
+ibuprofène  : S actif · R peu actif (mais converti in vivo)
+L-DOPA      : actif (Parkinson) · D-DOPA : inactif</span>
+<span class="why">// depuis le scandale de la thalidomide :
+// les agences réglementaires (FDA, EMA) exigent
+// l'évaluation séparée de chaque énantiomère ("switch" chiral)</span>`,
+q:"Le L-glutamate est un neurotransmetteur excitateur. Quelle affirmation est probablement vraie pour le D-glutamate ?",
+ch:["Il est encore plus excitateur","Il est peu ou pas actif sur les récepteurs au glutamate (qui sont chiraux)","Il est un inhibiteur du glutamate","Il n'existe pas dans la nature"],ok:1,
+hint:"les récepteurs biologiques ne reconnaissent souvent qu'un énantiomère",
+fb_ok:"// correct — récepteurs chiraux → D-glutamate peu actif ou inactif sur les mêmes récepteurs.",
+fb_no:"// récepteurs = protéines chirales → L-glutamate actif, D-glutamate peu ou pas actif.",mv:{dx:0,dy:-1}},
+
+{c:"piège · diastéréoisomères vs énantiomères",type:"qcm",
+code:`<span class="cm">// énantiomères vs diastéréoisomères</span>
+<span class="hl">énantiomères</span>     : images miroir non superposables
+                   toutes les configurations inversées
+<span class="hl">diastéréoisomères</span>: stéréoisomères qui ne sont PAS images miroir
+                   certaines configurations inversées, pas toutes
+<span class="ex">2 centres chiraux → 4 stéréoisomères :
+  (R,R) et (S,S) = énantiomères
+  (R,S) et (S,R) = énantiomères
+  (R,R) et (R,S) = diastéréoisomères</span>`,
+q:"Le glucose (R,R,S,R) et le galactose (R,R,S,S) diffèrent par la configuration d'un seul centre chiral. Ce sont des :",
+ch:["Énantiomères","Diastéréoisomères — configurations différentes mais pas images miroir totales","Isotopes","Isomères de constitution"],ok:1,
+hint:"un seul centre chiral différent sur plusieurs = diastéréoisomères (pas images miroir totales)",
+fb_ok:"// correct — un seul centre différent → pas images miroir totales → diastéréoisomères (épimères en C4).",
+fb_no:"// énantiomères = TOUTES les configurations inversées. Ici 1 seul inversé → diastéréoisomères.",mv:{dx:1,dy:0}},
+]},
+
+{id:"o3b",sec:"module 13 · stéréochimie",num:"16",name:"stéréoisomérie des alcènes — E/Z",level:"intermédiaire",
+takeaway:["Liaison C=C rigide : pas de rotation libre → isomères géométriques possibles","E (entgegen) : groupes prioritaires de part et d'autre (trans)","Z (zusammen) : groupes prioritaires du même côté (cis)","Priorité selon CIP : Z atomique décroissant","L'isomérie géométrique a des effets biologiques importants (rétinal, acides gras)"],
+questions:[
+{c:"notion · liaison double et rigidité",type:"qcm",
+code:`<span class="cm">// double liaison C=C — pas de rotation</span>
+liaison σ + liaison π
+la liaison π bloque la rotation
+→ configurations géométriques fixes
+<span class="ex">but-2-ène : CH₃−CH=CH−CH₃
+  cis (Z) : les 2 CH₃ du même côté
+  trans (E) : les 2 CH₃ de côtés opposés</span>`,
+q:"Pourquoi le but-2-ène existe-t-il en deux formes isomères (cis et trans) ?",
+ch:["Car il a un carbone asymétrique","Car la liaison double est rigide — pas de rotation libre autour de C=C","Car il y a deux façons de le nommer","Car les groupes CH₃ peuvent se déplacer"],ok:1,
+hint:"liaison π bloque la rotation",
+fb_ok:"// correct — liaison π rigide → pas de rotation → configurations fixes → isomères cis/trans.",
+fb_no:"// la liaison π = rigide. Pas de rotation autour de C=C → configurations géométriques stables.",mv:{dx:1,dy:0}},
+
+{c:"application · règle E/Z",type:"qcm",
+code:`<span class="cm">// nomenclature E/Z — règle CIP</span>
+1. Classer les 2 substituants sur chaque C de la double liaison
+   (selon la priorité CIP)
+2. Si les groupes prioritaires sont du <span class="hl">même côté</span> → <span class="hl">Z</span>
+   Si <span class="hl">côtés opposés</span> → <span class="hl">E</span>
+<span class="ex">ClHC=CHBr : Cl(17) et Br(35)
+  Br > Cl en priorité · si Br et Cl même côté → Z</span>`,
+q:"Pour CHCl=CHBr : Br (Z=35) > Cl (Z=17) > H (Z=1). Si Br et Cl sont du même côté, la configuration est :",
+ch:["E","Z","R","cis uniquement"],ok:1,
+hint:"groupes prioritaires (Br, Cl) même côté → Z (zusammen = ensemble)",
+fb_ok:"// correct — groupes prioritaires même côté → Z.",
+fb_no:"// même côté = Z (zusammen = ensemble). Côtés opposés = E (entgegen = opposé).",mv:{dx:0,dy:-1}},
+
+{c:"application · isomérie géométrique biologique",type:"qcm",
+code:`<span class="cm">// rétinal et vision</span>
+11-cis-rétinal : forme stockée dans l'œil
+→ absorbe la lumière → isomérisation en <span class="hl">all-trans-rétinal</span>
+→ change de forme → signal nerveux → vision
+<span class="why">// un seul changement de configuration cis→trans
+// déclenche tout le processus de la vision
+// la vitamine A (rétinol) est le précurseur du rétinal
+// cette réaction est quasi-instantanée (femtosecondes !)</span>`,
+q:"La conversion 11-cis-rétinal → all-trans-rétinal lors de l'absorption de lumière est une :",
+ch:["Réaction d'oxydoréduction","Isomérisation géométrique (changement de configuration autour d'une double liaison)","Réaction acide-base","Substitution nucléophile"],ok:1,
+hint:"cis→trans = changement de configuration géométrique autour d'une double liaison",
+fb_ok:"// correct — isomérisation cis→trans autour de la liaison C11=C12 du rétinal → signal visuel.",
+fb_no:"// cis→trans = isomérisation géométrique autour d'une double liaison. Base de la phototransduction.",mv:{dx:1,dy:0}},
+
+{c:"application · acides gras trans",type:"qcm",
+code:`<span class="cm">// acides gras cis vs trans</span>
+<span class="kw">acides gras insaturés naturels</span> : configuration <span class="hl">cis</span>
+→ coude dans la chaîne → membrane fluide
+<span class="kw">acides gras trans</span> (industriels) : configuration <span class="hl">trans</span>
+→ chaîne rectiligne → empilement dense → rigidité
+<span class="why">// acides gras trans : formés lors de l'hydrogénation partielle
+// margarine, produits industriels
+// association avec ↑ LDL et ↑ risque cardiovasculaire
+// leur usage est réglementé ou interdit dans certains pays</span>`,
+q:"Pourquoi les acides gras cis (comme dans l'huile d'olive) rendent-ils les membranes cellulaires plus fluides que les acides gras saturés ?",
+ch:["Car ils sont plus légers","Le coude dû à la configuration cis empêche l'empilement dense des chaînes → moins de cristallisation → plus fluide","Car ils contiennent plus d'oxygène","Car ils sont chargés électriquement"],ok:1,
+hint:"cis = coude dans la chaîne = empêche l'empilement = fluidité",
+fb_ok:"// correct — cis = coude → empilement perturbé → membrane fluide. Saturés = chaînes droites → empilement dense.",
+fb_no:"// cis = coude dans la chaîne → empêche l'empilement dense → membrane fluide. Essentiel pour la vie cellulaire.",mv:{dx:0,dy:-1}},
+
+{c:"piège · cis/trans vs E/Z",type:"qcm",
+code:`<span class="cm">// cis/trans vs E/Z — différence importante</span>
+<span class="kw">cis/trans</span> : simple, mais ambigu si les substituants ne sont pas identiques
+<span class="kw">E/Z</span> : universelle, basée sur les priorités CIP
+<span class="ex">mais-2-ène-dioate :
+  HOOC−CH=CH−COOH
+  cis (même côté) = acide maléique = Z (priorité COOH > H)
+  trans             = acide fumarique = E</span>`,
+q:"L'acide maléique (Z) et l'acide fumarique (E) sont deux isomères de l'acide but-2-ène-dioïque. Leurs points de fusion sont très différents (130°C vs 287°C). Pourquoi ?",
+ch:["Ils ont des formules moléculaires différentes","L'isomère Z (maléique) forme une liaison H intramoléculaire, l'E (fumarique) forme des liaisons H intermoléculaires → réseau plus fort","L'isomère E est moins stable","L'isomère Z est aromatique"],ok:1,
+hint:"isomère Z = groupes COOH du même côté → liaison H intramoléculaire possible",
+fb_ok:"// correct — Z : COOH proches → liaison H intramoléculaire → moins de liaisons H inter. → Tfusion plus basse.",
+fb_no:"// Z (maléique) : COOH proches → liaison H intramoléculaire. E (fumarique) : liaisons H intermoléculaires → réseau plus fort → Tfusion plus haute.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 14 — CHIMIE AROMATIQUE
+// ══════════════════════════════════════════════════════
+{id:"o4a",sec:"module 14 · chimie aromatique",num:"17",name:"aromaticité et benzène",level:"avancé",
+takeaway:["Critères de Hückel : cyclique, conjugué, plan, 4n+2 électrons π","Énergie de résonance du benzène ≈ 150 kJ/mol (stabilisation)","Benzène préfère la substitution (conserve l'aromaticité) à l'addition","6 électrons π délocalisés sur le cycle hexagonal","Hétérocycles aromatiques : pyridine, pyrrole, imidazole, purines"],
+questions:[
+{c:"notion · règle de Hückel",type:"qcm",
+code:`<span class="cm">// aromaticité — critères de Hückel</span>
+1. cyclique
+2. entièrement conjugué
+3. planaire
+4. <span class="hl">4n + 2 électrons π</span>  (n = 0, 1, 2, ...)
+<span class="ex">benzène : 6 e⁻ π (n=1) → aromatique ✓
+cyclobutadiène : 4 e⁻ π → antiaromatique ✗
+naphtalène : 10 e⁻ π (n=2) → aromatique ✓</span>`,
+q:"Le cyclopentadiényle anion C₅H₅⁻ a 6 électrons π. Est-il aromatique ?",
+ch:["Non — les anions ne peuvent pas être aromatiques","Oui — 6=4(1)+2, cyclique, conjugué, plan → aromatique","Non — 5 carbones seulement","Oui — toute molécule cyclique est aromatique"],ok:1,
+hint:"appliquer les 4 critères : 6=4n+2 avec n=1 ✓",
+fb_ok:"// correct — C₅H₅⁻ : 6 e⁻ π, cyclique, plan, conjugué → aromatique. Très stable.",
+fb_no:"// 6=4(1)+2, cyclique, plan, conjugué → aromatique. La charge ne change pas le critère.",mv:{dx:1,dy:0}},
+
+{c:"notion · stabilisation par résonance",type:"qcm",
+code:`<span class="cm">// énergie de résonance du benzène</span>
+3 doubles liaisons isolées attendraient : 3 × 119 = 357 kJ/mol
+benzène réel (hydrogénation) : <span class="hl">208 kJ/mol</span>
+→ énergie de résonance = 357 − 208 = <span class="hl">~150 kJ/mol</span>
+<span class="why">// cette stabilisation explique pourquoi le benzène
+// préfère la SUBSTITUTION (conserve les 6 e⁻ π)
+// à l'ADDITION (détruirait l'aromaticité)
+// inverse des alcènes qui font des additions !</span>`,
+q:"Contrairement aux alcènes, le benzène préfère la substitution électrophile à l'addition. Pourquoi ?",
+ch:["Car le benzène est trop encombré","Car l'addition détruirait l'aromaticité et perdrait ~150 kJ/mol de stabilisation","Car les électrophiles ne peuvent pas attaquer les cycles","Car le benzène n'a pas de double liaison"],ok:1,
+hint:"préserver l'aromaticité = préserver ~150 kJ/mol d'énergie de résonance",
+fb_ok:"// correct — addition → perte d'aromaticité → perte de 150 kJ/mol. Substitution → aromaticité conservée.",
+fb_no:"// addition détruirait les 6 e⁻ π délocalisés (150 kJ/mol de stabilisation). Substitution conserve l'aromaticité.",mv:{dx:0,dy:-1}},
+
+{c:"application · effets orienteurs",type:"qcm",
+code:`<span class="cm">// orientation en SEA</span>
+<span class="hl">+M (activants)</span> : −OH, −NH₂, −OR → orientent en <span class="kw">ortho/para</span>
+<span class="hl">−M (désactivants)</span>: −NO₂, −COOH, −CHO → orientent en <span class="r">méta</span>
+<span class="why">// +M : stabilisent le carbocation intermédiaire en ortho/para
+// −M : déstabilisent en ortho/para → seul méta accessible
+// −CH₃ : léger activant (+I) → ortho/para (moins sélectif)</span>`,
+q:"Nitration du phénol (C₆H₅OH). Le groupe −OH est activant (+M). Positions nitrées majoritaires ?",
+ch:["Méta uniquement","Ortho et para majoritairement","Toutes positions équivalentes","Para uniquement"],ok:1,
+hint:"−OH est +M → oriente en ortho ET para",
+fb_ok:"// correct — OH (+M) stabilise le carbocation en ortho/para → nitration majoritaire en ortho+para.",
+fb_no:"// OH (+M) : oriente en ortho ET para. En pratique : para dominant (moins d'encombrement).",mv:{dx:1,dy:0}},
+
+{c:"application · hétérocycles aromatiques",type:"qcm",
+code:`<span class="cm">// hétérocycles aromatiques biomédicaux</span>
+<span class="kw">pyridine</span>   : N remplace CH, aromatique, base faible (pKa~5.2)
+<span class="kw">pyrrole</span>    : N avec paire libre dans le cycle π → non basique
+<span class="kw">imidazole</span>  : 1 N basique (pKa~7) + 1 N dans cycle π
+<span class="kw">purines</span>    : adénine, guanine → bases de l'ADN
+<span class="kw">pyrimidines</span>: cytosine, thymine, uracile → bases de l'ADN
+<span class="why">// imidazole de l'histidine : pKa≈7 → tampon au pH physiologique
+// et catalyseur acido-basique des enzymes (sérine-protéases)
+// purines et pyrimidines → stockage de l'information génétique</span>`,
+q:"L'imidazole a pKa≈7 pour son N basique. À pH physiologique (7.4), quelle forme est majoritaire ?",
+ch:["Forme protonée ImH⁺ (pH < pKa)","Forme neutre Im (pH > pKa)","50/50","Forme doublement protonée"],ok:1,
+hint:"pH 7.4 > pKa 7.0 → forme déprotonée (base) domine",
+fb_ok:"// correct — pH>pKa → forme neutre Im majoritaire (~71%). Équilibre dynamique → catalyse enzymatique.",
+fb_no:"// pH > pKa → forme déprotonée (neutre) domine. pH 7.4 > 7.0 → Im majority.",mv:{dx:0,dy:-1}},
+
+{c:"piège · pyrrole non basique",type:"qcm",
+code:`<span class="cm">// pyrrole — paire libre dans le cycle π</span>
+pyrrole : 5 atomes dans le cycle, 6 e⁻ π
+N contribue sa <span class="hl">paire libre au système π</span>
+→ N non disponible pour la protonation
+→ pyrrole est <span class="r">non basique</span> (pKa~0 !)
+<span class="kw">vs pyridine</span> : paire libre du N <span class="hl">hors du cycle π</span>
+→ disponible pour la protonation → basique (pKa~5.2)`,
+q:"Pourquoi le pyrrole est-il un acide beaucoup plus faible que la pyridine en tant que base ?",
+ch:["Car le pyrrole est moins soluble","La paire libre de N du pyrrole est dans le système π aromatique — elle ne peut pas accepter H⁺ sans détruire l'aromaticité","Car le pyrrole a moins d'azotes","Car le pyrrole est plus grand"],ok:1,
+hint:"paire libre dans le cycle π = non disponible pour la protonation",
+fb_ok:"// correct — paire libre du N de pyrrole dans le cycle π → non disponible. Protonation détruirait l'aromaticité.",
+fb_no:"// pyrrole : paire libre du N dans le système π → protonation perdrait l'aromaticité → pKa très faible.",mv:{dx:1,dy:0}},
+]},
+
+{id:"o4b",sec:"module 14 · chimie aromatique",num:"18",name:"mécanisme SEA et applications",level:"avancé",
+takeaway:["SEA : 2 étapes — formation du complexe σ (arénonium) puis restauration de l'aromaticité","Les substituants EAS dirigent selon leur caractère +M/−M","Acide sulfonique, nitration, halogénation, alkylation Friedel-Crafts","Acide benzoïque et phénol : propriétés différentes selon la position −COOH vs −OH","Résonance dans les arènes substitués — compréhension des intermédiaires"],
+questions:[
+{c:"notion · mécanisme SEA en 2 étapes",type:"qcm",
+code:`<span class="cm">// substitution électrophile aromatique (SEA)</span>
+étape 1 : E⁺ + benzène → <span class="hl">complexe σ</span> (arénonium, non aromatique)
+          lente (étape limitante)
+étape 2 : perte de H⁺ → produit aromatique
+          rapide (restaure l'aromaticité)
+<span class="ex">nitration : HNO₃ + H₂SO₄ → NO₂⁺ (nitronium)
+  C₆H₆ + NO₂⁺ → [arénonium] → C₆H₅NO₂ + H⁺</span>`,
+q:"Dans la SEA, pourquoi la 2ème étape (départ de H⁺) est-elle très rapide ?",
+ch:["Car H⁺ est petit et peut partir facilement","Car le départ de H⁺ restaure l'aromaticité et libère ~150 kJ/mol d'énergie de stabilisation","Car la concentration en H⁺ est très faible","Par hasard cinétique"],ok:1,
+hint:"restaurer l'aromaticité = gain énergétique énorme → force motrice",
+fb_ok:"// correct — restauration de l'aromaticité = gain de ~150 kJ/mol → force motrice pour la déprotonation rapide.",
+fb_no:"// départ de H⁺ → restaure l'aromaticité → gain de ~150 kJ/mol → réaction très rapide et favorable.",mv:{dx:1,dy:0}},
+
+{c:"application · nitrobenzène",type:"qcm",
+code:`<span class="cm">// nitrobenzène — désactivant −M</span>
+−NO₂ : <span class="r">désactivant fort</span>, oriente en <span class="r">méta</span>
+→ stabilise le complexe σ uniquement en méta
+<span class="ex">nitrobenzène + Br₂/FeBr₃ → m-bromonitrobenzène
+              (pas ortho ni para)</span>
+<span class="why">// en méta : la charge positive du complexe σ ne coïncide jamais
+// avec l'atome de C portant NO₂ → moins de déstabilisation</span>`,
+q:"La nitration du nitrobenzène donne principalement le m-dinitrobenzène. Cela implique que −NO₂ oriente en :",
+ch:["Ortho — car NO₂ est adjacent","Para — car c'est le plus stable","Méta — car NO₂ est désactivant −M","Toutes les positions équivalentes"],ok:2,
+hint:"−NO₂ = désactivant −M → oriente en méta",
+fb_ok:"// correct — NO₂ (−M) → complexe σ déstabilisé en ortho/para → orientation en méta.",
+fb_no:"// −NO₂ : désactivant −M → destabilise en ortho/para → méta favorisé.",mv:{dx:0,dy:-1}},
+
+{c:"application · synthèse orientée",type:"qcm",
+code:`<span class="cm">// stratégie de synthèse — ordre des substitutions</span>
+Objectif : préparer le m-nitroacétanilide
+<span class="ex">voie 1 : benzène → acétanilide (−NHCOCH₃, +M) → nitration → ortho/para
+voie 2 : benzène → nitrobenzène (−NO₂, −M) → acétylation → ??</span>
+<span class="why">// l'ordre des réactions détermine la régiosélectivité !
+// le groupe présent ORIENTE le suivant
+// clé de la synthèse pharmaceutique</span>`,
+q:"Pour synthétiser le p-bromoaniline (−NH₂ en C1, −Br en C4), dans quel ordre faut-il procéder ?",
+ch:["Bromation d'abord, puis amination — le Br oriente en para","Réduction du nitrobenzène, puis bromation — le NH₂ oriente en ortho/para","Bromation puis nitration — le Br oriente en méta","L'ordre n'a pas d'importance"],ok:1,
+hint:"−NH₂ est +M → oriente en ortho/para. Il faut introduire −NH₂ (via −NO₂) avant de bromer",
+fb_ok:"// correct — introduire d'abord le groupe directeur +M (NH₂ via NO₂ → réduction) puis bromer.",
+fb_no:"// NH₂ (+M) oriente en ortho/para. Stratégie : benzène → nitrobenzène → réduction → NH₂ → bromation → p-Br.",mv:{dx:1,dy:0}},
+
+{c:"application · paracétamol — synthèse",type:"qcm",
+code:`<span class="cm">// paracétamol — analyse rétrosynthétique</span>
+paracétamol = 4-acétamidophénol
+structure : HO−C₆H₄−NHCOCH₃ (para)
+<span class="why">// synthèse industrielle :
+// p-aminophénol + anhydride acétique → paracétamol + acide acétique
+// le groupe OH (para) + NH₂ (para l'un de l'autre)
+// les deux sont +M → synergie → très activé
+// utilisé comme antalgique et antipyrétique depuis 1956</span>`,
+q:"Dans le paracétamol, les groupes −OH et −NHCOCH₃ sont en position para. Pourquoi cette molécule est-elle très réactive en SEA (si on voulait la nitrer, par exemple) ?",
+ch:["Car elle est soluble dans l'eau","Les deux substituants (+M) sont additifs et activent fortement les positions ortho/para","Car elle contient de l'azote","Car le cycle benzénique est toujours très réactif"],ok:1,
+hint:"deux substituants +M = double activation = cycle très électrophile",
+fb_ok:"// correct — OH (+M) et NHCOCH₃ (+M) orientent tous les deux vers les mêmes positions → activation très forte.",
+fb_no:"// 2 substituants +M = synergiques → cycle très activé → réactif en SEA.",mv:{dx:0,dy:-1}},
+
+{c:"piège · polysubstitution et règles de priorité",type:"qcm",
+code:`<span class="cm">// molécule polysubstituée — groupe dominant</span>
+si deux substituants : <span class="hl">le plus activant domine</span>
++M fort > +M faible > −M
+<span class="ex">4-nitroanisole : OCH₃ (+M fort) vs NO₂ (−M)
+→ OCH₃ domine → nitration ortho/para par rapport à OCH₃</span>`,
+q:"Toluène (−CH₃ en C1, activant +I faible). On brume : où va majoritairement Br ?",
+ch:["Méta — CH₃ faible activant","Ortho et para — CH₃ est un activant ortho/para","Para uniquement — para est plus stable","Toutes les positions équivalentes"],ok:1,
+hint:"−CH₃ = donneur +I → activant ortho/para (même si faible)",
+fb_ok:"// correct — CH₃ (+I) active en ortho/para. En pratique : mélange ortho(58%) + para(38%) + méta(4%).",
+fb_no:"// CH₃ = activant +I → oriente en ortho/para. Méta = produit minoritaire.",mv:{dx:1,dy:0}},
+]},
+
+];
+
+// ═════════════════════════════════════════
+//  MOTEUR
+// ═════════════════════════════════════════
+const SECTIONS={};
+CHAPTERS.forEach(ch=>{if(!SECTIONS[ch.sec])SECTIONS[ch.sec]=[];SECTIONS[ch.sec].push(ch);});
+let curChap=null,curQ=0,score=0,answered=false,rX=0,rY=5;
+const GOAL={x:5,y:0};let traces=new Set();
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){document.getElementById('win').classList.remove('show');show('s-home');}
+
+function buildHome(){
+  const list=document.getElementById('chap-list');list.innerHTML='';
+  Object.entries(SECTIONS).forEach(([sec,chaps])=>{
+    const sd=document.createElement('div');sd.className='chap-section';
+    const lbl=document.createElement('div');lbl.className='chap-section-lbl';lbl.textContent=sec;sd.appendChild(lbl);
+    chaps.forEach(ch=>{
+      const row=document.createElement('div');row.className='chap-row';
+      row.innerHTML=`<span class="chap-num">${ch.num}.</span><span class="chap-name">${ch.name}</span><span class="chap-level">${ch.level}</span><span class="chap-count">${ch.questions.length} qs</span>`;
+      row.onclick=()=>startChap(ch);sd.appendChild(row);});
+    list.appendChild(sd);});}
+
+function startChap(ch){curChap=ch;curQ=0;score=0;answered=false;rX=0;rY=5;traces=new Set();document.getElementById('win').classList.remove('show');buildGrid();loadQ();show('s-game');}
+
+function loadQ(){
+  answered=false;const q=curChap.questions[curQ];
+  document.getElementById('g-title').textContent=curChap.name;
+  document.getElementById('g-pts').textContent=score+' pts';
+  document.getElementById('g-ctag').textContent=q.c;
+  document.getElementById('g-concept').innerHTML=q.code;
+  document.getElementById('g-q').textContent=q.q;
+  document.getElementById('g-fb').className='fb';
+  document.getElementById('g-next').className='btnext';
+  const badge=document.getElementById('g-qbadge');
+  badge.textContent=q.type==='qcm'?'QCM':'question ouverte';
+  badge.className='qbadge '+(q.type==='qcm'?'qcm':'open');
+  const dr=document.getElementById('dots-row');dr.innerHTML='';
+  curChap.questions.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i<curQ?' done':i===curQ?' cur':'');dr.appendChild(d);});
+  const cc=document.getElementById('g-choices'),ow=document.getElementById('g-open'),inp=document.getElementById('g-input');
+  cc.innerHTML='';
+  if(q.type==='qcm'){ow.style.display='none';q.ch.forEach((t,i)=>{const b=document.createElement('button');b.className='choice';b.textContent=t;b.onclick=()=>answerQcm(i);cc.appendChild(b);});}
+  else{ow.style.display='flex';inp.value='';inp.disabled=false;document.querySelector('.open-btn').disabled=false;setTimeout(()=>inp.focus(),100);}
+}
+
+function answerQcm(idx){
+  if(answered)return;answered=true;const q=curChap.questions[curQ];const ok=idx===q.ok;
+  document.querySelectorAll('.choice').forEach((b,i)=>{if(i===q.ok)b.classList.add('ok');else if(i===idx&&!ok)b.classList.add('no');else b.classList.add('dim');b.onclick=null;});
+  showFb(ok,q);}
+
+function checkOpen(){
+  if(answered)return;const q=curChap.questions[curQ];const val=document.getElementById('g-input').value.trim().toLowerCase();if(!val)return;
+  const ok=q.keys.some(k=>val.includes(k.toLowerCase())||k.toLowerCase()===val);answered=true;
+  document.getElementById('g-input').disabled=true;document.querySelector('.open-btn').disabled=true;showFb(ok,q);}
+
+function showFb(ok,q){
+  const fb=document.getElementById('g-fb');fb.className='fb show '+(ok?'ok':'no');fb.textContent=ok?q.fb_ok:q.fb_no;
+  if(ok){score+=10;document.getElementById('g-pts').textContent=score+' pts';sparks();}
+  moveRobot(q.mv.dx,q.mv.dy);document.getElementById('g-next').className='btnext show';}
+
+function doHint(){const fb=document.getElementById('g-fb');fb.className='fb show hint';fb.textContent='? '+curChap.questions[curQ].hint;}
+function nextQ(){curQ++;if(curQ>=curChap.questions.length){showWin();return;}loadQ();}
+
+function showWin(){
+  document.getElementById('win-title').textContent=`// ${curChap.name} · maîtrisé`;
+  const ul=document.getElementById('win-list');ul.innerHTML='';
+  curChap.takeaway.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
+  document.getElementById('win').classList.add('show');}
+
+function restartChap(){document.getElementById('win').classList.remove('show');startChap(curChap);}
+
+function buildGrid(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  for(let y=0;y<6;y++)for(let x=0;x<6;x++){const d=document.createElement('div');d.id=`gc${x}${y}`;d.className='gcell';if(x===GOAL.x&&y===GOAL.y)d.textContent='🏁';g.appendChild(d);}renderGrid();}
+
+function renderGrid(){
+  for(let y=0;y<6;y++)for(let x=0;x<6;x++){
+    const d=document.getElementById(`gc${x}${y}`);if(!d)continue;
+    d.className='gcell';d.textContent='';d.innerHTML='';
+    if(x===GOAL.x&&y===GOAL.y){d.classList.add('goal');d.textContent='🏁';continue;}
+    if(traces.has(`${x},${y}`))d.classList.add('trace');
+    if(x===rX&&y===rY){d.classList.add('robot');d.innerHTML=`<svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/><rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/><rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/><rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/><rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/><circle cx="16" cy="7" r="2" fill="#c8a870"/><rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/><rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/><rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/><rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/></svg>`;}}}
+
+function moveRobot(dx,dy){
+  traces.add(`${rX},${rY}`);rX=Math.max(0,Math.min(5,rX+dx));rY=Math.max(0,Math.min(5,rY+dy));renderGrid();
+  const dir=dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent=`${curQ+1}/${curChap.questions.length} → ${dir}`;}
+
+function sparks(){
+  const cell=document.getElementById(`gc${rX}${rY}`);if(!cell)return;
+  const r=cell.getBoundingClientRect();
+  ['#c8a870','#e8a598','#7a9e87','#a89ec8'].forEach((c,i)=>{
+    const p=document.createElement('div');p.className='pt';const s=3+Math.random()*5;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);});}
+
+buildHome();
+</script>
+</body>
+</html>

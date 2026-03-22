@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · biochimie</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;--ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;--sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;--line:rgba(26,24,20,0.08);}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2rem;font-weight:300;text-align:center;max-width:460px;line-height:1.6;}
+.chap-list{max-width:520px;width:100%;display:flex;flex-direction:column;}
+.chap-section{margin-bottom:1.5rem;}
+.chap-section-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.chap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.5;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:24px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-level{font-size:10px;color:var(--ink3);padding:1px 8px;border-radius:999px;border:1px solid var(--line);}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--lav);}
+.topbar{display:flex;align-items:center;gap:10px;padding:0.7rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.btnback:hover{color:var(--ink);}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+.dots-row{display:flex;gap:2px;padding:0.4rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .r{color:#c85a5a;}
+.cbody .b{color:#5a7ec8;}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);}
+.cbody .why{display:block;background:rgba(168,158,200,0.1);border:1px solid rgba(168,158,200,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#4a4470;line-height:1.6;}
+.qbadge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:inline-block;margin-bottom:6px;}
+.qbadge.open{border-color:rgba(168,158,200,0.4);color:#4a4470;background:rgba(168,158,200,0.08);}
+.qbadge.qcm{border-color:rgba(122,158,135,0.4);color:#3d6b4f;background:rgba(122,158,135,0.08);}
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.open-wrap{display:flex;gap:7px;align-items:center;}
+.open-input{flex:1;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);outline:none;}
+.open-input:focus{border-color:var(--lav);}
+.open-btn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:8px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.open-btn:hover{opacity:0.75;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;}
+.btnhint:hover{color:var(--ink2);}
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;overflow-y:auto;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:500px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · sciences exactes</div>
+  <div class="home-title">biochimie</div>
+  <div class="home-sub">module 15 · acides aminés · protéines · ADN · enzymes · métabolisme<br>15 questions par notion · du débutant au niveau médical</div>
+  <div class="chap-list" id="chap-list"></div>
+</div>
+
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← biochimie</button>
+    <span style="color:var(--ink3);font-size:12px;">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div>
+        <div class="qbadge" id="g-qbadge"></div>
+        <div class="qtext" id="g-q"></div>
+      </div>
+      <div class="choices" id="g-choices"></div>
+      <div class="open-wrap" id="g-open" style="display:none;">
+        <input class="open-input" id="g-input" placeholder="tape ta réponse..." onkeydown="if(event.key==='Enter')checkOpen()">
+        <button class="open-btn" onclick="checkOpen()">→</button>
+      </div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+const CHAPTERS = [
+
+
+// ══════════════════════════════════════════════════════
+// MODULE 0 — INTRODUCTION À LA BIOCHIMIE (niveau zéro)
+// ══════════════════════════════════════════════════════
+{id:"b0",sec:"module 0 · introduction",num:"0",name:"les molécules de la vie — première approche",level:"zéro",
+takeaway:["Les 4 grandes familles de biomolécules : glucides, lipides, protéines, acides nucléiques","Les protéines sont faites d'acides aminés enchaînés","L'ADN encode l'information génétique via 4 bases (A, T, G, C)","ATP = monnaie énergétique universelle de la cellule","La structure détermine la fonction — principe central de la biochimie"],
+questions:[
+{c:"notion · les 4 familles de biomolécules",type:"qcm",
+code:`<span class="cm">// 4 grandes familles de biomolécules</span>
+<span class="hl">glucides</span>   : sucres, énergie immédiate (glucose)
+<span class="hl">lipides</span>    : graisses, membranes, réserves (triglycérides)
+<span class="hl">protéines</span>  : acides aminés, fonctions = structure, enzymes, signaux
+<span class="hl">ac. nucléiques</span> : ADN (info génétique), ARN (intermédiaire)
+<span class="why">// tout organisme vivant utilise exactement ces 4 familles
+// même bactérie, champignon, humain → même chimie de base</span>`,
+q:"Quelle biomolécule stocke l'information génétique ?",
+ch:["Les glucides","Les lipides","Les protéines","Les acides nucléiques (ADN)"],
+ok:3,hint:"4 lettres, double hélice, chromosome — c'est quoi ?",
+fb_ok:"// correct — l'ADN (acide désoxyribonucléique) encode toute l'information génétique.",
+fb_no:"// l'ADN (acide nucléique) stocke l'information génétique. Les protéines l'exécutent.",
+mv:{dx:1,dy:0}},
+
+{c:"notion · protéines et acides aminés",type:"qcm",
+code:`<span class="cm">// protéines = polymères d'acides aminés</span>
+<span class="hl">acide aminé</span> : molécule avec −NH₂ et −COOH
+→ 20 acides aminés naturels
+→ liés par <span class="hl">liaisons peptidiques</span>
+<span class="ex">dipeptide   : aa1 − aa2
+tripeptide  : aa1 − aa2 − aa3
+protéine    : 50 à 10 000+ acides aminés</span>
+<span class="why">// hémoglobine = 574 acides aminés
+// collagène = ~1000 acides aminés</span>`,
+q:"Quel lien chimique unit les acides aminés entre eux dans une protéine ?",
+ch:["Liaison hydrogène","Liaison peptidique","Liaison ionique","Liaison covalente non polaire"],
+ok:1,hint:"la liaison entre −COOH d'un AA et −NH₂ du suivant s'appelle ?",
+fb_ok:"// correct — liaison peptidique : −CO−NH− formée par condensation entre −COOH et −NH₂.",
+fb_no:"// liaison peptidique = −CO−NH−, formée entre le −COOH d'un acide aminé et le −NH₂ du suivant.",
+mv:{dx:0,dy:-1}},
+
+{c:"notion · l'ATP — monnaie énergétique",type:"qcm",
+code:`<span class="cm">// ATP = adénosine triphosphate</span>
+<span class="hl">ATP</span> → ADP + Pᵢ + <span class="hl">énergie (~30 kJ/mol)</span>
+<span class="why">// toutes les réactions cellulaires coûteuses
+// utilisent l'ATP comme source d'énergie
+// la cellule régénère l'ATP en permanence
+// glycolyse + Krebs + chaîne resp. → ATP</span>
+<span class="ex">contraction musculaire : ATP → ADP + énergie mécanique
+synthèse protéines : ATP → ADP + énergie chimique</span>`,
+q:"Pourquoi l'ATP est-il appelé la 'monnaie énergétique' de la cellule ?",
+ch:["Parce qu'il est rare et précieux","Parce qu'il est utilisé pour toutes les réactions cellulaires nécessitant de l'énergie","Parce qu'il ressemble à une pièce de monnaie","Parce que seules les cellules hépatiques le produisent"],
+ok:1,hint:"la monnaie = ce qu'on utilise pour 'payer' toutes les dépenses",
+fb_ok:"// correct — l'ATP est l'intermédiaire universel d'énergie : produit là où c'est disponible, utilisé partout où c'est nécessaire.",
+fb_no:"// l'ATP est utilisé par TOUTES les cellules pour TOUTES les réactions coûteuses → monnaie universelle.",
+mv:{dx:1,dy:0}},
+
+{c:"notion · ADN — les 4 bases",type:"qcm",
+code:`<span class="cm">// ADN — 4 bases azotées</span>
+<span class="hl">A</span> (adénine)   ↔ <span class="hl">T</span> (thymine)    2 liaisons H
+<span class="hl">G</span> (guanine)   ↔ <span class="hl">C</span> (cytosine)   3 liaisons H
+<span class="why">// règle de complémentarité de Chargaff
+// A s'apparie toujours avec T
+// G s'apparie toujours avec C
+// → séquence d'un brin détermine l'autre</span>`,
+q:"Si un brin d'ADN a la séquence A−T−G−C, quel est le brin complémentaire ?",
+ch:["A−T−G−C","T−A−C−G","U−A−C−G","G−C−T−A"],
+ok:1,hint:"A↔T et G↔C — chaque base s'apparie avec sa complémentaire",
+fb_ok:"// correct — A→T, T→A, G→C, C→G → brin complémentaire = T−A−C−G.",
+fb_no:"// règle A↔T et G↔C → A→T, T→A, G→C, C→G → T−A−C−G.",
+mv:{dx:0,dy:-1}},
+
+{c:"notion · structure détermine fonction",type:"qcm",
+code:`<span class="cm">// principe central de la biochimie</span>
+<span class="hl">structure → fonction</span>
+<span class="ex">hémoglobine : poche hydrophobe → lie O₂
+insuline    : forme spécifique → lie son récepteur
+enzyme      : site actif → complémentaire du substrat
+ADN double  : brins complémentaires → copie fidèle</span>
+<span class="why">// une mutation = changement d'1 acide aminé
+// peut modifier la structure → perte de fonction
+// drépanocytose : Val→Glu en position 6 de l'hémoglobine</span>`,
+q:"Un médicament bloque une enzyme en occupant son site actif. Quel principe illustre-t-il ?",
+ch:["Les enzymes sont toutes identiques","La structure du site actif détermine quelle molécule peut s'y lier","Les médicaments modifient l'ADN","Les enzymes fonctionnent mieux à haute température"],
+ok:1,hint:"le site actif a une forme précise — seules certaines molécules s'y adaptent",
+fb_ok:"// correct — la structure du site actif (forme, charges) détermine la spécificité : seul le bon substrat ou un inhibiteur complémentaire peut s'y lier.",
+fb_no:"// structure du site actif = complémentaire du substrat (ou de l'inhibiteur) → spécificité enzymatique.",
+mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// 15A — ACIDES AMINÉS ET PROTÉINES
+// ══════════════════════════════════════════════════════
+{id:"b1",sec:"module 15 · acides aminés et protéines",num:"15a",name:"acides aminés — structure et propriétés",level:"intermédiaire",
+takeaway:[
+  "20 acides aminés protéinogènes, tous L (configuration S sauf cystéine)",
+  "Structure générale : H₂N−Cα(R)−COOH · pKa(COOH)~2, pKa(NH₃⁺)~9-10",
+  "pI = (pKa1+pKa2)/2 pour AA non ionisables ; inclut pKa chaîne latérale si ionisable",
+  "À pH physiologique (7.4) : forme zwitterion NH₃⁺/COO⁻",
+  "Classement par chaîne latérale : apolaires, polaires, acides, basiques",
+  "Liaisons disulfure Cys−Cys : stabilisation des protéines",
+  "Acides aminés essentiels (non synthétisés) : His, Ile, Leu, Lys, Met, Phe, Thr, Trp, Val"
+],
+questions:[
+{c:"Q1 · structure générale",type:"qcm",
+code:`<span class="cm">// acide aminé — structure générale</span>
+H₂N−<span class="hl">Cα</span>(R)−COOH
+groupe α-amino (−NH₂) · groupe α-carboxyle (−COOH)
+chaîne latérale R (variable selon l'AA)
+<span class="cm">// tous les 20 AA protéinogènes ont cette structure</span>
+<span class="why">// Cα = carbone alpha = centre chiral (sauf glycine R=H)</span>`,
+q:"Quel est le seul acide aminé sans carbone asymétrique ?",
+ch:["Alanine","Glycine (R=H — deux fois H sur Cα)","Valine","Proline"],ok:1,
+hint:"pour qu'il y ait un carbone asymétrique, les 4 groupes doivent être différents",
+fb_ok:"// correct — glycine : Cα lié à NH₂, COOH, H, H → deux H identiques → pas de carbone asymétrique.",
+fb_no:"// glycine : R=H → Cα lié à NH₂, COOH, H, H → 2 groupes identiques → achiral.",mv:{dx:1,dy:0}},
+
+{c:"Q2 · pKa et zwitterion",type:"qcm",
+code:`<span class="cm">// acide aminé — états d'ionisation</span>
+pH très bas   : ⁺H₃N−CH(R)−COOH      (dicationique)
+pH interméd.  : ⁺H₃N−CH(R)−COO⁻     (zwitterion)
+pH très élevé :  H₂N−CH(R)−COO⁻      (anionique)
+<span class="hl">pKa(COOH) ≈ 2 · pKa(NH₃⁺) ≈ 9-10</span>
+pI = (pKa1 + pKa2) / 2`,
+q:"À pH physiologique (7.4), l'alanine (pI≈6) est sous quelle forme principale ?",
+ch:["H₂N−CH(CH₃)−COOH (neutre non ionisé)","⁺H₃N−CH(CH₃)−COO⁻ (zwitterion)","H₂N−CH(CH₃)−COO⁻ (anionique)","⁺H₃N−CH(CH₃)−COOH (cationique)"],ok:1,
+hint:"à pH physiologique (7.4), entre pKa1(~2) et pKa2(~9) → zwitterion",
+fb_ok:"// correct — pH 7.4 est entre pKa1(2) et pKa2(9.7) → zwitterion ⁺NH₃/COO⁻.",
+fb_no:"// entre les deux pKa → les deux groupes sont ionisés → zwitterion.",mv:{dx:0,dy:-1}},
+
+{c:"Q3 · classification des chaînes latérales",type:"qcm",
+code:`<span class="cm">// classification par chaîne latérale R</span>
+<span class="kw">apolaires</span>  : Gly, Ala, Val, Leu, Ile, Pro, Phe, Trp, Met
+<span class="kw">polaires</span>   : Ser, Thr, Cys, Tyr, Asn, Gln
+<span class="kw">acides</span>     : Asp (pKa~4), Glu (pKa~4)
+<span class="kw">basiques</span>   : Lys (pKa~10), Arg (pKa~12), His (pKa~6)
+<span class="why">// His : seul AA basique avec pKa proche du pH physiologique
+// → catalyseur acido-basique dans les enzymes</span>`,
+q:"L'histidine (His) est unique parmi les AA basiques car son pKa de chaîne latérale (~6) est proche du pH physiologique. Quelle conséquence fonctionnelle ?",
+ch:["Elle est toujours protonée","Elle peut jouer un rôle de catalyseur acido-basique dans les enzymes — accepter/donner H⁺ à pH physiologique","Elle est insoluble à pH 7","Elle est l'AA le plus fréquent"],ok:1,
+hint:"pKa proche de pH = équilibre dynamique entre formes protonée/déprotonée → catalyse",
+fb_ok:"// correct — His pKa~6 : à pH 7.4, ~90% neutre. Mais l'équilibre rapide permet la catalyse enzymatique.",
+fb_no:"// His avec pKa~6 peut osciller entre protonée/déprotonée à pH physio → catalyseur acido-basique idéal.",mv:{dx:1,dy:0}},
+
+{c:"Q4 · calcul de pI",type:"open",
+code:`<span class="cm">// pI — calcul</span>
+AA non ionisable : pI = (pKa1 + pKa2) / 2
+<span class="ex">glycine : pKa(COOH)=2.34 · pKa(NH₃⁺)=9.60
+  pI = (2.34+9.60)/2 = 5.97</span>
+AA ionisable : prendre les deux pKa encadrant la forme neutre`,
+q:"Calcule le pI de l'alanine : pKa(COOH)=2.35 et pKa(NH₃⁺)=9.87",
+keys:["6.11","6,11","6.1","6,1"],
+hint:"pI = (2.35+9.87)/2",
+fb_ok:"// correct — pI = (2.35+9.87)/2 = 12.22/2 = 6.11.",
+fb_no:"// pI = (2.35+9.87)/2 = 6.11.",mv:{dx:0,dy:-1}},
+
+{c:"Q5 · pI de l'acide aspartique",type:"qcm",
+code:`<span class="cm">// pI d'un AA acide (chaîne latérale ionisable)</span>
+acide aspartique : pKa1(COOH)=2.10 · pKa2(COO⁻ latérale)=3.86 · pKa3(NH₃⁺)=9.82
+<span class="hl">forme neutre nette = à pH entre pKa1 et pKa2</span>
+pI = (pKa1 + pKa2) / 2 = (2.10+3.86)/2 = 2.98
+<span class="why">// pI très bas pour les AA acides → chargés négativement à pH physiologique
+// point isoélectrique est au-dessous de 7 pour les AA acides
+// au-dessus de 7 pour les AA basiques</span>`,
+q:"Pourquoi les acides aminés acides (Asp, Glu) ont-ils un pI << 7 ?",
+ch:["Car ils sont solubles","Car ils ont une chaîne latérale acide supplémentaire qui abaisse le pI vers les valeurs acides","Car ils sont apolaires","Par convention arbitraire"],ok:1,
+hint:"une chaîne latérale acide supplémentaire = un troisième groupe ionisable côté acide",
+fb_ok:"// correct — chaîne latérale −COOH supplémentaire → 2 groupes acides → pI dans la zone acide.",
+fb_no:"// AA acide = chaîne R avec −COOH (pKa~4) → 2 groupes acides → pI entre pKa1 et pKa2 (acides).",mv:{dx:1,dy:0}},
+
+{c:"Q6 · acides aminés essentiels",type:"qcm",
+code:`<span class="cm">// acides aminés essentiels — non synthétisés par l'humain</span>
+His · Ile · Leu · Lys · Met · Phe · Thr · Trp · Val
+(9 essentiels chez l'adulte, 10 chez l'enfant : + Arg)
+<span class="why">// carences alimentaires :
+// tryptophane → précurseur sérotonine + niacine (B3)
+// phénylalanine → précurseur tyrosine (dopamine, mélanine)
+// lysine → peu présente dans les céréales → complémentation légumineuses
+// méthionine → seul AA soufré essentiel</span>`,
+q:"La phénylcétonurie (PKU) est due à l'absence de phénylalanine hydroxylase. Quelle est la conséquence directe ?",
+ch:["Excès de tyrosine","Accumulation de phénylalanine (neurotoxique) + déficit en tyrosine","Déficit en tryptophane","Aucune conséquence si régime normal"],ok:1,
+hint:"sans phénylalanine hydroxylase : Phe ne peut pas être convertie en tyrosine → accumule",
+fb_ok:"// correct — PKU : Phe s'accumule (neurotoxique) + Tyr devient essentielle. Régime pauvre en Phe nécessaire.",
+fb_no:"// phénylalanine hydroxylase : Phe → Tyr. Sans elle : Phe ↑ (toxique) + Tyr manque.",mv:{dx:0,dy:-1}},
+
+{c:"Q7 · cystéine et ponts disulfure",type:"qcm",
+code:`<span class="cm">// pont disulfure Cys−S−S−Cys</span>
+2 cystéines + oxydation → pont disulfure + 2H⁺ + 2e⁻
+liaison covalente forte → stabilise la structure 3D des protéines
+<span class="ex">insuline : 2 chaînes polypeptidiques reliées par 2 ponts S−S
+immunoglobulines : ponts S−S internes et entre chaînes
+kératine (cheveux) : nombreux ponts S−S → solidité</span>
+<span class="why">// permanente (frisage) : réduction des ponts S−S + reformage en position courbe
+// les protéines cellulaires n'ont généralement pas de ponts S−S (milieu réducteur)
+// les protéines sécrétées oui (milieu oxydant du RE et extracellulaire)</span>`,
+q:"Les ponts disulfure des protéines extracellulaires se forment dans le réticulum endoplasmique (RE). Pourquoi pas dans le cytoplasme ?",
+ch:["Car le cytoplasme est trop chaud","Le cytoplasme est réducteur (glutathion réduit) → ponts S−S seraient réduits. Le RE est oxydant → formation favorisée","Car les Cys ne sont pas dans le cytoplasme","Par hasard évolutif"],ok:1,
+hint:"milieu réducteur = ponts S−S instables ; milieu oxydant = formation favorisée",
+fb_ok:"// correct — cytoplasme réducteur (GSH, thiorédoxine) → ponts S−S réduits. RE oxydant → formation et stabilisation.",
+fb_no:"// cytoplasme réducteur (glutathion, thiorédoxine) → ponts S−S instables. RE oxydant → formation favorable.",mv:{dx:1,dy:0}},
+
+{c:"Q8 · séparation par électrophorèse",type:"qcm",
+code:`<span class="cm">// électrophorèse — migration selon charge et taille</span>
+à pH > pI : AA chargé négativement → migre vers l'anode (+)
+à pH < pI : AA chargé positivement → migre vers la cathode (−)
+à pH = pI : charge nette = 0 → ne migre pas
+<span class="why">// utilisation : SDS-PAGE (sépare selon masse)
+// électrofocalisation isoélectrique (IEF) : sépare selon pI
+// 2D-PAGE : IEF + SDS-PAGE → résolution maximale
+// identifie les protéines dans un échantillon biologique</span>`,
+q:"On réalise une électrophorèse à pH=6. La lysine (pI=9.74) migre vers :",
+ch:["L'anode — car pH > pI","La cathode — car pH < pI : lysine chargée positivement","Ne migre pas — au point isoélectrique","L'anode et la cathode simultanément"],ok:1,
+hint:"pH=6 < pI=9.74 → lysine pas encore à son pI → encore chargée positivement → vers cathode (−)",
+fb_ok:"// correct — pH < pI → lysine protonée → chargée + → migre vers cathode (−).",
+fb_no:"// pH < pI → plus protonée → charge positive → électrophorèse vers cathode (−).",mv:{dx:0,dy:-1}},
+
+{c:"Q9 · acides aminés et neurotransmetteurs",type:"qcm",
+code:`<span class="cm">// précurseurs de neurotransmetteurs</span>
+<span class="kw">tryptophane</span> → sérotonine (5-HT) + mélatonine
+<span class="kw">tyrosine</span>    → dopamine → noradrénaline → adrénaline
+<span class="kw">histidine</span>   → histamine
+<span class="kw">glutamate</span>   → GABA (acide γ-aminobutyrique)
+<span class="why">// IRS (inhibiteurs recapture sérotonine) : bloquent la recapture de 5-HT
+// L-DOPA : précurseur de dopamine, traverse BBB (contrairement à dopamine)
+// antihistaminiques : bloquent récepteurs H1 ou H2</span>`,
+q:"Pourquoi prescrit-on la L-DOPA (et pas la dopamine directement) dans la maladie de Parkinson ?",
+ch:["La L-DOPA est moins chère","La L-DOPA traverse la barrière hémato-encéphalique (BBB) grâce à son transporteur d'AA. La dopamine ne traverse pas.","La L-DOPA est plus stable","La dopamine est toxique"],ok:1,
+hint:"la BBB a des transporteurs spécifiques pour les AA mais pas pour la dopamine",
+fb_ok:"// correct — L-DOPA : substrat du transporteur LAT (Large neutral AA Transporter) → traverse BBB → décarboxylée en dopamine dans le SNC.",
+fb_no:"// L-DOPA traverse BBB via transporteur d'AA. Dopamine (amine) ne traverse pas → L-DOPA nécessaire.",mv:{dx:1,dy:0}},
+
+{c:"Q10 · piège — pKa du groupement amine",type:"qcm",
+code:`<span class="cm">// PIÈGE : pKa de NH₂ ou de NH₃⁺ ?</span>
+pKa(NH₃⁺) ≈ 9-10 signifie que NH₃⁺ est un acide (donne H⁺)
+NH₃⁺ ⇌ NH₂ + H⁺  Ka → pKa
+<span class="r">⚠️ le pKa est celui de la forme ACIDE (NH₃⁺) !</span>
+→ à pH < pKa : forme NH₃⁺ (protonée) majoritaire
+→ à pH > pKa : forme NH₂ (déprotonée) majoritaire`,
+q:"La lysine a pKa(ε-NH₃⁺)=10.5. À pH 7.4, la chaîne latérale de la lysine est :",
+ch:["Déprotonée (−NH₂) — car pH < pKa","Protonée (−NH₃⁺) — car pH < pKa → forme acide majoritaire","50/50","Dépend de la protéine"],ok:1,
+hint:"pH 7.4 < pKa 10.5 → forme protonée (NH₃⁺) majoritaire",
+fb_ok:"// correct — pH < pKa → forme protonée NH₃⁺ majoritaire. Lysine est chargée + à pH physiologique.",
+fb_no:"// pH < pKa → forme protonée (NH₃⁺) domine. Lysine : chargée + à pH 7.4.",mv:{dx:0,dy:-1}},
+
+{c:"Q11 · piège — electrophorèse et pI",type:"qcm",
+code:`<span class="cm">// PIÈGE : direction de migration en électrophorèse</span>
+pH > pI → charge nette négative → migre vers anode (+)
+pH < pI → charge nette positive → migre vers cathode (−)
+<span class="cm">// moyen mnémotechnique :</span>
+pH<pI → positif → cathode (c/c)
+pH>pI → négatif → anode (a/a)`,
+q:"On mélange Gly (pI=6), Asp (pI=2.98) et Lys (pI=9.74) et on fait une électrophorèse à pH=6. Quel AA ne migre pas ?",
+ch:["Asp","Lys","Gly — car pH=pI=6","Tous migrent"],ok:2,
+hint:"ne migre pas quand pH = pI",
+fb_ok:"// correct — Gly (pI=6) = pH → charge nulle → immobile. Asp(pI=2.98): pH>pI → vers anode. Lys(pI=9.74): pH<pI → vers cathode.",
+fb_no:"// pH = pI → charge nulle → pas de migration. Gly (pI=6) au pH=6.",mv:{dx:1,dy:0}},
+
+{c:"Q12 · piège — acide aminé essentiel conditionnellement",type:"qcm",
+code:`<span class="cm">// essentiels "conditionnellement"</span>
+certains AA sont essentiels dans des conditions particulières :
+tyrosine : essentielle si déficit en phénylalanine hydroxylase (PKU)
+arginine : essentielle pour la croissance (enfant) ou stress
+glutamine : essentielle en cas de stress/chirurgie/brûlures
+<span class="why">// "essentiel" = ne peut pas être synthétisé en quantité suffisante
+// dans certaines conditions pathologiques ou de croissance rapide</span>`,
+q:"Un patient en réanimation (brûlures graves) a besoin d'une supplémentation en glutamine. Pourquoi, alors que la glutamine est normalement non-essentielle ?",
+ch:["Par erreur du diététicien","En cas de stress extrême, la consommation de glutamine dépasse la capacité de synthèse de l'organisme → devient conditionnellement essentielle","Car les brûlures détruisent la glutamine","Car la glutamine est toxique à haute dose"],ok:1,
+hint:"stress intense → demande très élevée → synthèse insuffisante",
+fb_ok:"// correct — stress intense (brûlures, sepsis, chirurgie) → consommation de glutamine >> synthèse → conditionnellement essentielle.",
+fb_no:"// brûlures graves : catabolisme intensif → glutamine consommée plus vite que synthétisée → essentiellement conditionnelle.",mv:{dx:0,dy:-1}},
+
+{c:"Q13 · complexe — tampons physiologiques",type:"qcm",
+code:`<span class="cm">// acides aminés comme tampons — histidine</span>
+histidine imidazole : pKa~6 → tampon physiologique intracellulaire
+hémoglobine : riche en His → tampon du CO₂ dans les GR
+CO₂ + H₂O → H₂CO₃ → HCO₃⁻ + H⁺
+H⁺ capté par His de l'hémoglobine → effet Bohr
+<span class="why">// effet Bohr : ↑CO₂ (muscles actifs) → ↑H⁺ → protonation His Hb
+// → ↓ affinité Hb pour O₂ → libération O₂ aux muscles !</span>`,
+q:"L'effet Bohr décrit comment la libération d'O₂ par l'hémoglobine est favorisée dans les tissus actifs. Le mécanisme implique principalement :",
+ch:["Une augmentation de la température uniquement","La protonation des résidus histidine de l'hémoglobine par le CO₂/H⁺ des tissus actifs → diminution de l'affinité pour O₂","Une modification de la membrane des GR","Une activation enzymatique"],ok:1,
+hint:"CO₂ des muscles → H⁺ → His de Hb se protone → changement conformation → ↓ affinité O₂",
+fb_ok:"// correct — effet Bohr : CO₂ → H⁺ → protonation His Hb → allostérie → ↓ affinité O₂ → libération aux muscles.",
+fb_no:"// effet Bohr : CO₂+H₂O → H⁺. H⁺ + His(Hb) → HisH⁺(Hb) → ↓ affinité O₂ → déchargement aux tissues.",mv:{dx:1,dy:0}},
+
+{c:"Q14 · complexe — modification post-traductionnelle",type:"qcm",
+code:`<span class="cm">// modifications post-traductionnelles (MPT)</span>
+phosphorylation   : Ser, Thr, Tyr + kinase → régulation
+glycosylation     : Asn(N-lié) ou Ser/Thr(O-lié) → reconnaissance
+hydroxylation     : Pro → hydroxyproline (collagène) — vitamine C nécessaire
+acétylation       : Lys (histones) → expression génique
+ubiquitination    : Lys → marquage pour dégradation (protéasome)
+<span class="why">// environ 300 types de MPT connues
+// augmentent la diversité fonctionnelle des ~20 000 protéines humaines</span>`,
+q:"Le scorbut (déficit en vitamine C) provoque des lésions du tissu conjonctif. Quel mécanisme biochimique ?",
+ch:["La vitamine C est un précurseur du collagène","La vitamine C est cofacteur de la prolyl-hydroxylase → sans elle, la proline n'est pas hydroxylée → collagène instable (pas de liaisons H entre chaînes)","La vitamine C est un acide aminé essentiel","La vitamine C active les ostéoclastes"],ok:1,
+hint:"vitamine C (ascorbate) = cofacteur de la prolyl et lysyl-hydroxylase",
+fb_ok:"// correct — sans vitamine C : Pro non hydroxylée → pas d'hydroxyproline → collagène ne forme pas la triple hélice stable → scorbut.",
+fb_no:"// vitamine C cofacteur prolyl-hydroxylase → hydroxyproline nécessaire pour triple hélice du collagène. Sans : collagène instable.",mv:{dx:0,dy:-1}},
+
+{c:"Q15 · complexe — séquençage et maladies génétiques",type:"qcm",
+code:`<span class="cm">// mutation d'un seul acide aminé → maladie</span>
+drépanocytose : Glu(6) → Val dans la chaîne β-globine
+→ HbS au lieu de HbA
+→ Val est apolaire → agrégation des Hb désoxygénées → falciformation
+<span class="why">// 1 seule substitution d'AA sur 287 → maladie grave
+// Glu (chargé −) → Val (apolaire) → surface de la Hb change
+// les Hb s'agrègent → fibre longue → GR en faucille → occlusion vasculaire
+// avantage hétérozygote : résistance au paludisme (Plasmodium préfère HbA)</span>`,
+q:"Dans la drépanocytose, Glu→Val (position β6). Glu est polaire chargé, Val est apolaire. Pourquoi cette substitution cause-t-elle l'agrégation de l'HbS ?",
+ch:["Car Val est plus grand que Glu","Val apolaire expose une zone hydrophobe sur la surface de Hb → interaction hydrophobe avec une poche hydrophobe d'une autre HbS → agrégation","Car Val est moins stable","Car Glu était une liaison covalente"],ok:1,
+hint:"un groupe apolaire en surface d'une protéine → interaction hydrophobe avec d'autres protéines",
+fb_ok:"// correct — Val (apolaire) sur la surface → 'poignée hydrophobe' → s'insère dans la poche de l'HbS voisine → fibre → falciformation.",
+fb_no:"// Val apolaire en surface → interaction hydrophobe avec poche complémentaire sur Hb voisine → polymérisation → corps falciforme.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// 15B — STRUCTURE DES PROTÉINES
+// ══════════════════════════════════════════════════════
+{id:"b2",sec:"module 15 · acides aminés et protéines",num:"15b",name:"structure des protéines — 4 niveaux",level:"intermédiaire",
+takeaway:[
+  "Structure primaire : séquence d'AA — détermine tout le reste",
+  "Structure secondaire : hélice α (φ=-57°, ψ=-47°) et feuillet β — liaisons H entre C=O et N−H",
+  "Structure tertiaire : repliement 3D global — forces : liaisons H, hydrophobes, ioniques, S−S",
+  "Structure quaternaire : assemblage de plusieurs chaînes polypeptidiques",
+  "Dénaturation : perte de la structure 3D — irréversible pour beaucoup de protéines",
+  "Chaperonnes : aident au repliement correct (évitent les agrégations)",
+  "Thermodynamiquement : la structure native = état de plus basse énergie libre"
+],
+questions:[
+{c:"Q1 · structure primaire",type:"qcm",
+code:`<span class="cm">// structure primaire — séquence des AA</span>
+liaison peptidique : R₁−CO−NH−R₂
+déterminée par le gène (séquence ADN)
+<span class="hl">la structure primaire détermine tout le reste</span>
+<span class="why">// Anfinsen (Prix Nobel 1972) : la ribonucléase dénaturée
+// se replie spontanément → la séquence suffit
+// MAIS en pratique : les chaperonnes sont nécessaires pour de nombreuses protéines in vivo</span>`,
+q:"L'expérience d'Anfinsen avec la ribonucléase montre que :",
+ch:["Les protéines ont besoin des chaperonnes pour se replier","La structure 3D est entièrement déterminée par la séquence primaire (l'information est dans la séquence)","La dénaturation est toujours irréversible","Les enzymes se replient aléatoirement"],ok:1,
+hint:"ribonucléase dénaturée → repliement spontané = même structure → même activité",
+fb_ok:"// correct — Anfinsen : la séquence primaire contient toute l'information nécessaire au repliement.",
+fb_no:"// Anfinsen : ribonucléase dénaturée se replie spontanément → structure primaire détermine structure 3D.",mv:{dx:1,dy:0}},
+
+{c:"Q2 · hélice alpha",type:"qcm",
+code:`<span class="cm">// hélice alpha — structure secondaire</span>
+3.6 résidus/tour · montée de 1.5 Å/résidu
+liaisons H : C=O(i) ···H−N(i+4)
+<span class="hl">tous les groupes C=O et N−H participent aux liaisons H</span>
+chaînes latérales R pointent vers l'extérieur
+angles de Ramachandran : φ≈−57°, ψ≈−47°
+<span class="why">// très stable : ~4 liaisons H par tour
+// fréquente dans les segments transmembranaires (20 AA apolaires)
+// kératine, myosine, collagène (triple hélice particulière)</span>`,
+q:"Dans une hélice α, les liaisons hydrogène se forment entre :",
+ch:["Les chaînes latérales R des résidus voisins","Le C=O du résidu i et le N−H du résidu i+4","Le N−H du résidu i et le C=O du résidu i+1","Les liaisons disulfure des cystéines"],ok:1,
+hint:"les liaisons H se font le long de l'axe hélicoïdal entre résidus espacés de 4",
+fb_ok:"// correct — C=O(i) ↔ H−N(i+4). Cette distance correspond à 1 tour d'hélice (3.6 résidus).",
+fb_no:"// hélice α : liaison H entre C=O d'un résidu et N−H du résidu situé 4 positions plus loin.",mv:{dx:0,dy:-1}},
+
+{c:"Q3 · feuillet bêta",type:"qcm",
+code:`<span class="cm">// feuillet β — structure secondaire</span>
+brins β : étendus, angles φ≈−119°, ψ≈+113°
+liaisons H <span class="hl">entre brins voisins</span> (pas dans le même brin)
+<span class="kw">parallèle</span>  : brins N→C dans le même sens
+<span class="kw">antiparallèle</span>: brins N→C en sens opposés (plus stable)
+<span class="why">// soie (fibroïne) : feuillets β antiparallèles → très résistante
+// protéines amyloïdes (Alzheimer) : feuillets β empilés → agrégats toxiques
+// bêta-barreau (porine) : canal membranaire</span>`,
+q:"Les protéines amyloïdes impliquées dans la maladie d'Alzheimer (peptide Aβ) forment des agrégats de feuillets β. Pourquoi sont-ils difficiles à dégrader ?",
+ch:["Car les protéases ne reconnaissent pas les feuillets β","Les feuillets β empilés sont très stables thermodynamiquement et résistants aux protéases (structure compacte peu accessible)","Car ils sont extracellulaires","Car le cerveau manque de protéases"],ok:1,
+hint:"feuillets β empilés = structure très compacte et thermodynamiquement stable",
+fb_ok:"// correct — feuillets β empilés = structure très stable, compacte, peu accessible aux protéases → accumulation.",
+fb_no:"// feuillets β amyloïdes : extrêmement stables, compacts, résistants → accumulation → plaques séniles.",mv:{dx:1,dy:0}},
+
+{c:"Q4 · forces de la structure tertiaire",type:"qcm",
+code:`<span class="cm">// structure tertiaire — forces stabilisantes</span>
+<span class="kw">effet hydrophobe</span>  : résidus apolaires → cœur de la protéine
+<span class="kw">liaisons H</span>       : groupes polaires
+<span class="kw">ponts disulfure</span>  : Cys−S−S−Cys (covalente → très forte)
+<span class="kw">interactions ioniq.</span>: Asp/Glu(−) ↔ Lys/Arg(+)
+<span class="why">// l'effet hydrophobe est la force DOMINANTE dans le repliement
+// les résidus apolaires "fuient" l'eau → cœur hydrophobe
+// c'est entropique (libère les molécules d'eau structurées)</span>`,
+q:"L'effet hydrophobe est la force principale du repliement protéique. Cette force est de nature :",
+ch:["Enthalpique — les résidus apolaires s'attirent","Entropique — les résidus apolaires regroupés libèrent les molécules d'eau structurées → gain d'entropie","Électrostatique","Covalente"],ok:1,
+hint:"effet hydrophobe = gain d'entropie du solvant quand les résidus apolaires se regroupent",
+fb_ok:"// correct — effet hydrophobe : entropique. Résidus apolaires regroupés → eau libérée → ΔS > 0 → ΔG < 0.",
+fb_no:"// effet hydrophobe : résidus apolaires ensemble → eau libérée de sa 'cage' → ΔS(eau) ↑ → force entropique.",mv:{dx:0,dy:-1}},
+
+{c:"Q5 · structure quaternaire",type:"qcm",
+code:`<span class="cm">// structure quaternaire — assemblage de sous-unités</span>
+<span class="ex">hémoglobine : 2α + 2β (tétramère)
+  → coopérativité de liaison de l'O₂
+insuline : dimère (stockée) · hexamère (avec Zn²⁺)
+anticorps IgG : 2 chaînes lourdes + 2 chaînes légères
+ATP synthase : complexe multiprotéique rotatif (8+ sous-unités)</span>
+<span class="why">// la structure quaternaire permet la coopérativité :
+// liaison du 1er O₂ à Hb → change conformation → facilite les 3 suivants
+// courbe sigmoïde de liaison (S-shaped) = caractéristique de la coopérativité</span>`,
+q:"L'hémoglobine montre une courbe de saturation sigmoïde (en S) pour O₂, contrairement à la myoglobine (courbe hyperbolique). Cela reflète :",
+ch:["Une différence de structure primaire","La coopérativité allostérique — la liaison d'un O₂ augmente l'affinité des autres sous-unités pour O₂","Une différence de concentration","La présence du fer"],ok:1,
+hint:"sigmoïde = coopérativité positive → chaque liaison facilite la suivante",
+fb_ok:"// correct — courbe sigmoïde = coopérativité positive. 1er O₂ lié → changement conformationnel → ↑ affinité pour O₂ suivants.",
+fb_no:"// courbe sigmoïde = coopérativité allostérique. Hb tétramère → 1er O₂ → T→R → ↑ affinité → courbe en S.",mv:{dx:1,dy:0}},
+
+{c:"Q6 · dénaturation",type:"qcm",
+code:`<span class="cm">// dénaturation — perte de la structure 3D</span>
+agents dénaturants : chaleur · pH extrême · détergents (SDS) · urée/guanidinium
+→ rompent les forces non-covalentes (et réduisent S−S si réducteur)
+→ structure primaire <span class="hl">conservée</span>
+<span class="kw">réversible</span>  : petites protéines simples (ribonucléase)
+<span class="kw">irréversible</span>: grande majorité (agrégation des résidus hydrophobes exposés)
+<span class="why">// œuf cuit : blanc d'albumine dénaturé irréversiblement
+// cuisson = dénaturation des protéines alimentaires → meilleure digestibilité</span>`,
+q:"Le SDS (dodécyl sulfate de sodium) est utilisé en électrophorèse pour dénaturer les protéines. Il agit en :",
+ch:["Hydrolysant les liaisons peptidiques","S'associant aux résidus hydrophobes des protéines → les déplie → charge négative uniforme (1,4 g SDS/g protéine) → séparation par taille","Oxydant les ponts disulfure","Se liant au fer du groupe hème"],ok:1,
+hint:"SDS = détergent anionique → se lie aux résidus hydrophobes → déplie + charge uniforme",
+fb_ok:"// correct — SDS lie les résidus hydrophobes (~1 SDS/2 AA) → dépliement + charge uniforme → migration par taille seulement.",
+fb_no:"// SDS = détergent. Lie résidus hydrophobes → déplie. Charge uniforme (−) → migration selon masse moléculaire.",mv:{dx:0,dy:-1}},
+
+{c:"Q7 · chaperonnes moléculaires",type:"qcm",
+code:`<span class="cm">// chaperonnes — aide au repliement</span>
+HSP70 : lie les segments hydrophobes exposés (co-traductionnel)
+GroEL/GroES (bactéries) = Hsp60/Hsp10 (mitochondrie)
+→ chambre isolée → repliement à l'abri des agrégations
+<span class="why">// sans chaperonnes : les résidus hydrophobes exposés pendant le repliement
+// s'agrégeraient avec d'autres protéines en cours de synthèse
+// stress thermique → surexpression des HSP (heat shock proteins)
+// HSP90 : impliquée dans la résistance aux anticancéreux (cible thérapeutique)</span>`,
+q:"Lors d'un stress thermique (fièvre, brûlures), les cellules surexpriment les protéines HSP (Heat Shock Proteins). Pourquoi ?",
+ch:["Pour produire plus d'énergie","Pour aider à re-plier les protéines dénaturées par la chaleur et prévenir l'agrégation","Pour activer l'apoptose","Pour produire des anticorps"],ok:1,
+hint:"HSP = chaperonnes → protection contre les dommages liés à la chaleur",
+fb_ok:"// correct — HSP : aident à re-plier les protéines partiellement dénaturées et préviennent l'agrégation des résidus hydrophobes exposés.",
+fb_no:"// HSP sont des chaperonnes induites par le stress → re-pliement des protéines endommagées → survie cellulaire.",mv:{dx:1,dy:0}},
+
+{c:"Q8 · collagène — structure particulière",type:"qcm",
+code:`<span class="cm">// collagène — triple hélice</span>
+séquence : (Gly−X−Y)ₙ  X=Pro, Y=hydroxyPro fréquents
+3 chaînes polypeptidiques enroulées en triple hélice
+liaisons H entre les chaînes
+<span class="hl">Gly obligatoire : seul AA assez petit pour le centre de la triple hélice</span>
+<span class="why">// mutation Gly → autre AA = trouble du collagène
+// syndrome d'Ehlers-Danlos, ostéogenèse imparfaite
+// vitamine C nécessaire pour hydroxyproline → scorbut
+// collagène le plus abondant du corps humain</span>`,
+q:"Dans la triple hélice du collagène, chaque 3ème résidu doit être une glycine. Pourquoi ?",
+ch:["Car Gly est essentielle","Gly est le seul AA sans chaîne latérale (R=H) — assez petit pour se loger au centre de la triple hélice","Car Gly forme les meilleures liaisons H","Car Gly est la plus fréquente dans le génome"],ok:1,
+hint:"au centre de la triple hélice, l'espace est très limité",
+fb_ok:"// correct — Gly (R=H) : le plus petit AA. Toute autre chaîne latérale R briserait la triple hélice.",
+fb_no:"// Gly = seul AA sans chaîne R (R=H). Le centre de la triple hélice est trop étroit pour toute autre R.",mv:{dx:0,dy:-1}},
+
+{c:"Q9 · protéines membranaires",type:"qcm",
+code:`<span class="cm">// protéines transmembranaires</span>
+segments transmembranaires : ~20 AA apolaires en hélice α
+→ traversent la bicouche lipidique
+<span class="ex">récepteurs couplés à la protéine G (GPCR) : 7 hélices TM
+canaux ioniques : pore formé par 4-6 hélices TM
+transporteurs (GLUT, ABC) : 12 hélices TM</span>
+<span class="why">// les médicaments les plus prescrits ciblent les GPCR
+// β-bloquants, IEC, antagonistes calciques, antihistaminiques
+// ~40% des médicaments approuvés = ciblent des GPCR</span>`,
+q:"Les récepteurs β-adrénergiques sont des GPCR avec 7 hélices transmembranaires. Les β-bloquants (propranolol) agissent en :",
+ch:["Dénaturant le récepteur","Se liant au site de liaison de l'adrénaline (site orthostérique) et bloquant l'activation","Hydrolysant les hélices TM","Bloquant la synthèse du récepteur"],ok:1,
+hint:"antagoniste compétitif = se lie au même site que l'agoniste",
+fb_ok:"// correct — β-bloquants : antagonistes compétitifs au site de l'adrénaline → bloquent l'activation → ↓ FC et PA.",
+fb_no:"// β-bloquant = antagoniste compétitif → lie le site de l'adrénaline → bloque activation → effet anti-hypertenseur.",mv:{dx:1,dy:0}},
+
+{c:"Q10 · piège — primaire détermine tout mais pas toujours direct",type:"qcm",
+code:`<span class="cm">// PIÈGE : repliement in vivo ≠ toujours spontané</span>
+Anfinsen : ribonucléase se replie spontanément in vitro
+MAIS in vivo : beaucoup de protéines ont besoin des chaperonnes
+<span class="r">⚠️ la structure primaire détermine la structure native</span>
+<span class="r">⚠️ mais le repliement nécessite parfois de l'aide in vivo</span>
+<span class="why">// en cellule : ribosomes synthétisent en 20 AA/sec
+// résidus hydrophobes exposés avant que la chaîne soit finie → risque d'agrégation
+// chaperonnes préviennent les agrégations prématurées</span>`,
+q:"La conclusion de l'expérience d'Anfinsen est que la structure 3D est déterminée par la séquence primaire. Cela signifie-t-il que les chaperonnes sont inutiles ?",
+ch:["Oui — les chaperonnes sont redondantes","Non — les chaperonnes accélèrent et canalisent le repliement in vivo pour éviter les agrégations, mais ne 'programment' pas la structure","Oui — in vivo et in vitro sont équivalents","Non — les chaperonnes modifient la séquence primaire"],ok:1,
+hint:"Anfinsen in vitro ≠ conditions in vivo (protéines en cours de synthèse + autres protéines hydrophobes)",
+fb_ok:"// correct — chaperonnes utiles in vivo : évitent agrégations, accélèrent, mais n'encodent pas la structure (déjà dans la séquence).",
+fb_no:"// chaperonnes : nécessaires in vivo pour éviter l'agrégation mais n'encodent pas la structure. Anfinsen reste valide.",mv:{dx:0,dy:-1}},
+
+{c:"Q11 · piège — hélice alpha et proline",type:"qcm",
+code:`<span class="cm">// PIÈGE : proline brise les hélices alpha</span>
+proline = imino-acide : cycle pyrrolidine
+→ l'atome d'azote est dans le cycle → pas de H sur N
+→ <span class="r">ne peut pas former la liaison H N−H···O=C</span>
+→ <span class="r">introduce un coude rigide dans la chaîne</span>
+<span class="why">// Pro souvent en début d'hélice (acceptable) ou dans les boucles
+// Pro jamais au milieu d'une hélice α (brise l'hélice)
+// Pro dans les bêta-turns (virages de la chaîne)</span>`,
+q:"La proline est souvent trouvée aux coudes (boucles) des protéines et rarement dans les hélices α. Cela est dû à :",
+ch:["Sa grande taille","L'absence de N−H sur Pro (cycle pyrrolidine) → impossible de former la liaison H de l'hélice α + angle φ restreint","Sa charge positive","Sa solubilité dans l'eau"],ok:1,
+hint:"pas de N−H sur Pro → pas de liaison H → pas d'hélice",
+fb_ok:"// correct — Pro : N dans le cycle → pas de H sur N → liaison H impossible → brise l'hélice α.",
+fb_no:"// Pro : imino-acide (pas de N−H). Liaison H de l'hélice α requiert N−H → Pro incompatible avec hélice α.",mv:{dx:1,dy:0}},
+
+{c:"Q12 · piège — protéines intrasèquement désordonnées",type:"qcm",
+code:`<span class="cm">// protéines intrinsèquement désordonnées (IDP)</span>
+certaines protéines n'ont PAS de structure 3D définie
+→ flexibles en solution, se replient uniquement avec un partenaire
+<span class="ex">p53 : domaine de transactivation désordonné
+tau : s'agrège dans Alzheimer (désordonné)
+histones H1 : queue désordonnée</span>
+<span class="why">// ~30-50% des protéines eucaryotes ont des régions désordonnées
+// avantage : peut interagir avec plusieurs partenaires différents
+// contrairement au modèle classique clé-serrure de Fischer</span>`,
+q:"La protéine p53 (suppresseur de tumeur) a un domaine intrinsèquement désordonné. Quel avantage fonctionnel ?",
+ch:["Résistance à la dénaturation","Capacité d'interagir avec de nombreux partenaires différents (flexibilité conformationnelle = 'hub' de signalisation)","Plus facile à synthétiser","Moins immunogénique"],ok:1,
+hint:"désordre = flexibilité = peut prendre différentes formes selon le partenaire",
+fb_ok:"// correct — p53 désordonné : peut adapter sa conformation à de nombreux partenaires → hub central de signalisation.",
+fb_no:"// IDP : flexibles → peuvent interagir avec de multiples partenaires. p53 = hub de signalisation cellulaire.",mv:{dx:0,dy:-1}},
+
+{c:"Q13 · complexe — maladies de mauvais repliement",type:"qcm",
+code:`<span class="cm">// maladies conformationnelles — mauvais repliement</span>
+<span class="kw">amyloïdoses</span>     : feuillets β anormaux (Alzheimer, Parkinson, DT2)
+<span class="kw">prions</span>           : PrPᶜ (hélices) → PrPˢᶜ (feuillets) — infectieux !
+<span class="kw">mucoviscidose</span>    : CFTR ΔF508 → mauvais repliement → dégradation par protéasome
+<span class="why">// prions : transmission par contact (non par gène) : premier cas de maladie infectieuse sans acide nucléique
+// mucoviscidose : Lumacaftor (correcteur de repliement) + Ivacaftor (potentiateur)
+// → maintenant une maladie traitable !</span>`,
+q:"La mucoviscidose (CFTR ΔF508) est due à une délétion de 3 paires de bases → perte d'une phénylalanine. Le CFTR mal replié est dégradé par le protéasome. Lumacaftor (correcteur) agit en :",
+ch:["Remplaçant la phénylalanine manquante","Stabilisant le CFTR ΔF508 pendant son repliement → permettant à plus de protéines d'atteindre la membrane cellulaire","Inhibant le protéasome","Activant directement le canal CFTR"],ok:1,
+hint:"correcteur de repliement = stabilise la conformation → évite la dégradation prématurée",
+fb_ok:"// correct — Lumacaftor = correcteur. Stabilise CFTR ΔF508 pendant repliement → plus de protéines à la membrane → ↑ fonction.",
+fb_no:"// Lumacaftor : correcteur de repliement. Stabilise CFTR ΔF508 → moins dégradé → plus à la membrane.",mv:{dx:1,dy:0}},
+
+{c:"Q14 · complexe — immunoglobulines",type:"qcm",
+code:`<span class="cm">// immunoglobulines IgG — structure</span>
+2 chaînes lourdes (H) + 2 chaînes légères (L)
+reliées par ponts S−S
+<span class="kw">Fab</span> : fragment de liaison à l'antigène (variable)
+<span class="kw">Fc</span>  : fragment cristallisable (constant) — interagit avec récepteurs immunitaires
+domaines β-sandwich (barrel) = structure tertiaire stable
+<span class="why">// les anticorps monoclonaux = médicaments les + vendus au monde
+// rituximab, adalimumab, trastuzumab, bevacizumab...
+// ingénierie des Ac : humanisation, bispécifiques, conjugués ADC</span>`,
+q:"Les anticorps thérapeutiques (ex: adalimumab anti-TNFα) sont des protéines IgG. Ils doivent être administrés par injection. Pourquoi ne peut-on pas les donner per os ?",
+ch:["Car ils sont trop chers","Les IgG sont des protéines → dégradées par les protéases digestives → perdent leur structure et activité","Car ils sont allergisants par voie orale","Car ils sont insolubles"],ok:1,
+hint:"que font les protéases digestives sur les protéines ?",
+fb_ok:"// correct — protéases digestives (pepsine, trypsine, chymotrypsine) → hydrolysent les liaisons peptidiques → IgG détruits.",
+fb_no:"// IgG = protéines → pepsine, trypsine, chymotrypsine les hydrolysent → fragments inactifs. Injection nécessaire.",mv:{dx:0,dy:-1}},
+
+{c:"Q15 · complexe — CRISPR et protéines",type:"qcm",
+code:`<span class="cm">// CRISPR-Cas9 — protéine + ARN guide</span>
+Cas9 = endonucléase (protéine)
+ARN guide = spécifie la cible
+→ Cas9 + ARNg → complexe RNP
+→ coupure double brin de l'ADN → réparation (NHEJ ou HDR)
+<span class="why">// Cas9 de S. pyogenes = 1368 AA, structure 3D bien définie
+// le site catalytique (His, Asp) coupe les 2 brins de l'ADN
+// les 2 domaines RuvC et HNH coupent chacun un brin
+// révolution médicale : traitements géniques de maladies monogéniques</span>`,
+q:"La protéine Cas9 utilise des résidus His et Asp dans son site catalytique pour couper l'ADN. Ces résidus jouent le rôle de :",
+ch:["Résidus structuraux uniquement","Catalyseurs — His(acide-base) et Asp(chélateur de Mg²⁺) activent la coupure de la liaison phosphodiester","Résidus de liaison à l'ARN guide","Résidus pour la dimérisation"],ok:1,
+hint:"His = catalyseur acido-basique, Asp = coordination du métal Mg²⁺",
+fb_ok:"// correct — His : catalyse acido-basique. Asp : coordine Mg²⁺ → active l'eau → attaque nucléophile sur le phosphore.",
+fb_no:"// Cas9 : His catalyseur acido-basique + Asp coordine Mg²⁺ → activation de l'eau → hydrolyse liaison P-O de l'ADN.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// 15C — ADN ET BIOLOGIE MOLÉCULAIRE
+// ══════════════════════════════════════════════════════
+{id:"b3",sec:"module 15 · ADN et biologie moléculaire",num:"15c",name:"ADN — structure, réplication et transcription",level:"intermédiaire",
+takeaway:[
+  "ADN : double hélice antiparallèle, sucre désoxyribose, bases A-T(2H) et G-C(3H)",
+  "Réplication semi-conservative : chaque brin = matrice, ADN polymérase III 5'→3'",
+  "Brin continu (leading) et brin discontinu (lagging, fragments d'Okazaki)",
+  "Transcription : ADN → ARNm par ARN polymérase II (5'→3'), dans le noyau",
+  "Maturation de l'ARNm : coiffe 5', queue polyA, épissage des introns",
+  "Code génétique : 64 codons, 61 sens + 3 stop, dégénéré mais non ambigu",
+  "Traduction : ARNm → protéine sur les ribosomes (5'→3'), anticodon de l'ARNt"
+],
+questions:[
+{c:"Q1 · structure de la double hélice",type:"qcm",
+code:`<span class="cm">// ADN — double hélice (Watson & Crick, 1953)</span>
+2 brins antiparallèles (5'→3' et 3'→5')
+sucre : <span class="hl">désoxyribose</span> (ARN : ribose)
+bases : <span class="hl">A=T</span> (2 liaisons H) · <span class="hl">G≡C</span> (3 liaisons H)
+empilements des bases (π−π) : stabilisation supplémentaire
+<span class="why">// Rosalind Franklin : données de diffraction X (Photo 51)
+// les 3 liaisons H de G-C rendent les régions riches en GC plus stables (Tm plus haute)</span>`,
+q:"L'ARN diffère de l'ADN par :",
+ch:["L'utilisation de bases différentes (A,T,G,C → A,U,G,C) et du ribose au lieu du désoxyribose","Seulement l'absence de thymine","Seulement l'utilisation du ribose","L'ARN est double brin et l'ADN est simple brin"],ok:0,
+hint:"deux différences principales : sucre ET base (T→U)",
+fb_ok:"// correct — ARN : ribose (OH en C2) + uracile remplace thymine. De plus l'ARN est généralement simple brin.",
+fb_no:"// ARN vs ADN : ribose (au lieu de désoxyribose) ET uracile (U) au lieu de thymine (T).",mv:{dx:1,dy:0}},
+
+{c:"Q2 · Tm et teneur en GC",type:"qcm",
+code:`<span class="cm">// température de fusion Tm</span>
+Tm ↑ si teneur en GC ↑  (3 liaisons H vs 2 pour AT)
+Tm ↑ si longueur du fragment ↑
+<span class="ex">ADN bactérien riche en GC : Tm ≈ 90-100°C
+primer PCR 20 bp, 50% GC : Tm ≈ 60°C</span>
+<span class="why">// Tm utilisée pour concevoir les oligonucléotides (PCR, hybridation)
+// PCR : la température d'hybridation ≈ Tm − 5°C
+// Thermus aquaticus (≥ 72°C) → ADN pol. thermostable → PCR possible</span>`,
+q:"En PCR, on utilise une étape de 'dénaturation' à 95°C. Quel est le but ?",
+ch:["Activer la Taq polymérase","Séparer les deux brins de l'ADN matrice en rompant les liaisons H entre les bases","Dégrader les primers","Synthétiser les nouveaux brins"],ok:1,
+hint:"la dénaturation en PCR = séparer les 2 brins pour qu'ils servent de matrices",
+fb_ok:"// correct — 95°C : casse les liaisons H entre A-T et G-C → brins séparés → peuvent servir de matrices.",
+fb_no:"// dénaturation PCR : 95°C rompt les liaisons H → 2 brins séparés → accessibles aux primers.",mv:{dx:0,dy:-1}},
+
+{c:"Q3 · réplication — semi-conservative",type:"qcm",
+code:`<span class="cm">// réplication semi-conservative (Meselson & Stahl 1958)</span>
+chaque brin parental sert de matrice
+→ 2 doubles hélices filles : 1 brin parental + 1 nouveau
+ADN pol. III : synthèse <span class="hl">5'→3' uniquement</span>
+<span class="hl">brin continu</span> (leading) : synthèse continue 5'→3'
+<span class="hl">brin discontinu</span> (lagging) : fragments d'Okazaki + ADN ligase
+<span class="why">// chaque cellule fille reçoit une copie exacte de l'ADN
+// fidélité : 1 erreur / 10⁹ pb (avec correction d'épreuve)
+// réplication bidirectionnelle depuis les origines de réplication</span>`,
+q:"Pourquoi la réplication du brin discontinu (lagging) nécessite-t-elle l'ADN ligase alors que le brin continu n'en a pas besoin ?",
+ch:["Car le brin discontinu est plus long","Les fragments d'Okazaki sont synthétisés séparément → ADN ligase nécessaire pour souder les fragments entre eux","Car l'ADN polymérase ne peut pas se lier au brin discontinu","Par hasard évolutif"],ok:1,
+hint:"les fragments d'Okazaki sont des morceaux séparés → doivent être joints",
+fb_ok:"// correct — brin discontinu = fragments d'Okazaki → ADN ligase joint les fragments → chromosome continu.",
+fb_no:"// fragments d'Okazaki = segments discontinus. ADN ligase soude les fragments en formant des liaisons phosphodiester.",mv:{dx:1,dy:0}},
+
+{c:"Q4 · maturation de l'ARNm",type:"qcm",
+code:`<span class="cm">// maturation de l'ARNm (eucaryotes)</span>
+1. Coiffe 5' : 7-méthylguanosine → protection + reconnaissance ribosome
+2. Queue polyA 3' : ~200A → protection contre nucléases + export
+3. Épissage : retrait des introns · assemblage des exons
+→ ARNm mature quitte le noyau via les pores nucléaires
+<span class="why">// épissage alternatif : un gène → plusieurs protéines
+// ~95% des gènes humains multi-exoniques font de l'épissage alt.
+// exon skipping thérapeutique : Duchenne (skip exon 51) → dystrophine partielle</span>`,
+q:"L'épissage alternatif permet à un seul gène de coder pour plusieurs protéines. Quel pourcentage des gènes humains à plusieurs exons utilisent ce mécanisme ?",
+ch:["~10%","~50%","~95%","~1%"],ok:2,
+hint:"l'épissage alternatif est la règle, pas l'exception chez l'humain",
+fb_ok:"// correct — ~95% des gènes humains multi-exoniques font de l'épissage alternatif → diversité du protéome.",
+fb_no:"// ~95% des gènes humains multi-exoniques → épissage alternatif → diversité protéique bien supérieure aux ~20 000 gènes.",mv:{dx:0,dy:-1}},
+
+{c:"Q5 · code génétique",type:"qcm",
+code:`<span class="cm">// code génétique — propriétés</span>
+64 codons (4³) pour 20 AA + 3 stop (UAA, UAG, UGA)
+→ code <span class="hl">dégénéré</span> : plusieurs codons pour le même AA
+→ code <span class="hl">non ambigu</span> : 1 codon → 1 seul AA (jamais 2)
+→ code <span class="hl">universel</span> : quasi-identique dans tous les organismes
+<span class="ex">Leu : 6 codons (UUA, UUG, CUU, CUC, CUA, CUG)
+Met : 1 codon (AUG) = codon initiateur</span>`,
+q:"Le code génétique est dégénéré mais non ambigu. Cela signifie :",
+ch:["1 AA peut être codé par plusieurs codons, mais 1 codon ne code que pour 1 AA","1 codon peut coder pour plusieurs AA","Les mutations ne changent jamais les protéines","Le code est différent dans chaque organisme"],ok:0,
+hint:"dégénéré = plusieurs codons → 1 AA. Non ambigu = 1 codon → 1 seul AA.",
+fb_ok:"// correct — dégénéré : AA → plusieurs codons. Non ambigu : codon → 1 seul AA. Jamais l'inverse.",
+fb_no:"// dégénéré = plusieurs codons pour 1 AA. Non ambigu = 1 codon → 1 seul AA. Unidirectionnel.",mv:{dx:1,dy:0}},
+
+{c:"Q6 · mutations et code génétique",type:"qcm",
+code:`<span class="cm">// types de mutations ponctuelles</span>
+<span class="kw">silencieuse</span>  : même AA (dégénérescence) → pas de changement protéique
+<span class="kw">faux sens</span>    : AA différent → protéine modifiée (peut être grave ou non)
+<span class="kw">non-sens</span>     : codon stop prématuré → protéine tronquée (grave)
+<span class="kw">décalage</span>     : insertion/délétion → tous les codons suivants changés (grave)
+<span class="ex">drépanocytose : GAG→GTG = Glu→Val (faux sens grave)
+mucoviscidose : ΔF508 = délétion de 3 pb = perte de Phe (faux sens)</span>`,
+q:"Une mutation crée un codon stop prématuré (mutation non-sens) dans le milieu d'un gène. La conséquence est :",
+ch:["La protéine est plus stable","La traduction s'arrête prématurément → protéine tronquée, généralement non-fonctionnelle et dégradée","La protéine est plus longue","La transcription est bloquée"],ok:1,
+hint:"codon stop = signal d'arrêt de la traduction",
+fb_ok:"// correct — stop prématuré → protéine tronquée → généralement non-fonctionnelle → dégradée par NMD (nonsense-mediated decay).",
+fb_no:"// codon stop = arrêt de la traduction → protéine tronquée. NMD (nonsense-mediated decay) détruit souvent l'ARNm.",mv:{dx:0,dy:-1}},
+
+{c:"Q7 · réparation de l'ADN",type:"qcm",
+code:`<span class="cm">// systèmes de réparation de l'ADN</span>
+<span class="kw">BER</span> (base excision repair) : bases endommagées
+<span class="kw">NER</span> (nucleotide excision repair) : lésions volumineuses (UV → thymidine dimers)
+<span class="kw">MMR</span> (mismatch repair) : erreurs de réplication
+<span class="kw">DSBR</span> (double strand break repair) : NHEJ ou recombinaison homologue
+<span class="why">// xeroderma pigmentosum : déficit NER → sensibilité extrême aux UV → cancers cutanés
+// syndrome de Lynch : déficit MMR → cancer colorectal héréditaire
+// BRCA1/2 : réparation par recombinaison homologue → cancer du sein si muté</span>`,
+q:"Le syndrome de Lynch (HNPCC) est dû à un déficit de la réparation des mésappariements (MMR). Pourquoi cela conduit-il au cancer colorectal ?",
+ch:["Car le côlon produit plus de ROS","Les erreurs de réplication s'accumulent → mutations dans les gènes suppresseurs de tumeurs et proto-oncogènes → transformation maligne","Car MMR répare uniquement les dommages UV","Car les cellules du côlon se divisent lentement"],ok:1,
+hint:"sans MMR : les erreurs s'accumulent → mutations dans des gènes importants",
+fb_ok:"// correct — sans MMR : erreurs de réplication non corrigées → mutations progressives → instabilité microsatellitaire → cancer.",
+fb_no:"// MMR déficient → erreurs de réplication accumulées → mutations dans gènes critiques (KRAS, APC, TP53...) → cancer.",mv:{dx:1,dy:0}},
+
+{c:"Q8 · épigénétique",type:"qcm",
+code:`<span class="cm">// épigénétique — modifications sans changement de séquence</span>
+<span class="kw">méthylation ADN</span>  : CpG → 5-méthylcytosine → répression transcriptionnelle
+<span class="kw">histones</span>         : acétylation (active), méthylation (active ou répressive selon position)
+<span class="kw">ARN non-codants</span>  : miARN → dégradation ARNm · lncARN → régulation chromatine
+<span class="why">// méthylation promoteurs → silence de gènes → cancer (gènes suppresseurs silencés)
+// inhibiteurs HDAC (acide valproïque, vorinostat) → réactivent gènes silencés → anticancer
+// héritable sans changer l'ADN → 'mémoire cellulaire'</span>`,
+q:"La méthylation des cytosines (CpG) dans les îlots promoteurs est associée au silence des gènes. Dans certains cancers, les gènes suppresseurs de tumeurs sont silencés par cette méthylation. Quel type de traitement cible ce mécanisme ?",
+ch:["Chimiothérapie classique","Les agents déméthylants (5-azacytidine, décitabine) qui inhibent les ADN méthyltransférases → réactivent les gènes suppresseurs silencés","Les inhibiteurs de kinases","La radiothérapie"],ok:1,
+hint:"si silence par méthylation → déméthylation = réactivation",
+fb_ok:"// correct — 5-azacytidine = analogue de cytosine → inhibe DNMT → déméthylation → réactivation des gènes suppresseurs.",
+fb_no:"// agents déméthylants (5-azacytidine) inhibent DNMT → déméthylation des promoteurs → réactivation des gènes suppresseurs.",mv:{dx:0,dy:-1}},
+
+{c:"Q9 · télomères et vieillissement",type:"qcm",
+code:`<span class="cm">// télomères — protection des extrémités chromosomiques</span>
+séquence répétée : (TTAGGG)ₙ chez les vertébrés
+raccourcissent à chaque division cellulaire (~50-200 pb/division)
+→ problème de fin de réplication (lagging strand)
+<span class="hl">télomérase</span> : transcriptase inverse + ARN matrice → allonge les télomères
+active dans : cellules souches · cellules germinales · cellules cancéreuses
+<span class="why">// cellules somatiques : télomérase inactive → raccourcissement → sénescence → apoptose
+// "horloge" du vieillissement cellulaire (Blackburn, Greider, Szostak - Nobel 2009)
+// cancer : réactivation télomérase → immortalisation = hallmark du cancer</span>`,
+q:"La télomérase est une cible thérapeutique dans le cancer. Pourquoi inhiber la télomérase tuerait-elle préférentiellement les cellules cancéreuses ?",
+ch:["Car la télomérase est absente dans les cellules normales","Les cellules cancéreuses dépendent de la télomérase pour maintenir leurs télomères. Les cellules somatiques normales (sans télomérase) ne seraient pas affectées davantage.","Car la télomérase produit des radicaux libres dans les cancers","Car les cancers ont plus de chromosomes"],ok:1,
+hint:"les cellules somatiques normales n'ont déjà pas de télomérase active → inhibition = peu d'effet supplémentaire",
+fb_ok:"// correct — cellules normales somatiques : pas de télomérase → peu affectées. Cancers dépendent de télomérase → mortalité sélective.",
+fb_no:"// cellules somatiques : télomérase déjà inactive → peu affectées par l'inhibition. Cancers dépendants → mort sélective.",mv:{dx:1,dy:0}},
+
+{c:"Q10 · piège — sens des brins",type:"qcm",
+code:`<span class="cm">// PIÈGE : sens des brins — 5' et 3'</span>
+ADN : brin sens (codant) 5'→3' = même sens que ARNm
+      brin antisens (matrice) 3'→5' = lu par ARN pol. 5'→3'
+<span class="r">⚠️ l'ARN pol. lit le brin ANTISENS (3'→5') et synthétise l'ARNm 5'→3'</span>
+<span class="r">⚠️ la séquence de l'ARNm = séquence du brin SENS (sauf T→U)</span>`,
+q:"Si le brin sens d'un gène est 5'-ATGCCC-3', quelle est la séquence de l'ARNm correspondant ?",
+ch:["5'-ATGCCC-3'","5'-AUGCCC-3'","5'-GGGCAT-3'","3'-UACGGG-5'"],ok:1,
+hint:"ARNm = séquence du brin sens mais avec U à la place de T",
+fb_ok:"// correct — ARNm = brin sens avec T→U → 5'-AUGCCC-3'.",
+fb_no:"// ARNm a la même séquence que le brin sens sauf que T est remplacé par U → AUGCCC.",mv:{dx:0,dy:-1}},
+
+{c:"Q11 · piège — introns et exons",type:"qcm",
+code:`<span class="cm">// PIÈGE : introns vs exons</span>
+<span class="hl">exons</span>   : séquences EXPRIMÉES (présentes dans l'ARNm mature)
+<span class="hl">introns</span> : séquences INTERVANTES (retirées lors de l'épissage)
+<span class="r">⚠️ les introns sont RETIRÉS de l'ARNm → non traduits</span>
+<span class="r">⚠️ les exons sont CONSERVÉS → traduits</span>
+<span class="why">// méthode mnémotechnique : EXons = EXprimés · INtrons = INtervenus</span>`,
+q:"Le gène de la dystrophine humaine est le plus long gène connu (~2,4 Mb), mais son ARNm ne fait que ~14 kb. Cela s'explique par :",
+ch:["Une erreur de mesure","La présence de nombreux et très longs introns (79 exons, introns peuvent faire >300 kb) qui sont retirés lors de l'épissage","Une transcription incomplète","Des ARN non codants inclus"],ok:1,
+hint:"2,4 Mb de gène → 14 kb d'ARNm = rapport ~170 → presque tout est de l'intron",
+fb_ok:"// correct — dystrophine : 79 exons (~14 kb) noyés dans 2,4 Mb de gène (>99% d'introns). Épissage élimine les introns.",
+fb_no:"// 2,4 Mb gène → 14 kb ARNm : ~99% est des introns épissés. 79 exons seulement représentent l'ARNm final.",mv:{dx:1,dy:0}},
+
+{c:"Q12 · piège — ADN polymérase vs ARN polymérase",type:"qcm",
+code:`<span class="cm">// PIÈGE : ADN pol vs ARN pol</span>
+<span class="kw">ADN pol. III</span> : réplication · besoin d'une amorce ARN · fidélité +++
+<span class="kw">ARN pol. II</span> : transcription · PAS besoin d'amorce · moins fidèle
+<span class="r">⚠️ ADN pol. NE PEUT PAS initier une chaîne seule → primase ARN d'abord</span>
+<span class="r">⚠️ ARN pol. peut initier sans amorce</span>`,
+q:"Pourquoi l'ADN polymérase nécessite-t-elle une amorce (primer) ARN pour démarrer la réplication, alors que l'ARN polymérase n'en a pas besoin ?",
+ch:["Par convention biochimique","L'ADN polymérase ne peut qu'ALLONGER une chaîne existante (ajouter un nt au 3'-OH libre). L'ARN polymérase peut commencer de novo (former la première liaison phosphodiester).","Car l'ADN polymérase est plus grande","Car les primers ADN seraient trop stables"],ok:1,
+hint:"ADN pol = elongase uniquement ; ARN pol = peut initier de novo",
+fb_ok:"// correct — ADN pol : uniquement elongase (besoin d'un 3'-OH libre). ARN pol : peut initier de novo.",
+fb_no:"// ADN pol ne peut qu'allonger (besoin 3'-OH). ARN pol peut former la 1ère liaison → initiation de novo.",mv:{dx:0,dy:-1}},
+
+{c:"Q13 · complexe — CRISPR en médecine",type:"qcm",
+code:`<span class="cm">// CRISPR-Cas9 — applications médicales</span>
+coupure DSB → 2 voies de réparation :
+<span class="kw">NHEJ</span> : non-homologous end joining → insertions/délétions → KO du gène
+<span class="kw">HDR</span>  : homology-directed repair → avec un template → correction précise
+<span class="why">// exemples cliniques approuvés :
+// Casgevy (2023) : 1er traitement CRISPR approuvé → drépanocytose et β-thalassémie
+// → réactivation HbF (fœtale) en ciblant BCL11A (répresseur de HbF)
+// → ne corrige pas la mutation mais contourne le défaut</span>`,
+q:"Le traitement Casgevy de la drépanocytose n'utilise pas HDR pour corriger la mutation du gène de la β-globine. Il utilise NHEJ pour inactiver BCL11A (répresseur de l'hémoglobine fœtale). Pourquoi cette approche ?",
+ch:["Car la correction directe est impossible","HDR est inefficace dans les cellules souches hématopoïétiques non-divisant. NHEJ est plus efficace et l'inactivation de BCL11A réactive HbF qui compense le défaut de HbS.","Car NHEJ est plus précis que HDR","Car BCL11A code pour la β-globine"],ok:1,
+hint:"HDR requiert des cellules en division ; les cellules souches sont souvent en G0",
+fb_ok:"// correct — HDR inefficace dans CSH (peu divisant). NHEJ → KO BCL11A → ↑ HbF → compense HbS → cliniquement efficace.",
+fb_no:"// HDR : peu efficace dans CSH quiescentes. NHEJ : KO BCL11A → levée répression HbF → HbF compense HbS drépanocytaire.",mv:{dx:1,dy:0}},
+
+{c:"Q14 · complexe — ARN interférence",type:"qcm",
+code:`<span class="cm">// ARN interférence (RNAi)</span>
+siARN : petits ARN double brin → RISC → dégradation ARNm cible
+miARN : ARN endogènes → répression traductionnelle ou dégradation ARNm
+<span class="kw">oncomiRs</span> : miARN surexprimés dans les cancers (miR-21, miR-155)
+<span class="kw">tumor suppressors miRs</span> : miR-34, let-7 (inhibent les oncogènes)
+<span class="why">// siRNA thérapeutiques approuvés :
+// inclisiran (PCSK9 ARNi) → ↓ LDL-C → 2 injections/an
+// patisiran (TTR ARNi) → amylose héréditaire (Nobel-adjacent)
+// givosiran, lumasiran, vutrisiran...</span>`,
+q:"L'inclisiran est un siARN ciblant PCSK9 (proprotéine convertase). Il réduit le LDL-c. Son mécanisme est :",
+ch:["Inhiber la synthèse du cholestérol comme les statines","Dégrader l'ARNm de PCSK9 dans les hépatocytes → moins de PCSK9 → moins de dégradation des récepteurs LDL → plus de LDL capté par le foie → ↓ LDL plasmatique","Bloquer l'absorption intestinale du cholestérol","Activer la bile"],ok:1,
+hint:"siARN → RISC → dégradation ARNm cible → moins de protéine PCSK9",
+fb_ok:"// correct — inclisiran : siARN → dégradation ARNm PCSK9 → ↓ PCSK9 → ↑ LDLR à la surface → ↓ LDL. 2 injections/an.",
+fb_no:"// inclisiran = siARN → dégrade ARNm PCSK9 dans les hépatocytes → moins de PCSK9 → plus de LDLR → ↓ LDL.",mv:{dx:0,dy:-1}},
+
+{c:"Q15 · complexe — ARNm thérapeutiques",type:"qcm",
+code:`<span class="cm">// vaccins et thérapeutiques à ARNm</span>
+ARNm modifié (pseudouridine → uridine) : moins immunogène
+nanoparticules lipidiques (LNP) : protection et délivrance cellulaire
+→ ARNm traduit dans la cellule → protéine antigénique ou thérapeutique
+<span class="why">// vaccins COVID-19 (Pfizer/BioNTech, Moderna) : ARNm spike
+// ARNm thérapeutiques : traitement maladies rares (OTC déficiency)
+// avantage : pas d'intégration dans le génome · production rapide
+// avantage : peut coder pour n'importe quelle protéine</span>`,
+q:"Les vaccins à ARNm (COVID-19) utilisent la pseudouridine au lieu de l'uridine dans l'ARNm. Quel est l'avantage ?",
+ch:["La pseudouridine est moins chère","L'ARNm avec pseudouridine est moins reconnu par les récepteurs de l'immunité innée (TLR) → moins de réponse inflammatoire non spécifique → meilleure tolérance et efficacité","La pseudouridine est plus stable","La pseudouridine est naturelle"],ok:1,
+hint:"pseudouridine = modification qui masque l'ARNm 'étranger' au système immunitaire inné",
+fb_ok:"// correct — pseudouridine : évite reconnaissance par TLR7/8 → moins d'inflammation non spécifique → meilleure efficacité (Karikó, Weissman - Nobel 2023).",
+fb_no:"// pseudouridine → non reconnu par TLR7/8 (immunité innée) → moins de dégradation et moins d'inflammation → ARNm plus stable et efficace.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// 15D — ENZYMES
+// ══════════════════════════════════════════════════════
+{id:"b4",sec:"module 15 · enzymes",num:"15d",name:"cinétique enzymatique et inhibition",level:"avancé",
+takeaway:[
+  "Km = [S] pour v = Vmax/2 — mesure de l'affinité (petit Km = forte affinité)",
+  "Équation de Michaelis-Menten : v = Vmax[S]/(Km+[S])",
+  "Inhibition compétitive : Km↑, Vmax inchangé — surmontable par excès de substrat",
+  "Inhibition non-compétitive : Vmax↓, Km inchangé — non surmontable",
+  "Inhibition irréversible : covalente avec le site actif (ex: aspirine, organophosphorés)",
+  "Régulation allostérique : effeteur lie un site distant → changement conformationnel",
+  "kcat/Km = efficacité catalytique (limit diffusion : ~10⁸ M⁻¹s⁻¹)"
+],
+questions:[
+{c:"Q1 · Km et affinité",type:"qcm",
+code:`<span class="cm">// Km — constante de Michaelis</span>
+Km = [S] quand v = Vmax/2
+petit Km → grande <span class="hl">affinité</span> pour le substrat
+grand Km → faible affinité
+<span class="ex">hexokinase (cerveau) : Km(glucose) = 0.05 mM → haute affinité
+glucokinase (foie)  : Km(glucose) = 10 mM → faible affinité</span>
+<span class="why">// hexokinase capte le glucose même à faible concentration (cerveau prioritaire)
+// glucokinase active seulement après un repas (glucose ↑) → captage hépatique proportionnel</span>`,
+q:"Hexokinase (Km=0.05 mM) vs glucokinase (Km=10 mM) — à jeun (glycémie ~4 mM), quelle enzyme est la plus active ?",
+ch:["Glucokinase — plus grande Vmax","Hexokinase — son Km est << 4 mM donc elle est saturée et fonctionne à Vmax. Glucokinase : Km >> 4 mM → peu active","Les deux sont également actives","Glucokinase — présente dans plus de tissus"],ok:1,
+hint:"à [S] >> Km → enzyme saturée → v ≈ Vmax. À [S] << Km → v faible",
+fb_ok:"// correct — hexokinase Km=0.05 mM << 4 mM → saturée → v ≈ Vmax. Glucokinase Km=10 mM >> 4 mM → peu active à jeun.",
+fb_no:"// [S]=4 mM >> Km hexokinase(0.05) → saturée. [S]=4 mM << Km glucokinase(10) → peu active à jeun.",mv:{dx:1,dy:0}},
+
+{c:"Q2 · équation de Michaelis-Menten",type:"open",
+code:`<span class="cm">// v = Vmax × [S] / (Km + [S])</span>
+si [S] = Km → v = Vmax × Km / (Km + Km) = <span class="hl">Vmax/2</span>
+si [S] >> Km → v ≈ Vmax   (ordre 0 en S)
+si [S] << Km → v ≈ Vmax×[S]/Km  (ordre 1 en S)`,
+q:"Vmax = 100 μmol/min, Km = 2 mM, [S] = 8 mM. Calcule v (μmol/min).",
+keys:["80","80 µmol","80μmol","80 umol"],
+hint:"v = 100×8/(2+8) = 800/10",
+fb_ok:"// correct — v = 100×8/(2+8) = 800/10 = 80 μmol/min.",
+fb_no:"// v = Vmax×[S]/(Km+[S]) = 100×8/(2+8) = 800/10 = 80 μmol/min.",mv:{dx:0,dy:-1}},
+
+{c:"Q3 · inhibition compétitive",type:"qcm",
+code:`<span class="cm">// inhibition compétitive</span>
+inhibiteur ressemble au substrat → lie le <span class="hl">site actif</span>
+→ <span class="hl">Km apparent ↑</span>   (affinité apparente ↓)
+→ <span class="hl">Vmax inchangé</span>   (surmontable par excès de S)
+<span class="ex">statines (simvastatine) : inhibiteurs compétitifs de HMG-CoA réductase
+méthotrexate : inhibiteur compétitif de la dihydrofolate réductase</span>`,
+q:"Un médicament augmente le Km apparent sans changer Vmax. C'est :",
+ch:["Inhibiteur non-compétitif","Inhibiteur compétitif — lie le site actif, surmontable par excès de substrat","Activateur allostérique","Inhibiteur irréversible"],ok:1,
+hint:"Km↑ + Vmax inchangé = signature de l'inhibition compétitive",
+fb_ok:"// correct — Km↑ + Vmax inchangé = inhibition compétitive. Surmontable par excès de substrat.",
+fb_no:"// Km↑ + Vmax inchangé = compétitif. Surmontable : si [S]↑ → déplace l'inhibiteur du site actif.",mv:{dx:1,dy:0}},
+
+{c:"Q4 · inhibition non-compétitive",type:"qcm",
+code:`<span class="cm">// inhibition non-compétitive</span>
+inhibiteur lie un site <span class="hl">allostérique</span> (≠ site actif)
+→ <span class="hl">Vmax ↓</span>   (non surmontable par excès de S)
+→ <span class="hl">Km inchangé</span>  (affinité pour S non modifiée)
+<span class="ex">cyanures (CN⁻) : lient le fer du complexe IV (hème) irréversible
+theophylline : inhibiteur des phosphodiestérases (non compétitif)</span>`,
+q:"Un inhibiteur diminue Vmax mais ne change pas Km. C'est :",
+ch:["Inhibition compétitive","Inhibition non-compétitive — lie un site allostérique","Inhibition substrat excess","Activation allostérique"],ok:1,
+hint:"Vmax↓ + Km inchangé = non-compétitif",
+fb_ok:"// correct — Vmax↓ + Km inchangé = inhibition non-compétitive. Non surmontable par excès de substrat.",
+fb_no:"// Vmax↓ + Km inchangé = non-compétitif. Site allostérique → impossible à surmonter par excès de substrat.",mv:{dx:0,dy:-1}},
+
+{c:"Q5 · inhibition irréversible",type:"qcm",
+code:`<span class="cm">// inhibition irréversible — liaison covalente</span>
+l'inhibiteur forme une <span class="hl">liaison covalente</span> avec le site actif
+→ enzyme inactivée de façon permanente
+→ activité ne revient que si nouvelle enzyme synthétisée
+<span class="ex">aspirine : acétyle la COX-1/COX-2 (Ser530) irréversiblement
+IMAO irréversibles : phénelzine → MAO inactivée définitivement
+organophosphorés (sarin, tabun) : phosphorylent AChE irréversiblement</span>`,
+q:"L'aspirine inhibe COX-1 de manière irréversible (acétylation Ser530). Les plaquettes sont particulièrement affectées. Pourquoi les plaquettes ne récupèrent-elles pas ?",
+ch:["Car les plaquettes n'ont pas de cytoplasme","Les plaquettes sont anucléées → ne peuvent pas synthétiser de nouvelles protéines → l'effet dure la vie entière de la plaquette (~7-10 jours)","Car l'aspirine reste dans les plaquettes","Car les plaquettes n'ont pas de COX"],ok:1,
+hint:"les plaquettes n'ont pas de noyau → pas de synthèse de nouvelles protéines",
+fb_ok:"// correct — plaquettes anucléées → pas de synthèse protéique → COX-1 inactivée pour toute la vie de la plaquette (~7j) → antiagrégant durable.",
+fb_no:"// plaquettes : pas de noyau → pas de synthèse protéique. COX-1 acétylée irréversiblement → effet dure 7-10 jours.",mv:{dx:1,dy:0}},
+
+{c:"Q6 · régulation allostérique",type:"qcm",
+code:`<span class="cm">// enzymes allostériques</span>
+effecteur positif (+) : ↑ activité (active)
+effecteur négatif (−) : ↓ activité (inhibe)
+<span class="kw">rétro-inhibition</span> : le produit final inhibe la 1ère enzyme de la voie
+<span class="ex">threonine déhydratase : inhibée par l'isoleucine (produit final)
+ATP inhibe la phosphofructokinase (PFK) → stoppe la glycolyse si E suffisante
+AMP active la PFK → accélère la glycolyse si E manque</span>`,
+q:"La phosphofructokinase-1 (PFK-1, étape clé de la glycolyse) est inhibée par l'ATP et activée par l'AMP. Ce mécanisme de régulation est :",
+ch:["Un gaspillage d'énergie","Une régulation allostérique par l'état énergétique de la cellule — ATP↑ = énergie suffisante = freiner glycolyse · AMP↑ = manque d'énergie = accélérer glycolyse","Une inhibition compétitive par l'ATP","Une régulation transcriptionnelle"],ok:1,
+hint:"ATP = énergie disponible = inhiber production supplémentaire",
+fb_ok:"// correct — allostérie par statut énergétique. ATP↑ → freine glycolyse (inutile). AMP↑ → accélère glycolyse (besoin d'ATP).",
+fb_no:"// régulation allostérique par énergie : ATP (plein = stop) · AMP (vide = go). Rétrocontrôle élégant.",mv:{dx:0,dy:-1}},
+
+{c:"Q7 · statines et HMG-CoA réductase",type:"qcm",
+code:`<span class="cm">// statines — inhibiteurs HMG-CoA réductase</span>
+HMG-CoA réductase : étape limitante de la biosynthèse du cholestérol
+statines (simvastatine, atorvastatine) : analogues de HMG-CoA + mévalonate
+→ inhibition compétitive → ↓ cholestérol intracellulaire
+→ ↑ LDLR (récepteur LDL) → ↓ LDL plasmatique
+<span class="why">// effet pléiotrope : anti-inflammatoire, stabilisation plaque
+// myopathie : effet indésirable lié à ↓ ubiquinone (coQ10) - même voie
+// atorvastatine : statine la plus prescrite au monde</span>`,
+q:"Les statines réduisent la synthèse hépatique du cholestérol. Les hépatocytes compensent en surexprimant les récepteurs LDL (LDLR). Quel est l'effet net ?",
+ch:["Le LDL plasmatique augmente","↑ LDLR → ↑ captation du LDL plasmatique → ↓ LDL plasmatique → ↓ risque cardiovasculaire","Le HDL diminue","Le cholestérol total reste inchangé"],ok:1,
+hint:"plus de LDLR → plus de LDL capté → moins de LDL en circulation",
+fb_ok:"// correct — ↓ synthèse intrahepatocytaire → ↑ LDLR → ↑ captation LDL plasmatique → ↓ LDL → ↓ athérosclérose.",
+fb_no:"// statines : ↓ cholestérol cellulaire → ↑ LDLR (SREBP) → ↑ captation LDL du plasma → ↓ LDL plasmatique.",mv:{dx:1,dy:0}},
+
+{c:"Q8 · organophosphorés et AChE",type:"qcm",
+code:`<span class="cm">// organophosphorés — inhibiteurs irréversibles de l'AChE</span>
+acétylcholinestérase (AChE) : hydrolyse l'acétylcholine (ACh) → choline + acétate
+organophosphorés (sarin, malathion, parathion) :
+→ phosphorylent Ser du site actif → AChE irréversiblement inhibée
+→ accumulation ACh → convulsions · hypersécrétion · paralysie
+<span class="why">// antidote : atropine (antagoniste muscarinique) + pralidoxime (2-PAM)
+// pralidoxime régénère AChE si donné rapidement (avant vieillissement)
+// insecticides organophosphorés = même mécanisme (selectivité relative insectes/humains)</span>`,
+q:"L'antidote de l'intoxication aux organophosphorés (gaz neurotoxiques) comprend la pralidoxime (2-PAM). Elle agit en :",
+ch:["Bloquant les récepteurs nicotiniques","Réactivant l'AChE en déplaçant le groupement phosphate du site actif (si donné avant le 'vieillissement' de l'enzyme)","Inhibant la synthèse d'ACh","Activant la MAO"],ok:1,
+hint:"pralidoxime = réactivateur d'AChE phosphorylée",
+fb_ok:"// correct — pralidoxime : oxime qui attaque le phosphore → déphosphoryle la Ser → AChE réactivée. Urgent (vieillissement).",
+fb_no:"// pralidoxime régénère AChE en déplaçant le phosphate de la Ser. Doit être donné vite (avant vieillissement irréversible).",mv:{dx:0,dy:-1}},
+
+{c:"Q9 · enzymes et diagnostics biologiques",type:"qcm",
+code:`<span class="cm">// enzymes plasmatiques comme marqueurs biologiques</span>
+<span class="kw">créatine kinase (CK)</span>    : ↑ IDM · rhabdomyolyse · myopathie
+<span class="kw">transaminases (ASAT/ALAT)</span>: ↑ hépatite · IDM (ASAT)
+<span class="kw">troponines (T et I)</span>     : ↑ IDM · spécifiques du myocarde
+<span class="kw">LDH</span>                     : ↑ lyse cellulaire (multiple)
+<span class="kw">amylase/lipase</span>          : ↑ pancréatite
+<span class="why">// principe : enzymes normalement intracellulaires → libérées si cellule lésée → dosables dans plasma</span>`,
+q:"Dans l'infarctus du myocarde, la troponine I cardiaque est le marqueur le plus spécifique. Pourquoi est-il plus spécifique que la CK-MB ?",
+ch:["Car la troponine est plus grande","La troponine I cardiaque (cTnI) n'est exprimée QUE dans le myocarde. La CK-MB est présente dans le myocarde mais aussi dans d'autres muscles (moins spécifique)","Car la troponine se dose plus facilement","Car la troponine augmente plus vite"],ok:1,
+hint:"spécificité = expression exclusive dans le tissu cible",
+fb_ok:"// correct — cTnI : expression cardiaque exclusive → spécificité 100%. CK-MB : aussi dans muscles squelettiques → moins spécifique.",
+fb_no:"// cTnI exprimée uniquement dans le myocarde → spécificité absolue. CK-MB : présente aussi dans muscle squelettique.",mv:{dx:1,dy:0}},
+
+{c:"Q10 · piège — Km ≠ affinité absolue",type:"qcm",
+code:`<span class="cm">// PIÈGE : Km reflète l'affinité mais ≠ Kd</span>
+Km = (k₋₁ + kcat) / k₁
+<span class="hl">si kcat << k₋₁ : Km ≈ Kd (vraie affinité)</span>
+<span class="hl">si kcat >> k₋₁ : Km > Kd</span>
+→ Km peut surestimer la vraie affinité
+<span class="why">// implications : une enzyme avec un Km élevé n'a pas forcément
+// une faible affinité si kcat est aussi très élevé
+// la vrai affinité = Kd (constante de dissociation) ≠ Km</span>`,
+q:"Enzyme A : Km=1 mM, kcat=10 s⁻¹. Enzyme B : Km=5 mM, kcat=1000 s⁻¹. Laquelle a la meilleure efficacité catalytique (kcat/Km) ?",
+ch:["Enzyme A — plus petite Km","Enzyme B — kcat/Km = 1000/5=200 mM⁻¹s⁻¹ >> kcat/Km_A = 10/1=10 mM⁻¹s⁻¹","Identiques","Impossible à comparer"],ok:1,
+hint:"efficacité = kcat/Km. Calculer les deux.",
+fb_ok:"// correct — Enzyme B : 1000/5=200 >> Enzyme A : 10/1=10. Enzyme B 20× plus efficace malgré un Km plus grand.",
+fb_no:"// kcat/Km : A = 10/1 = 10 mM⁻¹s⁻¹. B = 1000/5 = 200 mM⁻¹s⁻¹. B plus efficace malgré Km plus grand.",mv:{dx:0,dy:-1}},
+
+{c:"Q11 · piège — inhibition compétitive surmontable",type:"qcm",
+code:`<span class="cm">// PIÈGE : compétitif surmontable par excès de substrat</span>
+inhibition compétitive : Km apparent ↑
+→ si [S] très élevé → l'inhibiteur est 'dilué' dans le site actif
+→ v peut atteindre Vmax quand même
+<span class="r">⚠️ donc même en présence d'inhibiteur compétitif, Vmax est inchangé</span>
+<span class="kw">clinique</span> : surdose en substrat peut 'lever' l'inhibition compétitive`,
+q:"Un patient prend du méthotrexate (inhibiteur compétitif de la DHFR). Si on lui administre beaucoup de folate (substrat), l'effet du méthotrexate est-il annulé ?",
+ch:["Oui — c'est une inhibition compétitive donc surmontable","Non — méthotrexate a une affinité pour DHFR >> folate (Kd ~1 nM vs Km folate ~1 μM). En pratique la levée est impossible à atteindre","Oui mais seulement partiellement","Non car méthotrexate est irréversible"],ok:1,
+hint:"théoriquement surmontable, mais l'affinité du méthotrexate est 1000× plus grande",
+fb_ok:"// correct — théoriquement surmontable, mais méthotrexate : Kd~1 nM vs folate Km~1 μM → ratio 1000 → impossible en pratique.",
+fb_no:"// méthotrexate : affinité ~1000× > folate → surmontable théoriquement mais impossible en pratique. Traitement : leucovorine rescue.",mv:{dx:1,dy:0}},
+
+{c:"Q12 · piège — enzyme allostérique vs michaelien",type:"qcm",
+code:`<span class="cm">// PIÈGE : enzymes allostériques ≠ Michaelis-Menten</span>
+enzyme michaelienne : courbe v vs [S] = hyperbolique
+enzyme allostérique : courbe v vs [S] = <span class="hl">sigmoïde</span>
+→ effet coopératif positif : la liaison d'un S facilite les suivants
+<span class="ex">ATCase, hémoglobine (transport O₂, pas enzyme mais analogue)</span>
+<span class="why">// la courbe sigmoïde = "switch" biochimique
+// l'enzyme est peu active à faible [S], très active à haute [S]
+// → évite une réponse graduelle → réponse "tout ou rien" plus nette</span>`,
+q:"La courbe v/[S] de la pyruvate kinase (enzyme allostérique) est sigmoïde. Quelle implication fonctionnelle ?",
+ch:["L'enzyme est moins efficace","La sigmoïde reflète la coopérativité — la pyruvate kinase est un 'commutateur métabolique' actif seulement quand le PEP dépasse un seuil","L'enzyme ne suit pas la cinétique Michaelis-Menten car elle est trop grande","La sigmoïde est une erreur expérimentale"],ok:1,
+hint:"sigmoïde = effet seuil = commutateur biochimique",
+fb_ok:"// correct — sigmoïde = coopérativité positive = commutateur. Pyruvate kinase inactive à faible PEP, très active au-dessus du seuil.",
+fb_no:"// courbe sigmoïde = coopérativité = commutateur. Réponse 'switch' à un seuil de substrat → régulation précise.",mv:{dx:0,dy:-1}},
+
+{c:"Q13 · complexe — inhibition enzymatique et thérapeutique",type:"qcm",
+code:`<span class="cm">// exemples cliniques d'inhibiteurs enzymatiques</span>
+<span class="kw">IEC</span> (captopril) : compétitif de l'enzyme de conversion → ↓ angiotensine II → ↓ PA
+<span class="kw">gliptines</span> (sitagliptine) : compétitifs de DPP-4 → ↓ dégradation GLP-1 → ↑ insuline
+<span class="kw">imatinib</span> (Gleevec) : compétitif ATP sur BCR-ABL kinase → LMC
+<span class="kw">ritonavir</span> : inhibe protéase VIH → arrêt maturation virions
+<span class="why">// ~50% des médicaments approuvés = inhibiteurs enzymatiques
+// la connaissance de la structure 3D de l'enzyme → conception rationnelle des médicaments</span>`,
+q:"L'imatinib (Gleevec) inhibe BCR-ABL en compétant avec l'ATP pour le site catalytique. Pourquoi cette approche est-elle difficile à appliquer à toutes les kinases ?",
+ch:["Car toutes les kinases sont identiques","Le site de liaison ATP est très conservé entre les ~500 kinases humaines → un inhibiteur du site ATP risque d'inhiber d'autres kinases → effets indésirables. La sélectivité nécessite des interactions supplémentaires.","Car l'ATP est présent en trop grande concentration","Car les kinases ne peuvent pas être inhibées"],ok:1,
+hint:"toutes les kinases ont un site ATP similaire → sélectivité difficile",
+fb_ok:"// correct — site ATP conservé → manque de sélectivité intrinsèque. Imatinib : sélectif grâce à liaison à une poche unique de BCR-ABL inactive.",
+fb_no:"// site ATP ~ conservé dans les 500 kinases humaines → sélectivité difficile. Imatinib exploite une conformation inactive unique à BCR-ABL.",mv:{dx:1,dy:0}},
+
+{c:"Q14 · complexe — cinétique à deux substrats",type:"qcm",
+code:`<span class="cm">// réactions à deux substrats — mécanismes</span>
+<span class="kw">séquentiel ordonné</span> : A se lie d'abord, puis B
+<span class="kw">séquentiel aléatoire</span> : A ou B peuvent se lier en premier
+<span class="kw">ping-pong</span> : A se lie, produit P libéré, B se lie → Q libéré
+<span class="ex">aminotransférases (ASAT, ALAT) : mécanisme ping-pong
+  Glu + OA → α-KG + Asp (via PLP comme groupe prosthétique)</span>
+<span class="why">// ASAT et ALAT : mécanisme ping-pong
+// le PLP (pyridoxal phosphate, B6) est transitoirement aminé
+// puis transamine le cétoacide accepteur</span>`,
+q:"Les transaminases (ASAT, ALAT) fonctionnent selon un mécanisme ping-pong avec le PLP (vitamine B6). Cela signifie :",
+ch:["Les deux substrats se lient simultanément","Le groupe amine du premier substrat est transféré au PLP (enzyme aminée), puis transféré au second substrat — les deux substrats ne sont jamais présents simultanément sur l'enzyme","L'enzyme est allostérique","L'enzyme peut fonctionner sans cofacteur"],ok:1,
+hint:"ping-pong = les substrats se lient et libèrent séquentiellement, pas simultanément",
+fb_ok:"// correct — ping-pong : Asp(donneur) → PLP → α-KG(accepteur). Les deux substrats ne se lient jamais en même temps.",
+fb_no:"// ping-pong : substrat 1 → transfert groupe au PLP → substrat 1 part → substrat 2 se lie → transfert → produit 2.",mv:{dx:0,dy:-1}},
+
+{c:"Q15 · complexe — conception de médicaments",type:"qcm",
+code:`<span class="cm">// drug design rationnel — inhibiteurs enzymatiques</span>
+structure 3D de l'enzyme → identification du site de liaison
+→ conception d'une molécule complémentaire (forme, charge, liaisons H)
+<span class="ex">neuraminidase VIH → oseltamivir (Tamiflu) · zanamivir
+  liaison via : groupement carboxylate, guanidinium, glycérol
+HIV protéase → lopinavir, ritonavir, darunavir
+  liaison via : hydroxyle central mimant la liaison peptidique clivée</span>`,
+q:"Le Tamiflu (oseltamivir) inhibe la neuraminidase du virus influenza. Il imite le substrat naturel (acide sialique). Son efficacité maximale est si pris :",
+ch:["Une semaine après les symptômes","Dans les 48h du début des symptômes — la réplication virale est maximale à ce moment et la neuraminidase est très active","Avant l'exposition (prophylaxie uniquement)","Pendant la guérison"],ok:1,
+hint:"la neuraminidase est nécessaire pour la libération de nouveaux virions → pic d'activité en début d'infection",
+fb_ok:"// correct — neuraminidase : libère les nouveaux virions des cellules infectées. Inhibition efficace si réplication active (≤ 48h).",
+fb_no:"// Tamiflu : inhibe neuraminidase (libération virions). Efficace quand réplication maximale (≤ 48h). Après → peu d'impact.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// 15E — MÉTABOLISME ÉNERGÉTIQUE
+// ══════════════════════════════════════════════════════
+{id:"b5",sec:"module 15 · métabolisme",num:"15e",name:"métabolisme énergétique — glycolyse, Krebs, chaîne respiratoire",level:"avancé",
+takeaway:[
+  "Glycolyse : glucose → 2 pyruvates + 2 ATP + 2 NADH (cytoplasme, anaérobie possible)",
+  "Pyruvate → acétyl-CoA (pyruvate déshydrogénase, mitochondrie) + CO₂ + NADH",
+  "Cycle de Krebs : 2 acétyl-CoA → 4 CO₂ + 6 NADH + 2 FADH₂ + 2 GTP",
+  "Chaîne respiratoire : NADH(2.5 ATP) + FADH₂(1.5 ATP) → ~30 ATP/glucose",
+  "Fermentation : lactique (muscle) ou alcoolique (levures) — régénère NAD⁺",
+  "Gluconéogenèse : précurseurs non glucidiques → glucose (foie principalement)",
+  "Régulation : ATP/AMP, NADH/NAD⁺, insuline/glucagon contrôlent les flux"
+],
+questions:[
+{c:"Q1 · glycolyse — bilan",type:"qcm",
+code:`<span class="cm">// glycolyse — 10 réactions dans le cytoplasme</span>
+glucose (6C) → 2 pyruvate (3C)
+bilan net : <span class="hl">2 ATP + 2 NADH + 2 pyruvate</span>
+<span class="kw">enzymes régulatrices</span> :
+  hexokinase · PFK-1 (principale) · pyruvate kinase
+<span class="why">// PFK-1 : allostérie — inhibée par ATP (énergie suffisante) et citrate
+//         activée par AMP, ADP, fructose-2,6-BP (effet insuline)
+// étape irréversible → ne peut pas être inverse directement en gluconéogenèse</span>`,
+q:"Lors d'un exercice intense anaérobie (sprint), la glycolyse produit du pyruvate. Le pyruvate est converti en lactate. Pourquoi ?",
+ch:["Car le lactate est un meilleur carburant","La conversion pyruvate → lactate régénère le NAD⁺ nécessaire à la poursuite de la glycolyse (GAPDH a besoin de NAD⁺)","Pour refroidir le muscle","Car la mitochondrie est trop lente"],ok:1,
+hint:"la glycolyse a besoin de NAD⁺ (oxydé) pour continuer. La LDH régénère le NAD⁺",
+fb_ok:"// correct — LDH : pyruvate + NADH → lactate + NAD⁺. Le NAD⁺ régénéré permet à GAPDH de continuer la glycolyse.",
+fb_no:"// lactate = régénération du NAD⁺. Sans NAD⁺ → GAPDH bloquée → glycolyse stoppée → pas d'ATP → mort cellulaire.",mv:{dx:1,dy:0}},
+
+{c:"Q2 · cycle de Krebs — bilan",type:"qcm",
+code:`<span class="cm">// cycle de Krebs (cycle de l'acide citrique)</span>
+lieu : matrice mitochondriale
+entrée : acétyl-CoA (2C) + oxaloacétate (4C) → citrate (6C)
+par tour : 3 NADH + 1 FADH₂ + 1 GTP + 2 CO₂
+2 tours (1 glucose → 2 acétyl-CoA) :
+→ <span class="hl">6 NADH + 2 FADH₂ + 2 GTP + 4 CO₂</span>
+<span class="why">// le CO₂ expiré provient du cycle de Krebs
+// OAA est régénéré → cycle catalytique
+// enzymes clé : isocitrate déshydrogénase, α-KG déshydrogénase, succinate déshydrogénase (complexe II)</span>`,
+q:"Le CO₂ que nous expirons provient principalement de :",
+ch:["La glycolyse","La décarboxylation du pyruvate et le cycle de Krebs (les 4 CO₂ par acétyl-CoA)","La chaîne respiratoire","La fermentation"],ok:1,
+hint:"où est produit le CO₂ dans la respiration cellulaire ?",
+fb_ok:"// correct — décarboxylation pyruvate (1 CO₂) + Krebs (2 CO₂ par tour × 2 tours) = 4 CO₂ par glucose. La chaîne resp. ne produit pas de CO₂.",
+fb_no:"// CO₂ : décarboxylation du pyruvate (1 CO₂) + 2 tours de Krebs (4 CO₂) = 6 CO₂ par glucose.",mv:{dx:0,dy:-1}},
+
+{c:"Q3 · chaîne respiratoire et phosphorylation oxydative",type:"qcm",
+code:`<span class="cm">// chaîne respiratoire — complexes I à V</span>
+NADH → <span class="hl">complexe I</span> → CoQ → complexe III → cyt c → complexe IV → O₂ → H₂O
+FADH₂ → <span class="hl">complexe II</span> → CoQ...
+→ pompage de H⁺ vers l'espace intermembranaire (complexes I, III, IV)
+→ gradient H⁺ → <span class="hl">complexe V (ATP synthase)</span> → ATP
+rendement : NADH = 2.5 ATP · FADH₂ = 1.5 ATP
+<span class="why">// ~30 ATP/glucose (moderne) vs 38 ATP (ancienne estimation)
+// 2.5 ATP par NADH car le gradient H⁺ est partiellement utilisé pour d'autres transports</span>`,
+q:"La metformine inhibe le complexe I de la chaîne respiratoire. Pourquoi cela réduit-il la glycémie ?",
+ch:["Car elle bloque l'absorption intestinale du glucose","↓ ATP mitochondrial → ↑ AMP/ATP → activation AMPK → inhibition de la gluconéogenèse hépatique → ↓ production hépatique de glucose","Car elle stimule l'insuline","Car elle augmente la captation musculaire du glucose directement"],ok:1,
+hint:"complexe I inhibé → ATP↓ → AMP/ATP↑ → AMPK activée → gluconéogenèse inhibée",
+fb_ok:"// correct — metformine → complexe I inhibé → AMP↑ → AMPK → gluconéogenèse hépatique inhibée → ↓ glucose sanguin.",
+fb_no:"// metformine → complexe I → ↓ ATP → ↑ AMP/ATP → AMPK activée → ↓ gluconéogenèse hépatique (effet principal).",mv:{dx:1,dy:0}},
+
+{c:"Q4 · fermentation",type:"qcm",
+code:`<span class="cm">// fermentation — anaérobie</span>
+<span class="kw">lactique</span>  : pyruvate + NADH → lactate + NAD⁺ (muscles, GR)
+<span class="kw">alcoolique</span>: pyruvate → acétaldéhyde → éthanol + CO₂ + NAD⁺ (levures)
+rôle : régénérer NAD⁺ pour permettre la glycolyse en anaérobie
+<span class="why">// les GR (érythrocytes) : pas de mitochondrie → dépendent uniquement de la glycolyse
+// l'acidose lactique = accumulation de lactate → ↓ pH → enzyme inhibées
+// acidose lactique de la metformine : rare mais grave (surtout si insuffisance rénale)</span>`,
+q:"Les globules rouges (érythrocytes) n'ont pas de mitochondries. Comment produisent-ils de l'ATP ?",
+ch:["Par la photosynthèse","Uniquement par la glycolyse anaérobie + fermentation lactique pour régénérer le NAD⁺","Par le cycle de Krebs dans le cytoplasme","Ils n'ont pas besoin d'ATP"],ok:1,
+hint:"pas de mitochondrie → pas de Krebs ni de chaîne respiratoire",
+fb_ok:"// correct — GR anucléés et sans mitochondrie → glycolyse seule → 2 ATP/glucose + LDH régénère NAD⁺.",
+fb_no:"// GR : pas de mitochondrie → glycolyse + fermentation lactique (pour NAD⁺). 2 ATP/glucose seulement.",mv:{dx:0,dy:-1}},
+
+{c:"Q5 · régulation par insuline et glucagon",type:"qcm",
+code:`<span class="cm">// régulation hormonale du métabolisme glucidique</span>
+<span class="kw">insuline</span>  (post-prandial) : ↑ glycolyse · ↑ glycogénogenèse · ↓ gluconéogenèse
+<span class="kw">glucagon</span>  (jeûne) : ↑ gluconéogenèse · ↑ glycogénolyse · ↓ glycolyse
+<span class="why">// mécanisme glucagon :
+// glucagon → GPCR → ↑ AMPc → PKA → phosphorylation PFK-2 → ↓ F-2,6-BP → ↓ PFK-1 → ↓ glycolyse
+// PKA → phosphorylation GPa → ↑ glycogénolyse
+// mécanisme insuline : opposé (↓ AMPc, ↑ PI3K, ↑ Akt)</span>`,
+q:"À jeun, le glucagon est sécrété. Il active la glycogénolyse hépatique via la PKA. Cela produit du glucose et l'évite l'hypoglycémie. Comment le glucagon active-t-il la PKA ?",
+ch:["Directement en se liant à la PKA","Glucagon → récepteur GPCR → ↑ adénylate cyclase → ↑ AMPc → activation PKA → phosphorylation des cibles","En inhibant l'insuline","En bloquant l'AMP"],ok:1,
+hint:"glucagon = GPCR couplé à Gs → adénylate cyclase → AMPc → PKA",
+fb_ok:"// correct — glucagon → GPCR(Gs) → adénylate cyclase ↑ → AMPc ↑ → PKA activée → glycogénolyse + gluconéogenèse.",
+fb_no:"// glucagon → GPCR → ↑ AMPc → PKA → phosphorylation glycogène phosphorylase (active) → glycogénolyse → glucose.",mv:{dx:1,dy:0}},
+
+{c:"Q6 · corps cétoniques",type:"qcm",
+code:`<span class="cm">// corps cétoniques — jeûne prolongé / cétose</span>
+jeûne > 24h / régime cétogène / DT1 non traité :
+↓ glucose → ↑ lipolyse → ↑ acyl-CoA → ↑ cétogenèse (foie)
+corps cétoniques : β-hydroxybutyrate · acétoacétate · acétone
+→ exportés vers cerveau, cœur, muscle comme carburant alternatif
+<span class="why">// en cétose physiologique (jeûne) : glucose épargné pour le cerveau
+// en acidocétose diabétique (DT1) : insulin absence + glucagon ↑ → cétose extrême
+// pH < 7.3 → confusion, coma, décès si non traité → urgence !
+// corps cétoniques : utilisés par cerveau (60-70% en jeûne prolongé)</span>`,
+q:"Dans l'acidocétose diabétique (DT1), le pH sanguin chute. Quelle est la cause directe de l'acidose ?",
+ch:["L'hyperglycémie directement","L'accumulation de β-hydroxybutyrate et d'acétoacétate (acides faibles, pKa~4-4.5) → ↓ pH sanguin","La déshydratation","L'hyperkaliémie"],ok:1,
+hint:"corps cétoniques = acides faibles → libèrent H⁺ → acidose",
+fb_ok:"// correct — β-OHB (pKa=4.7) et acétoacétate (pKa=3.6) = acides faibles → libèrent H⁺ → acidose métabolique.",
+fb_no:"// corps cétoniques = acides faibles → pKa~4 → à pH sanguin (7.4) totalement déprotonés → libèrent H⁺ → acidose.",mv:{dx:0,dy:-1}},
+
+{c:"Q7 · β-oxydation des acides gras",type:"qcm",
+code:`<span class="cm">// β-oxydation — dégradation des acides gras</span>
+lieu : matrice mitochondriale
+par cycle (enlève 2C) : 1 FADH₂ + 1 NADH + 1 acétyl-CoA
+acide palmitique (C16) : 7 cycles → 8 acétyl-CoA + 7 FADH₂ + 7 NADH
+rendement total : <span class="hl">~108 ATP par palmitate</span> (vs ~30 ATP/glucose)
+<span class="why">// les acides gras sont 2× plus énergétiques/gramme que les glucides
+// réserves graisseuses = stockage énergétique optimal (anhydres, denses)
+// carnitine : transporte les AG dans la mitochondrie
+// déficit carnitine → accumulation AG → myopathie lipidique</span>`,
+q:"Pourquoi les lipides sont-ils une meilleure réserve d'énergie que le glycogène par gramme de tissu ?",
+ch:["Car les lipides sont moins toxiques","Les lipides : ~9 kcal/g (hydrophobes, anhydres). Le glycogène : ~4 kcal/g ET retient 3-4× son poids en eau → ~1 kcal/g de tissu hydraté réel","Car les lipides se métabolisent plus vite","Par hasard évolutif"],ok:1,
+hint:"glycogène = polaire = retient l'eau. Les lipides = apolaires = anhydres = plus denses.",
+fb_ok:"// correct — lipides 9 kcal/g (anhydres). Glycogène ~4 kcal/g sec mais retient l'eau → ~1 kcal/g de tissu. Lipides: 9× plus efficaces.",
+fb_no:"// lipides : apolaires → pas d'eau. Glycogène : polaire → retient ~3× son poids en eau → densité énergétique faible.",mv:{dx:1,dy:0}},
+
+{c:"Q8 · gluconéogenèse",type:"qcm",
+code:`<span class="cm">// gluconéogenèse — synthèse de glucose</span>
+lieu : foie (principalement) · cortex rénal (jeûne prolongé)
+précurseurs : lactate · pyruvate · oxaloacétate · glycérol · AA glucoformateurs
+pas l'inverse de la glycolyse : 3 réactions différentes
+enzyme clé : <span class="hl">PEPCK</span> (OAA → PEP) · fructose-1,6-bisphosphatase · glucose-6-phosphatase
+<span class="why">// régulée par glucagon (↑) et insuline (↓)
+// cortisol stimule la gluconéogenèse (stress → ↑ glycémie)
+// cycle de Cori : lactate musculaire → foie → glucose → muscle</span>`,
+q:"Le cycle de Cori décrit la navette entre les muscles et le foie. Le lactate musculaire est transformé en glucose par le foie, qui le renvoie aux muscles. Quel est le bilan énergétique pour l'organisme ?",
+ch:["Neutre — cycle fermé","Le foie utilise 6 ATP pour reconvertir 2 lactate en glucose, alors que les muscles n'ont produit que 2 ATP par glucose → bilan net négatif (énergie fournie par le foie)","Le foie produit de l'ATP supplémentaire","Le cycle est gratuit"],ok:1,
+hint:"convertir lactate en glucose coûte de l'énergie (gluconéogenèse = énergivore)",
+fb_ok:"// correct — gluconéogenèse hépatique : coûte 6 ATP par glucose. Muscles : ont produit 2 ATP. Bilan = −4 ATP. Coût énergétique au foie.",
+fb_no:"// cycle de Cori : musclesproduit 2 ATP + lactate. Foie consomme 6 ATP pour remettre glucose. Bilan : −4 ATP. Foie paie la dette.",mv:{dx:0,dy:-1}},
+
+{c:"Q9 · synthèse des acides gras",type:"qcm",
+code:`<span class="cm">// lipogenèse de novo — synthèse des AG</span>
+lieu : cytoplasme (FAS = fatty acid synthase)
+unité de base : acétyl-CoA (2C) + malonyl-CoA (3C)
+cofacteur : <span class="hl">NADPH</span> (pas NADH !)
+palmitate C16 : 8 acétyl-CoA + 14 NADPH + 7 ATP
+<span class="why">// NADPH fourni par : voie des pentoses phosphates · malate enzyme
+// lipogenèse activée par l'insuline (après repas)
+// inhibée par le jeûne · l'exercice · les acides gras polyinsaturés
+// FAS = cible thérapeutique dans les cancers (souvent surexprimée)</span>`,
+q:"La synthèse des acides gras nécessite du NADPH. Quelle voie métabolique principale fournit ce NADPH ?",
+ch:["La glycolyse","La voie des pentoses phosphates (PPP) — oxyde le glucose-6-phosphate en générant du NADPH","La chaîne respiratoire","Le cycle de Krebs"],ok:1,
+hint:"la voie des pentoses phosphates génère du NADPH (pas du NADH)",
+fb_ok:"// correct — PPP : G6P + 2 NADP⁺ → ribulose-5P + 2 NADPH + CO₂. Principal fournisseur de NADPH réducteur.",
+fb_no:"// PPP (voie des pentoses phosphates) : G6P → 2 NADPH + ribulose-5P + CO₂. NADPH essentiel pour lipogenèse et défense anti-oxydante (GSH).",mv:{dx:1,dy:0}},
+
+{c:"Q10 · piège — aérobie vs anaérobie",type:"qcm",
+code:`<span class="cm">// PIÈGE : anaérobie ne signifie pas moins d'ATP total</span>
+glycolyse anaérobie = 2 ATP/glucose (rapide, cytoplasme)
+aérobie complet = ~30 ATP/glucose (lent, mitochondrie)
+<span class="r">⚠️ l'aérobie est BEAUCOUP plus efficace (×15)</span>
+<span class="r">⚠️ mais l'anaérobie est PLUS RAPIDE (pas besoin de mitochondrie)</span>
+<span class="why">// sprint (5s) : glycolyse anaérobie
+// course longue : phosphorylation oxydative
+// les deux voies coexistent : la glycolyse alimente aussi la mitochondrie</span>`,
+q:"Lors d'un sprint de 100m (~10s), le muscle utilise principalement :",
+ch:["La phosphorylation oxydative — la plus efficace","Le phosphocréatine (0-5s) puis la glycolyse anaérobie (5-30s). La phosphorylation oxydative est trop lente pour s'activer en 10s.","Uniquement les corps cétoniques","La gluconéogenèse"],ok:1,
+hint:"sprint 100m = effort maximal très court. La phosphorylation oxydative a une latence de ~30-60s",
+fb_ok:"// correct — 100m : PCr (0-5s) puis glycolyse anaérobie. PO trop lente. Contribution PO maximale après ~2min d'effort.",
+fb_no:"// sprint 100m : phosphocréatine d'abord, glycolyse anaérobie ensuite. PO trop lente (délai ~30-60s pour s'activer pleinement).",mv:{dx:0,dy:-1}},
+
+{c:"Q11 · piège — voie des pentoses",type:"qcm",
+code:`<span class="cm">// PIÈGE : la voie des pentoses a 2 rôles distincts</span>
+<span class="hl">rôle 1</span> : production de NADPH (défense anti-oxydante + biosynthèse)
+<span class="hl">rôle 2</span> : production de ribose-5-phosphate (nucléotides → ADN, ARN)
+<span class="r">⚠️ le rapport des besoins varie selon le tissu :</span>
+GR : besoin surtout NADPH (défense anti-oxydante → glutathion)
+cellules en prolifération : besoin surtout ribose-5P (ADN)`,
+q:"Un déficit en G6PD (glucose-6-phosphate déshydrogénase, 1ère enzyme de la PPP) provoque une anémie hémolytique. Quel mécanisme ?",
+ch:["Car les GR ne peuvent plus faire la glycolyse","Sans G6PD : pas de NADPH → pas de glutathion réduit → accumulation H₂O₂ → oxydation membranaire GR → hémolyse","Car les GR ne produisent plus de ribose-5P","Car l'enzyme est nécessaire pour la respiration"],ok:1,
+hint:"G6PD → NADPH → glutathion réductase → GSH → neutralise H₂O₂",
+fb_ok:"// correct — G6PD↓ → NADPH↓ → GSH↓ → H₂O₂ s'accumule → peroxydation lipidique → membrane GR endommagée → hémolyse.",
+fb_no:"// G6PD → NADPH → glutathion (GSH). Sans GSH : H₂O₂ non neutralisé → oxydation membranaire GR → hémolyse.",mv:{dx:1,dy:0}},
+
+{c:"Q12 · piège — jeûne et carburants",type:"qcm",
+code:`<span class="cm">// ordre d'utilisation des réserves énergétiques</span>
+0-4h   : glucose (glycémie) + glycogène hépatique
+4-24h  : glycogène épuisé → gluconéogenèse (AA + glycérol) + lipolyse ↑
+24-72h : lipolyse intense → acides gras → cétogenèse ↑
+> 3 jours : cerveau utilise cétoniques (60-70%) + économie protéines musculaires`,
+q:"Après 3 jours de jeûne total, quel est le carburant principal du cerveau ?",
+ch:["Le glucose exclusivement","Les corps cétoniques (β-hydroxybutyrate principalement) — le cerveau s'adapte pour économiser le glucose pour les tissus glucose-dépendants (GR)","Les acides gras","Les acides aminés"],ok:1,
+hint:"après 3 jours, les corps cétoniques deviennent le carburant principal du cerveau",
+fb_ok:"// correct — après 3j : cétoniques = 60-70% énergie cérébrale. Économise glucose (obligatoire pour GR, médulla rénale).",
+fb_no:"// jeûne prolongé → cétoadaptation cérébrale. β-OHB = carburant principal après 3 jours. Préserve protéines musculaires.",mv:{dx:0,dy:-1}},
+
+{c:"Q13 · complexe — intégration métabolique",type:"qcm",
+code:`<span class="cm">// intégration — repas glucidique</span>
+repas → ↑ glucose → ↑ insuline :
+  foie  : ↑ glycolyse · ↑ glycogène · ↑ lipogenèse · ↓ gluconéogenèse
+  muscle: ↑ glycogène · ↑ captation glucose (GLUT4 translocation)
+  tissu adipeux : ↑ lipoprotéine lipase · ↑ estérification · ↓ lipolyse
+<span class="why">// l'insuline coordonne la redistribution des substrats entre les organes
+// résistance à l'insuline : GLUT4 ne se transloque plus → DT2
+// thiazolidinediones (glitazones) activent PPARγ → ↑ sensibilité à l'insuline</span>`,
+q:"Dans le diabète de type 2, les cellules musculaires et adipeuses sont résistantes à l'insuline. Quelle conséquence directe sur le transport du glucose musculaire ?",
+ch:["↑ glycolyse","GLUT4 ne se transloque pas vers la membrane → ↓ captation du glucose par le muscle → hyperglycémie persistante","↑ glycogénogenèse","↓ production d'ATP"],ok:1,
+hint:"l'insuline permet la translocation de GLUT4 vers la membrane",
+fb_ok:"// correct — résistance insuline → signalisation IRS/PI3K/Akt déficiente → GLUT4 ne se transloque pas → ↓ captation glucose → hyperglycémie.",
+fb_no:"// résistance insuline → voie PI3K/Akt bloquée → GLUT4 reste intracellulaire → ↓ captation glucose musculaire.",mv:{dx:1,dy:0}},
+
+{c:"Q14 · complexe — thermogenèse",type:"qcm",
+code:`<span class="cm">// thermogenèse — découplage mitochondrial</span>
+tissu adipeux brun (BAT) : UCP1 (uncoupling protein 1)
+→ le gradient H⁺ est dissipé en chaleur au lieu d'ATP
+→ thermogenèse sans frisson (nouveau-nés, hibernants)
+<span class="why">// UCP1 : canal H⁺ mitochondrial → gradient dissipé → chaleur
+// nouveau-nés : riche en BAT → thermorégulation
+// thermogenèse par le BAT : cible thérapeutique pour l'obésité ?
+// β3-AR agonistes : activent BAT → consommation d'énergie ↑</span>`,
+q:"Le tissu adipeux brun contient UCP1 qui permet la thermogenèse. Quelle conséquence sur la synthèse d'ATP ?",
+ch:["↑ ATP car plus d'oxydation","↓ ATP — le gradient H⁺ est utilisé pour la chaleur au lieu de l'ATP synthase → faible rendement énergétique","ATP inchangé","↑ ATP via la glycolyse compensatoire"],ok:1,
+hint:"UCP1 court-circuite l'ATP synthase → gradient H⁺ → chaleur, pas ATP",
+fb_ok:"// correct — UCP1 : le gradient de H⁺ contourne l'ATP synthase → chaleur produite → très peu d'ATP par mol d'O₂ consommé.",
+fb_no:"// UCP1 = découplant : gradient H⁺ → chaleur (pas ATP synthase). ↓ ATP mais ↑ chaleur. Thermorégulation du nouveau-né.",mv:{dx:0,dy:-1}},
+
+{c:"Q15 · complexe — pharmacologie métabolique",type:"qcm",
+code:`<span class="cm">// médicaments ciblant le métabolisme</span>
+<span class="kw">metformine</span>   : complexe I → AMPK → ↓ gluconéogenèse
+<span class="kw">statines</span>     : HMG-CoA réductase → ↓ cholestérol
+<span class="kw">fibrates</span>     : PPARα → ↑ β-oxydation → ↓ triglycérides
+<span class="kw">gliflozines</span>  : SGLT2 inhibiteur → ↑ glucosurie → ↓ glycémie
+<span class="kw">GLP-1 RA</span>    : semaglutide → ↑ insuline, ↓ glucagon, ↓ appétit, ↓ vidange gastrique
+<span class="why">// semaglutide (Ozempic/Wegovy) : agoniste GLP-1 → résultats remarquables
+// perte de poids ~15% · ↓ événements cardiovasculaires · essais en obésité</span>`,
+q:"Les gliflozines (SGLT2 inhibiteurs, ex: empagliflozine) réduisent la glycémie en augmentant l'élimination rénale du glucose. Quel effet inattendu a montré des bénéfices cardiovasculaires et rénaux majeurs ?",
+ch:["Réduction de la pression artérielle uniquement","Réduction de la glycémie + réduction de la pression de perfusion rénale (vasoconstriction afférente) + effet cardioprotecteur (réduction de précharge) → bénéfices au-delà du simple contrôle glycémique","Stimulation de l'insuline","Réduction du cholestérol"],ok:1,
+hint:"les gliflozines ont des effets cardiovasculaires et rénaux indépendants du contrôle glycémique",
+fb_ok:"// correct — SGLT2i : au-delà de la glycémie → ↓ pression intraglomérulaire → protection rénale + ↓ surcharge volumique → protection cardiaque.",
+fb_no:"// SGLT2i : effets pléiotropes. ↓ glycosurie + ↓ natriurie légère → ↓ précardiale + ↓ pression intraglomérulaire → cardioprotection + néphroprotection.",mv:{dx:1,dy:0}},
+]},
+
+];
+
+// ══════════════════════════════════════
+//  MOTEUR DE JEU
+// ══════════════════════════════════════
+const SECTIONS={};
+CHAPTERS.forEach(ch=>{if(!SECTIONS[ch.sec])SECTIONS[ch.sec]=[];SECTIONS[ch.sec].push(ch);});
+let curChap=null,curQ=0,score=0,answered=false,rX=0,rY=5;
+const GOAL={x:5,y:0};let traces=new Set();
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){document.getElementById('win').classList.remove('show');show('s-home');}
+
+function buildHome(){
+  const list=document.getElementById('chap-list');list.innerHTML='';
+  Object.entries(SECTIONS).forEach(([sec,chaps])=>{
+    const sd=document.createElement('div');sd.className='chap-section';
+    const lbl=document.createElement('div');lbl.className='chap-section-lbl';lbl.textContent=sec;sd.appendChild(lbl);
+    chaps.forEach(ch=>{
+      const row=document.createElement('div');row.className='chap-row';
+      row.innerHTML=`<span class="chap-num">${ch.num}.</span><span class="chap-name">${ch.name}</span><span class="chap-level">${ch.level}</span><span class="chap-count">${ch.questions.length} qs</span>`;
+      row.onclick=()=>startChap(ch);sd.appendChild(row);});
+    list.appendChild(sd);});}
+
+function startChap(ch){curChap=ch;curQ=0;score=0;answered=false;rX=0;rY=5;traces=new Set();document.getElementById('win').classList.remove('show');buildGrid();loadQ();show('s-game');}
+
+function loadQ(){
+  answered=false;const q=curChap.questions[curQ];
+  document.getElementById('g-title').textContent=curChap.name;
+  document.getElementById('g-pts').textContent=score+' pts';
+  document.getElementById('g-ctag').textContent=q.c;
+  document.getElementById('g-concept').innerHTML=q.code;
+  document.getElementById('g-q').textContent=q.q;
+  document.getElementById('g-fb').className='fb';
+  document.getElementById('g-next').className='btnext';
+  const badge=document.getElementById('g-qbadge');
+  badge.textContent=q.type==='qcm'?'QCM':'question ouverte';
+  badge.className='qbadge '+(q.type==='qcm'?'qcm':'open');
+  const dr=document.getElementById('dots-row');dr.innerHTML='';
+  curChap.questions.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i<curQ?' done':i===curQ?' cur':'');dr.appendChild(d);});
+  const cc=document.getElementById('g-choices'),ow=document.getElementById('g-open'),inp=document.getElementById('g-input');
+  cc.innerHTML='';
+  if(q.type==='qcm'){ow.style.display='none';q.ch.forEach((t,i)=>{const b=document.createElement('button');b.className='choice';b.textContent=t;b.onclick=()=>answerQcm(i);cc.appendChild(b);});}
+  else{ow.style.display='flex';inp.value='';inp.disabled=false;document.querySelector('.open-btn').disabled=false;setTimeout(()=>inp.focus(),100);}
+}
+
+function answerQcm(idx){
+  if(answered)return;answered=true;const q=curChap.questions[curQ];const ok=idx===q.ok;
+  document.querySelectorAll('.choice').forEach((b,i)=>{if(i===q.ok)b.classList.add('ok');else if(i===idx&&!ok)b.classList.add('no');else b.classList.add('dim');b.onclick=null;});showFb(ok,q);}
+
+function checkOpen(){
+  if(answered)return;const q=curChap.questions[curQ];const val=document.getElementById('g-input').value.trim().toLowerCase();if(!val)return;
+  const ok=q.keys.some(k=>val.includes(k.toLowerCase())||k.toLowerCase()===val);answered=true;
+  document.getElementById('g-input').disabled=true;document.querySelector('.open-btn').disabled=true;showFb(ok,q);}
+
+function showFb(ok,q){
+  const fb=document.getElementById('g-fb');fb.className='fb show '+(ok?'ok':'no');fb.textContent=ok?q.fb_ok:q.fb_no;
+  if(ok){score+=10;document.getElementById('g-pts').textContent=score+' pts';sparks();}
+  moveRobot(q.mv.dx,q.mv.dy);document.getElementById('g-next').className='btnext show';}
+
+function doHint(){const fb=document.getElementById('g-fb');fb.className='fb show hint';fb.textContent='? '+curChap.questions[curQ].hint;}
+function nextQ(){curQ++;if(curQ>=curChap.questions.length){showWin();return;}loadQ();}
+
+function showWin(){
+  document.getElementById('win-title').textContent=`// ${curChap.name} · maîtrisé`;
+  const ul=document.getElementById('win-list');ul.innerHTML='';
+  curChap.takeaway.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
+  document.getElementById('win').classList.add('show');}
+
+function restartChap(){document.getElementById('win').classList.remove('show');startChap(curChap);}
+
+function buildGrid(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  for(let y=0;y<6;y++)for(let x=0;x<6;x++){const d=document.createElement('div');d.id=`gc${x}${y}`;d.className='gcell';if(x===GOAL.x&&y===GOAL.y)d.textContent='🏁';g.appendChild(d);}renderGrid();}
+
+function renderGrid(){
+  for(let y=0;y<6;y++)for(let x=0;x<6;x++){
+    const d=document.getElementById(`gc${x}${y}`);if(!d)continue;
+    d.className='gcell';d.textContent='';d.innerHTML='';
+    if(x===GOAL.x&&y===GOAL.y){d.classList.add('goal');d.textContent='🏁';continue;}
+    if(traces.has(`${x},${y}`))d.classList.add('trace');
+    if(x===rX&&y===rY){d.classList.add('robot');d.innerHTML=`<svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/><rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/><rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/><rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/><rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/><circle cx="16" cy="7" r="2" fill="#c8a870"/><rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/><rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/><rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/><rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/></svg>`;}}}
+
+function moveRobot(dx,dy){
+  traces.add(`${rX},${rY}`);rX=Math.max(0,Math.min(5,rX+dx));rY=Math.max(0,Math.min(5,rY+dy));renderGrid();
+  const dir=dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent=`${curQ+1}/${curChap.questions.length} → ${dir}`;}
+
+function sparks(){
+  const cell=document.getElementById(`gc${rX}${rY}`);if(!cell)return;
+  const r=cell.getBoundingClientRect();
+  ['#c8a870','#e8a598','#7a9e87','#a89ec8'].forEach((c,i)=>{
+    const p=document.createElement('div');p.className='pt';const s=3+Math.random()*5;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);});}
+
+buildHome();
+</script>
+</body>
+</html>

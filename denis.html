@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --bg2: #f0ebe2;
+  --bg3: #e8dfd0;
+  --ink: #1a1814;
+  --ink2: #6b6760;
+  --ink3: #b5b2ac;
+  --sage: #7a9e87;
+  --blush: #e8a598;
+  --sky: #8fb4c8;
+  --amber: #c8a870;
+  --lavender: #a89ec8;
+  --line: rgba(26,24,20,0.08);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ════════════════════════════════
+   ACCUEIL
+════════════════════════════════ */
+#screen-home {
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  gap: 0;
+}
+.home-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--ink3);
+  margin-bottom: 0.4rem;
+}
+.home-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.home-sub {
+  font-size: 14px;
+  color: var(--ink2);
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+/* module 0 card */
+.m0-card {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  position: relative;
+}
+.m0-card:hover { opacity: 0.88; }
+.m0-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+.m0-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.m0-desc { font-size: 13px; opacity: 0.6; font-weight: 300; }
+.m0-skip {
+  max-width: 480px;
+  width: 100%;
+  text-align: right;
+  margin-bottom: 2.5rem;
+}
+.m0-skip button {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+}
+.m0-skip button:hover { color: var(--ink2); }
+
+/* categories */
+.cats { max-width: 480px; width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: opacity 0.13s;
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-row:hover { opacity: 0.6; }
+.cat-icon { font-size: 16px; width: 28px; text-align: center; }
+.cat-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+}
+.cat-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+}
+.cat-arrow { font-size: 12px; color: var(--ink3); }
+
+/* link cat (external file) */
+.cat-row.external .cat-count { color: var(--sky); }
+
+/* ════════════════════════════════
+   CATÉGORIE
+════════════════════════════════ */
+#screen-cat { padding: 0; }
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.back-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  padding: 0;
+}
+.back-btn:hover { color: var(--ink); }
+.cat-header-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--ink);
+}
+.games-list {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+.game-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.13s;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.game-card:hover { border-color: var(--ink3); background: var(--bg2); }
+.game-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.game-info { flex: 1; }
+.game-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.game-desc { font-size: 12px; color: var(--ink2); font-weight: 300; }
+.game-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink3);
+}
+.game-badge.external { border-color: rgba(143,180,200,0.4); color: var(--sky); }
+
+/* ════════════════════════════════
+   JEU (layout commun)
+════════════════════════════════ */
+#screen-game { flex-direction: column; }
+.game-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.game-topbar-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+}
+.game-topbar-mod {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+}
+.spacer { flex: 1; }
+.pts-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--sage);
+  background: rgba(122,158,135,0.1);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(122,158,135,0.2);
+}
+
+/* dots */
+.dots-row {
+  display: flex;
+  gap: 4px;
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  transition: all 0.3s;
+}
+.dot.done { background: var(--sage); border-color: var(--sage); }
+.dot.cur  { background: var(--ink); border-color: var(--ink); transform: scale(1.3); }
+
+/* game layout */
+.game-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+}
+@media(max-width:680px) {
+  .game-body { grid-template-columns: 1fr; }
+  .game-right { border-left: none; border-top: 1px solid var(--line); }
+}
+.game-left {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+}
+.game-right {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg2);
+}
+
+/* concept tag */
+.ctag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+/* code card */
+.code-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.code-card-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+}
+.cdot { width: 8px; height: 8px; border-radius: 50%; }
+.code-card-body {
+  padding: 0.9rem 1.1rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--ink2);
+  white-space: pre-wrap;
+}
+.code-card-body .hl { color: var(--ink); font-weight: 500; }
+.code-card-body .cm { color: var(--ink3); font-style: italic; }
+.code-card-body .kw { color: var(--sage); }
+.code-card-body .ex {
+  display: block;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 11px;
+  margin: 5px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink);
+  font-style: normal;
+}
+
+/* question */
+.q-text {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.choices { display: flex; flex-direction: column; gap: 6px; }
+.choice {
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+  line-height: 1.5;
+}
+.choice:hover:not(:disabled) { border-color: var(--ink3); background: var(--bg2); }
+.choice.ok  { background: rgba(122,158,135,0.1); border-color: var(--sage); color: #3d6b4f; }
+.choice.no  { background: rgba(232,165,152,0.1); border-color: var(--blush); color: #8b4a3e; }
+.choice.dim { opacity: 0.35; cursor: default; }
+
+/* feedback */
+.fb {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.7;
+  padding: 9px 13px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  display: none;
+}
+.fb.show { display: block; }
+.fb.ok { border-color: rgba(122,158,135,0.35); color: #3d6b4f; background: rgba(122,158,135,0.07); }
+.fb.no { border-color: rgba(232,165,152,0.35); color: #8b4a3e; background: rgba(232,165,152,0.07); }
+.fb.hint { border-color: rgba(200,168,112,0.35); color: #7a5e1e; background: rgba(200,168,112,0.07); }
+
+/* bottom */
+.game-actions { display: flex; gap: 8px; align-items: center; }
+.btn-next {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  display: none;
+  transition: opacity 0.13s;
+}
+.btn-next:hover { opacity: 0.75; }
+.btn-next.show { display: block; }
+.btn-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  border: 1px solid var(--line);
+  background: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.03em;
+}
+.btn-hint:hover { color: var(--ink2); border-color: var(--ink3); }
+
+/* GRID */
+.grid-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+.grid-outer {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 7px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 38px);
+  grid-template-rows: repeat(6, 38px);
+  gap: 3px;
+}
+.gcell {
+  width: 38px; height: 38px;
+  border-radius: 6px;
+  background: var(--bg2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.gcell.trace { background: rgba(122,158,135,0.1); }
+.gcell.trace::after { content:'·'; color: var(--sage); font-size: 16px; }
+.gcell.goal  { background: rgba(122,158,135,0.12); }
+.gcell.robot { background: transparent; }
+.mlog-txt {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink3);
+  align-self: flex-start;
+  min-height: 16px;
+}
+
+/* WIN overlay */
+.win-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(250,248,244,0.96);
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+}
+.win-screen.show { display: flex; }
+.win-robot { font-size: 40px; animation: bob 2s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+.win-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.win-msgs {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+  text-align: left;
+  max-width: 420px;
+  width: 100%;
+}
+.win-msgs-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+.win-msgs ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.win-msgs li {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.6;
+  padding-left: 14px;
+  position: relative;
+}
+.win-msgs li::before { content:'→'; position:absolute; left:0; color:var(--sage); }
+.win-btns { display: flex; gap: 8px; }
+.btn-restart {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.13s;
+}
+.btn-restart:hover { opacity: 0.75; }
+.btn-home {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.13s;
+}
+.btn-home:hover { border-color: var(--ink3); color: var(--ink); }
+
+/* particles */
+.pt { position:fixed; pointer-events:none; border-radius:50%; animation:fup 1s ease-out forwards; z-index:999; }
+@keyframes fup { 0%{transform:translateY(0) scale(1);opacity:1} 100%{transform:translateY(-60px) scale(0);opacity:0} }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     SCREEN : ACCUEIL
+══════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-logo">denis · v0.2</div>
+  <div class="home-title">denis</div>
+  <div class="home-sub">apprendre n'importe quoi, progressivement.</div>
+
+  <div class="m0-card" onclick="startGame('m0')">
+    <div class="m0-tag">module_0 · recommandé</div>
+    <div class="m0-name">comment fonctionne la science ?</div>
+    <div class="m0-desc">base épistémologique · 9 questions · universel</div>
+  </div>
+
+  <div class="m0-skip">
+    <button onclick="showCats()">passer → choisir un jeu</button>
+  </div>
+
+  <div class="cats" id="cats" style="display:none;">
+    <div class="cat-row" onclick="showCat('sciences')">
+      <span class="cat-icon">🔬</span>
+      <span class="cat-name">sciences</span>
+      <span class="cat-count">5 jeux</span>
+      <span class="cat-arrow">›</span>
+    </div>
+    <div class="cat-row" onclick="showCat('langues')">
+      <span class="cat-icon">🌍</span>
+      <span class="cat-name">langues</span>
+      <span class="cat-count">2 jeux</span>
+      <span class="cat-arrow">›</span>
+    </div>
+    <div class="cat-row" onclick="showCat('philo')">
+      <span class="cat-icon">🧠</span>
+      <span class="cat-name">philosophie</span>
+      <span class="cat-count">2 jeux</span>
+      <span class="cat-arrow">›</span>
+    </div>
+    <div class="cat-row" onclick="showCat('info')">
+      <span class="cat-icon">💻</span>
+      <span class="cat-name">informatique</span>
+      <span class="cat-count">4 jeux</span>
+      <span class="cat-arrow">›</span>
+    </div>
+    <div class="cat-row" onclick="showCat('medecine')">
+      <span class="cat-icon">🏥</span>
+      <span class="cat-name">médecine</span>
+      <span class="cat-count">4 outils</span>
+      <span class="cat-arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN : CATÉGORIE
+══════════════════════════════════ -->
+<div class="screen" id="screen-cat">
+  <div class="cat-header">
+    <button class="back-btn" onclick="goHome()">← denis</button>
+    <span class="cat-header-title" id="cat-title"></span>
+  </div>
+  <div class="games-list" id="games-list"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN : JEU
+══════════════════════════════════ -->
+<div class="screen" id="screen-game">
+  <div class="game-topbar">
+    <button class="back-btn" onclick="backFromGame()">← retour</button>
+    <span class="game-topbar-title" id="game-title"></span>
+    <span class="game-topbar-mod" id="game-mod"></span>
+    <div class="spacer"></div>
+    <span class="pts-pill" id="pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="game-body">
+    <div class="game-left">
+      <div class="ctag" id="ctag"></div>
+      <div class="code-card">
+        <div class="code-card-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="code-card-body" id="concept-body"></div>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div class="choices" id="choices"></div>
+      <div class="fb" id="fb"></div>
+      <div class="game-actions">
+        <button class="btn-hint" onclick="doHint()">? indice</button>
+        <button class="btn-next show" id="btn-next" onclick="nextQ()" style="display:none">suivant →</button>
+      </div>
+    </div>
+    <div class="game-right">
+      <div class="grid-lbl">déplacement</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog-txt" id="mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="win-screen" id="win-screen">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-msgs-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartGame()">↺ recommencer</button>
+    <button class="btn-home" onclick="goHome()">accueil</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  DONNÉES DES JEUX
+// ══════════════════════════════════════════════════
+const CATS = {
+  sciences: {
+    label: "🔬 sciences",
+    games: ["physique", "algo", "chimie_gen_mini", "chimie_org_mini", "biochimie_mini"]
+  },
+  langues: {
+    label: "🌍 langues",
+    games: ["francais", "espagnol"]
+  },
+  philo: {
+    label: "🧠 philosophie",
+    games: ["philo_base", "philo_ethique"]
+  },
+  info: {
+    label: "💻 informatique",
+    games: ["quantum_mini", "qsharp_mini", "python_mini", "crypto_mini"]
+  },
+  medecine: {
+    label: "🏥 médecine",
+    games: ["cbip_mini", "pico_mini", "diag_mini"]
+  }
+};
+
+// ── Fiches "mini" pointant vers les fichiers dédiés ──
+const EXTERNAL_GAMES = {
+  quantum_mini: {
+    name: "quantum robot · qiskit",
+    desc: "qubits · portes · superposition · Qiskit",
+    color: "#7c3aed",
+    external: "quantum_robot_avec_correctifs_.html"
+  },
+  qsharp_mini: {
+    name: "quantum robot · Q#",
+    desc: "portes · mesure · langage Microsoft Q#",
+    color: "#5c2aed",
+    external: "quantum_robot_qsharp.html"
+  },
+  python_mini: {
+    name: "python robot",
+    desc: "variables · conditions · boucles · fonctions",
+    color: "#3a7a6a",
+    external: "python_learn.html"
+  },
+  crypto_mini: {
+    name: "crypto robot",
+    desc: "césar · vigenère · RSA · chiffrement",
+    color: "#c8a870",
+    external: "crypto_robot_web.html"
+  },
+  cbip_mini: {
+    name: "médecine robot · CBIP",
+    desc: "pharmacologie · interactions · EBM · 10 chapitres",
+    color: "#e8a598",
+    external: "denis_cbip.html"
+  },
+  pico_mini: {
+    name: "PICO · aide au traitement",
+    desc: "recherche EBM guidée · sources hiérarchisées · gradation",
+    color: "#1a4a2e",
+    external: "pico_medical.html"
+  },
+  diag_mini: {
+    name: "aide au diagnostic",
+    desc: "diagnostic différentiel · probabilités · examens · drapeaux rouges",
+    color: "#1a3a5c",
+    external: "diagnostic_medical.html"
+  },
+  chimie_gen_mini: {
+    name: "chimie générale",
+    desc: "atomes → liaisons → thermo → équilibres → cinétique · 18 chapitres",
+    color: "#a89ec8",
+    external: "denis_chimie_generale.html"
+  },
+  chimie_org_mini: {
+    name: "chimie organique",
+    desc: "introduction → nomenclature → réactivité → stéréochimie → aromatique",
+    color: "#c8a870",
+    external: "denis_chimie_organique.html"
+  },
+  biochimie_mini: {
+    name: "biochimie",
+    desc: "biomolécules → protéines → ADN → enzymes → métabolisme",
+    color: "#7a9e87",
+    external: "denis_biochimie.html"
+  }
+};
+
+const GAMES = {
+
+  // ── MODULE 0 ───────────────────────────────────────
+  m0: {
+    name: "comment fonctionne la science ?",
+    desc: "base épistémologique · universel",
+    color: "#1a1814",
+    takeaway: [
+      "opinion ≠ croyance ≠ connaissance scientifique",
+      "une expérience personnelle ne prouve rien seule",
+      "corrélation ≠ causalité",
+      "\"comment on le sait ?\" — toujours la bonne question",
+      "la science change d'avis. c'est sa force."
+    ],
+    questions: [
+      {
+        c:"concept_1/3", concept:`<span class="cm">// trois types d'affirmations</span>
+<span class="kw">type</span> Opinion  = <span class="hl">préférence personnelle</span>
+<span class="kw">type</span> Croyance = <span class="hl">non vérifiée rigoureusement</span>
+<span class="kw">type</span> Science  = <span class="hl">testée · mesurée · reproductible</span>`,
+        q:"\"Le chocolat est meilleur que la vanille.\" C'est quoi ?",
+        ch:["une opinion","une croyance","une connaissance scientifique"],
+        ok:0, hint:"peut-on mesurer si c'est vrai pour tout le monde ?",
+        fb_ok:"// correct — les préférences de goût ne se mesurent pas.",
+        fb_no:"// c'est une opinion. personne n'a tort ici.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_1/3", concept:`<span class="cm">// reconnaitre une croyance</span>
+<span class="kw">ex</span> = <span class="ex">"Mon voisin a pris ce médicament et est guéri."</span>
+problème = un seul cas ≠ une preuve
+solution = tester sur <span class="hl">beaucoup de personnes</span>`,
+        q:"\"Les vaccins rendent malade, mon voisin me l'a dit.\" C'est quoi ?",
+        ch:["une opinion","une croyance non vérifiée","une connaissance scientifique"],
+        ok:1, hint:"est-ce que le voisin représente tout le monde ?",
+        fb_ok:"// correct — un témoignage isolé n'est pas une preuve.",
+        fb_no:"// c'est une croyance. un témoignage ≠ des études sur des milliers de personnes.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_1/3", concept:`<span class="cm">// qu'est-ce qui rend une affirmation scientifique ?</span>
+<span class="kw">if</span> (testée AND mesurée AND reproductible) {
+  → <span class="hl">connaissance scientifique</span>
+}
+<span class="cm">// le sucre ne rend PAS les enfants hyperactifs</span>
+<span class="cm">// mythe — confirmé par 15 études indépendantes</span>`,
+        q:"Laquelle est la plus scientifique ?",
+        ch:["\"Mon médecin dit que ça marche.\"","\"Tout le monde sait que le sucre rend fou.\"","\"15 études indépendantes → aucun lien sucre/hyperactivité.\""],
+        ok:2, hint:"cherche la réponse avec des chiffres et plusieurs études.",
+        fb_ok:"// correct — plusieurs études, indépendantes, résultat mesuré.",
+        fb_no:"// la 3ème est juste. elle cite des études multiples avec des chiffres précis.",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_2/3", concept:`<span class="cm">// pourquoi une expérience seule ne suffit pas</span>
+<span class="kw">ex</span> = <span class="ex">"Sirop pris. 7 jours après : guéri !"</span>
+<span class="kw">mais</span> un rhume dure naturellement <span class="hl">5-10 jours</span>
+sans groupe de comparaison → impossible de conclure`,
+        q:"Tu prends du sirop, tu guéris en 7 jours. Quelle conclusion est correcte ?",
+        ch:["le sirop a guéri mon rhume.","peut-être — un rhume guérit souvent seul en 7 jours.","le sirop ne sert à rien."],
+        ok:1, hint:"combien de temps dure un rhume sans traitement ?",
+        fb_ok:"// correct — guérir après ≠ guérir grâce à.",
+        fb_no:"// la b) est juste. sans comparaison, impossible de conclure.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_2/3", concept:`<span class="cm">// corrélation ≠ causalité</span>
+<span class="kw">ex</span> = <span class="ex">ventes de glaces ↑  ET  noyades ↑
+→ les glaces causent des noyades ?</span>
+<span class="hl">non</span> — les deux augmentent en été (cause commune)`,
+        q:"Les enfants avec plus de livres réussissent mieux. Quelle conclusion est prudente ?",
+        ch:["les livres rendent les enfants plus intelligents.","il y a un lien, mais le niveau des parents explique probablement les deux.","c'est prouvé : les livres causent la réussite."],
+        ok:1, hint:"quelles autres différences y a-t-il entre ces familles ?",
+        fb_ok:"// correct — corrélation ≠ causalité.",
+        fb_no:"// la b) est juste. le niveau des parents est probablement la cause commune.",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_2/3", concept:`<span class="cm">// l'effet placebo</span>
+<span class="kw">ex</span> = <span class="ex">30-40% des patients prennent du sucre
+→ ressentent quand même une amélioration réelle</span>
+solution = essai en <span class="hl">double aveugle</span>
+<span class="cm">// ni patient, ni médecin ne sait qui reçoit quoi</span>`,
+        q:"Pourquoi personne ne sait qui prend le vrai médicament dans une étude sérieuse ?",
+        ch:["pour que les médecins ne trichent pas.","pour éliminer l'effet placebo et les biais d'évaluation.","c'est une règle administrative."],
+        ok:1, hint:"que se passe-t-il dans la tête du médecin s'il sait qui prend quoi ?",
+        fb_ok:"// correct — le double aveugle élimine les biais des deux côtés.",
+        fb_no:"// la b) est juste. sans ça, le médecin évalue inconsciemment différemment.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_3/3", concept:`<span class="cm">// la question magique</span>
+<span class="kw">function</span> evaluer(info) {
+  <span class="hl">return "comment on le sait ?"</span>
+  <span class="cm">// pas : "qui l'a dit ?"</span>
+  <span class="cm">// pas : "est-ce que ça semble logique ?"</span>
+}`,
+        q:"\"Le wifi cause le cancer.\" Quelle est la meilleure réaction ?",
+        ch:["éteindre le wifi.","lui dire qu'il a tort.","demander : \"c'est quelle étude ? sur combien de personnes ?\""],
+        ok:2, hint:"qu'est-ce qui distingue une rumeur d'une preuve ?",
+        fb_ok:"// correct — demander la source, toujours.",
+        fb_no:"// la c) est juste. la question magique : \"comment on le sait ?\"",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_3/3", concept:`<span class="cm">// hiérarchie des preuves</span>
+<span class="kw">const</span> preuves = [
+  <span class="cm">"témoignage",      // peu fiable</span>
+  <span class="cm">"avis d'expert",   // mieux</span>
+  <span class="cm">"une étude",       // début de preuve</span>
+  <span class="hl">"méta-analyse",    // très solide</span>
+  <span class="hl">"consensus",       // le plus fiable</span>
+]`,
+        q:"Un médecin célèbre contredit 10 000 études. Que penser ?",
+        ch:["le médecin célèbre a forcément raison.","les 10 000 études sont toutes fausses.","un expert isolé pèse moins que des milliers d'études indépendantes."],
+        ok:2, hint:"qu'est-ce qui est plus difficile à falsifier ?",
+        fb_ok:"// correct — la notoriété ne remplace pas les preuves.",
+        fb_no:"// la c) est juste. nombre + indépendance > avis d'un seul expert.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_3/3", concept:`<span class="cm">// la science se corrige elle-même</span>
+<span class="kw">ex</span> = <span class="ex">1984 : ulcères → bactérie H. pylori. Nobel 2005.
+Pendant des siècles : la Terre était au centre.</span>
+croyance → résiste aux preuves contraires
+<span class="hl">science  → intègre et évolue</span>`,
+        q:"La science change parfois d'avis. Est-ce un problème ?",
+        ch:["oui — si elle change d'avis, elle ne sait rien.","non — changer d'avis face aux preuves, c'est ça la science.","oui — mieux vaut les traditions."],
+        ok:1, hint:"qu'est-ce qu'on préfère : quelqu'un qui admet ses erreurs ou pas ?",
+        fb_ok:"// correct — se corriger est la plus grande force de la science.",
+        fb_no:"// la b) est juste. une idéologie qui ne change jamais n'apprend jamais.",
+        mv:{dx:0,dy:-1}
+      }
+    ]
+  },
+
+  // ── PHYSIQUE ───────────────────────────────────────
+  physique: {
+    name: "physique robot",
+    desc: "mécanique · énergie · ondes",
+    color: "#8fb4c8",
+    takeaway:[
+      "F = ma — la deuxième loi de Newton",
+      "E_c = ½mv² — énergie cinétique",
+      "conservation de l'énergie — fondamentale",
+      "v = λf — vitesse = longueur d'onde × fréquence",
+      "tout modèle physique a une limite de validité"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · forces", concept:`<span class="cm">// 2ème loi de Newton</span>
+<span class="hl">F = m × a</span>
+F = force (Newton, N)
+m = masse (kg)
+a = accélération (m/s²)
+<span class="cm">// si F double et m reste → a double</span>`,
+        q:"Une voiture de 1000 kg accélère à 2 m/s². Quelle force est appliquée ?",
+        ch:["500 N","2000 N","1000 N"],
+        ok:1,hint:"F = m × a = 1000 × 2",
+        fb_ok:"// correct — F = 1000 × 2 = 2000 N",
+        fb_no:"// F = m × a = 1000 × 2 = 2000 N",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_2/3 · énergie", concept:`<span class="cm">// énergie cinétique</span>
+<span class="hl">E_c = ½ × m × v²</span>
+<span class="cm">// si la vitesse double → E_c multipliée par 4</span>
+<span class="kw">ex</span> m=2kg, v=3m/s → E_c = ½×2×9 = <span class="hl">9 J</span>`,
+        q:"m=4 kg, v=5 m/s. Quelle énergie cinétique ?",
+        ch:["10 J","50 J","100 J"],
+        ok:1,hint:"E_c = ½ × 4 × 25 = ?",
+        fb_ok:"// correct — ½ × 4 × 25 = 50 J",
+        fb_no:"// E_c = ½ × m × v² = ½ × 4 × 25 = 50 J",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_3/3 · ondes", concept:`<span class="cm">// ondes : vitesse, fréquence, longueur d'onde</span>
+<span class="hl">v = λ × f</span>
+v = vitesse (m/s)
+λ = longueur d'onde (m)
+f = fréquence (Hz)
+<span class="cm">// lumière : v = 3×10⁸ m/s</span>`,
+        q:"v = 340 m/s (son), f = 440 Hz (la). Quelle longueur d'onde ?",
+        ch:["λ ≈ 0.77 m","λ ≈ 7.7 m","λ ≈ 77 m"],
+        ok:0,hint:"λ = v/f = 340/440 ≈ ?",
+        fb_ok:"// correct — λ = 340/440 ≈ 0.77 m",
+        fb_no:"// λ = v/f = 340/440 ≈ 0.77 m",
+        mv:{dx:0,dy:-1}
+      }
+    ]
+  },
+
+  // ── ALGO ──────────────────────────────────────────
+  algo: {
+    name: "algo robot",
+    desc: "complexité · tri · récursion",
+    color: "#8fb4c8",
+    takeaway:[
+      "O(1) = constant · O(n) = linéaire · O(n²) = quadratique",
+      "un algorithme de tri efficace est en O(n log n)",
+      "récursion : une fonction qui s'appelle elle-même avec un cas de base",
+      "diviser pour régner : découper le problème en sous-problèmes",
+      "tester avec des cas limites : liste vide, un seul élément, déjà triée"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · complexité", concept:`<span class="cm">// notation Big O — complexité temporelle</span>
+<span class="hl">O(1)</span>    : constant   <span class="cm">// accès tableau[i]</span>
+<span class="hl">O(n)</span>    : linéaire   <span class="cm">// chercher dans une liste</span>
+<span class="hl">O(n²)</span>   : quadratique <span class="cm">// deux boucles imbriquées</span>
+<span class="hl">O(n log n)</span>: tri efficace <span class="cm">// mergesort, quicksort</span>`,
+        q:"Chercher un élément dans une liste non triée de n éléments : quelle complexité ?",
+        ch:["O(1) — on accède directement","O(n) — on doit vérifier chaque élément","O(n²) — on compare tout"],
+        ok:1,hint:"dans le pire cas, l'élément est le dernier — on a parcouru toute la liste",
+        fb_ok:"// correct — O(n) : dans le pire cas, on parcourt toute la liste",
+        fb_no:"// liste non triée → parcours complet nécessaire → O(n)",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_2/3 · récursion", concept:`<span class="cm">// récursion</span>
+<span class="kw">def</span> factorielle(n):
+  <span class="hl">if</span> n == 0: <span class="hl">return</span> 1      <span class="cm">// cas de base</span>
+  <span class="hl">return</span> n * factorielle(n-1)  <span class="cm">// appel récursif</span>
+<span class="cm">// sans cas de base → boucle infinie !</span>`,
+        q:"factorielle(4) vaut combien ?",
+        ch:["16","24","8"],
+        ok:1,hint:"4! = 4×3×2×1",
+        fb_ok:"// correct — 4! = 4×3×2×1 = 24",
+        fb_no:"// 4! = 4×3×2×1 = 24",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_3/3 · tri", concept:`<span class="cm">// algorithmes de tri</span>
+<span class="hl">bubble sort</span>  : O(n²)   — simple, inefficace pour grand n
+<span class="hl">merge sort</span>   : O(n log n) — diviser, trier, fusionner
+<span class="hl">quicksort</span>    : O(n log n) moyen — très utilisé en pratique
+<span class="cm">// Python : list.sort() utilise Timsort → O(n log n)</span>`,
+        q:"Pour trier 1 million d'éléments, quel algorithme choisir ?",
+        ch:["bubble sort — simple à comprendre","merge sort — O(n log n)","les deux sont équivalents pour 1 million"],
+        ok:1,hint:"O(n²) sur 1 million = 10^12 opérations. O(n log n) = 20 millions.",
+        fb_ok:"// correct — O(n log n) vs O(n²) : différence énorme à grande échelle",
+        fb_no:"// bubble sort sur 1M éléments = 10^12 opérations. merge sort = ~20M. pas pareil.",
+        mv:{dx:1,dy:0}
+      }
+    ]
+  },
+
+  // ── FRANÇAIS ───────────────────────────────────────
+  francais: {
+    name: "français robot",
+    desc: "grammaire · orthographe · conjugaison",
+    color: "#e8a598",
+    takeaway:[
+      "le sujet fait l'action — le verbe s'accorde avec lui",
+      "participe passé avec avoir : accord avec le COD si avant",
+      "leur (sans s) = pronom · leurs (avec s) = possessif pluriel",
+      "c'est / s'est / ces / ses — quatre homophones, quatre sens",
+      "on = pronom indéfini · ont = verbe avoir"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · accord sujet-verbe", concept:`<span class="cm">// accord sujet-verbe</span>
+le verbe s'accorde <span class="hl">toujours avec le sujet</span>
+<span class="kw">ex</span> Les enfants <span class="hl">jouent</span>.    <span class="cm">// ils → 3ème pl.</span>
+   Elle <span class="hl">mange</span>.              <span class="cm">// elle → 3ème sg.</span>
+<span class="cm">// attention aux sujets inversés et multiples</span>`,
+        q:"\"Les oiseaux ___ dans le ciel.\" Quelle forme est correcte ?",
+        ch:["vole","volent","volez"],
+        ok:1,hint:"\"les oiseaux\" = ils → 3ème personne du pluriel",
+        fb_ok:"// correct — \"les oiseaux\" → ils → volent",
+        fb_no:"// \"les oiseaux\" = ils → 3ème personne pluriel → volent",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_2/3 · homophones", concept:`<span class="cm">// on / ont</span>
+<span class="hl">on</span>  = pronom indéfini  <span class="cm">// remplaçable par "il"</span>
+<span class="hl">ont</span> = verbe avoir       <span class="cm">// remplaçable par "avaient"</span>
+<span class="kw">ex</span> <span class="hl">On</span> part.   <span class="cm">// il part ✓</span>
+   Ils <span class="hl">ont</span> faim. <span class="cm">// ils avaient faim ✓</span>`,
+        q:"\"Elles ___ mangé toute la tarte.\" On ou ont ?",
+        ch:["on","ont"],
+        ok:1,hint:"remplace par \"avaient\" : elles avaient mangé → ça marche ?",
+        fb_ok:"// correct — elles avaient mangé ✓ → ont",
+        fb_no:"// test : \"elles avaient mangé\" fonctionne → ont (verbe avoir)",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_3/3 · leur/leurs", concept:`<span class="cm">// leur / leurs</span>
+<span class="hl">leur</span>   = pronom  <span class="cm">// Je <u>leur</u> parle. (à eux)</span>
+<span class="hl">leurs</span>  = possessif pluriel <span class="cm">// <u>Leurs</u> livres.</span>
+<span class="kw">astuce</span> : remplace par "lui"
+  Si ça marche → <span class="hl">leur</span> (sans s)
+  Sinon → <span class="hl">leurs</span> (avec s)`,
+        q:"\"Je ___ ai dit la vérité.\" Leur ou leurs ?",
+        ch:["leur","leurs"],
+        ok:0,hint:"remplace par \"lui\" : je lui ai dit → ça marche → leur sans s",
+        fb_ok:"// correct — \"je lui ai dit\" fonctionne → leur (pronom, sans s)",
+        fb_no:"// test : \"je lui ai dit\" fonctionne → leur = pronom → sans s",
+        mv:{dx:1,dy:0}
+      }
+    ]
+  },
+
+  // ── ESPAGNOL ───────────────────────────────────────
+  espagnol: {
+    name: "español robot",
+    desc: "gramática · ser/estar · conjugación",
+    color: "#e8d498",
+    takeaway:[
+      "ser = identité permanente · estar = état temporaire",
+      "les verbes en -ar : yo -o, tú -as, él -a",
+      "les articles définis : el/la/los/las",
+      "hay = il y a (invariable)",
+      "interrogatifs : ¿qué? ¿quién? ¿dónde? ¿cuándo?"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · ser/estar", concept:`<span class="cm">// ser vs estar</span>
+<span class="hl">ser</span>   = identité, origine, caractère permanent
+<span class="hl">estar</span> = état temporaire, position, humeur
+<span class="kw">ex</span> Soy médico.       <span class="cm">// je suis médecin (identité)</span>
+   Estoy cansado.    <span class="cm">// je suis fatigué (état)</span>`,
+        q:"\"El café ___ frío.\" (Le café est froid.) Ser ou estar ?",
+        ch:["es (ser)","está (estar)"],
+        ok:1,hint:"le café froid c'est un état temporaire — il peut se réchauffer",
+        fb_ok:"// correcto — état temporaire → estar → está frío",
+        fb_no:"// froid = état temporaire → estar → está frío",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_2/3 · conjugaison -ar", concept:`<span class="cm">// verbes réguliers en -ar (hablar = parler)</span>
+yo      habl<span class="hl">o</span>
+tú      habl<span class="hl">as</span>
+él/ella habl<span class="hl">a</span>
+nosotros habl<span class="hl">amos</span>
+ellos   habl<span class="hl">an</span>`,
+        q:"\"Ellos ___ español.\" (Ils parlent espagnol.) Quelle forme ?",
+        ch:["hablas","habla","hablan"],
+        ok:2,hint:"ellos = ils → terminaison -an",
+        fb_ok:"// correcto — ellos → -an → hablan",
+        fb_no:"// ellos → 3ème personne pluriel → -an → hablan",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_3/3 · hay", concept:`<span class="cm">// hay = il y a (invariable !)</span>
+<span class="hl">Hay</span> un libro.    <span class="cm">// il y a un livre</span>
+<span class="hl">Hay</span> dos libros.  <span class="cm">// il y a deux livres</span>
+<span class="cm">// hay ne s'accorde jamais</span>
+<span class="cm">// ¿Hay un médico? = est-ce qu'il y a un médecin ?</span>`,
+        q:"\"___ muchos estudiantes en la clase.\" (Il y a beaucoup d'étudiants.)",
+        ch:["Es","Están","Hay"],
+        ok:2,hint:"\"il y a\" en espagnol = hay (invariable)",
+        fb_ok:"// correcto — il y a = hay, toujours invariable",
+        fb_no:"// il y a = hay. invariable, même au pluriel.",
+        mv:{dx:1,dy:0}
+      }
+    ]
+  },
+
+  // ── PHILOSOPHIE BASE ──────────────────────────────
+  philo_base: {
+    name: "philo robot · bases",
+    desc: "argumentation · sophismes · grandes questions",
+    color: "#7a9e87",
+    takeaway:[
+      "un argument valide : prémisses vraies → conclusion nécessaire",
+      "ad hominem : attaquer la personne, pas l'argument",
+      "l'appel à la majorité n'est pas une preuve",
+      "une affirmation non réfutable n'est pas scientifique (Popper)",
+      "distinguer est de doit — la loi de Hume"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · argumentation", concept:`<span class="cm">// structure d'un argument valide</span>
+<span class="hl">prémisse 1</span> : Tous les humains sont mortels.
+<span class="hl">prémisse 2</span> : Socrate est humain.
+<span class="hl">conclusion</span> : Donc Socrate est mortel.
+<span class="cm">// si prémisses vraies → conclusion nécessaire</span>`,
+        q:"\"Tous les chats sont des animaux. Rex est un animal. Donc Rex est un chat.\" Cet argument est :",
+        ch:["valide — la conclusion suit des prémisses","invalide — un animal n'est pas forcément un chat","valide — Rex pourrait être un chat"],
+        ok:1,hint:"est-ce que tous les animaux sont des chats ?",
+        fb_ok:"// correct — l'erreur : \"animal\" ≠ \"chat\". Rex peut être un chien.",
+        fb_no:"// invalide. \"tous les chats sont des animaux\" ≠ \"tous les animaux sont des chats\"",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_2/3 · sophismes", concept:`<span class="cm">// sophismes courants</span>
+<span class="kw">ad hominem</span>    : attaquer la personne, pas l'argument
+<span class="kw">appel majorité</span>: "tout le monde le croit" ≠ vrai
+<span class="kw">faux dilemme</span>  : "soit A, soit B" (il y a d'autres options)
+<span class="kw">pente glissante</span>: A → catastrophe (sans justification)`,
+        q:"\"Tu ne peux pas parler de santé, tu fumes.\" C'est quel sophisme ?",
+        ch:["appel à la majorité","ad hominem","faux dilemme"],
+        ok:1,hint:"on attaque la personne plutôt que son argument",
+        fb_ok:"// correct — ad hominem : attaquer la personne ne réfute pas l'argument",
+        fb_no:"// c'est un ad hominem. fumer ne rend pas l'argument sur la santé faux.",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_3/3 · Popper", concept:`<span class="cm">// réfutabilité — Karl Popper</span>
+une théorie est <span class="hl">scientifique</span> si elle peut être
+<span class="hl">réfutée</span> par une expérience
+<span class="kw">ex</span> "Tous les cygnes sont blancs" → réfutable
+   <span class="cm">// (un cygne noir suffit à la réfuter)</span>
+   "Les esprits existent" → non réfutable → non scientifique`,
+        q:"\"Mon cristal me porte bonheur — s'il ne marche pas, c'est que je n'y crois pas assez.\" Cette affirmation est :",
+        ch:["scientifique — elle est testable","non scientifique — elle ne peut pas être réfutée","incertaine — on manque de données"],
+        ok:1,hint:"peut-on concevoir une expérience qui la prouverait fausse ?",
+        fb_ok:"// correct — non réfutable → non scientifique (Popper)",
+        fb_no:"// non réfutable = non scientifique. si elle échappe à toute réfutation, elle n'est pas testable.",
+        mv:{dx:0,dy:-1}
+      }
+    ]
+  },
+
+  // ── PHILO ÉTHIQUE ─────────────────────────────────
+  philo_ethique: {
+    name: "philo robot · éthique",
+    desc: "utilitarisme · déontologie · vertus",
+    color: "#7a9e87",
+    takeaway:[
+      "utilitarisme : maximiser le bonheur du plus grand nombre (Mill)",
+      "déontologie : certains actes sont intrinsèquement bons ou mauvais (Kant)",
+      "éthique des vertus : être une bonne personne (Aristote)",
+      "le dilemme du tramway illustre la tension entre ces théories",
+      "aucune théorie n'a toutes les réponses"
+    ],
+    questions:[
+      {
+        c:"concept_1/3 · utilitarisme", concept:`<span class="cm">// utilitarisme (Bentham, Mill)</span>
+<span class="hl">la bonne action = celle qui maximise le bonheur</span>
+<span class="cm">// du plus grand nombre</span>
+<span class="kw">ex</span> mentir pour éviter une souffrance → justifié
+   sacrifier un pour en sauver mille → peut être justifié
+<span class="cm">// critique : peut justifier des injustices individuelles</span>`,
+        q:"Un médecin peut-il prendre l'organe d'un patient sain pour en sauver 5 autres ? L'utilitarisme dirait :",
+        ch:["non — jamais","oui — 5 vies > 1 vie","ça dépend du contexte"],
+        ok:1,hint:"l'utilitarisme calcule : 5 bonheurs > 1 bonheur",
+        fb_ok:"// correct — selon l'utilitarisme pur : 5 > 1. C'est aussi pourquoi la théorie est critiquée.",
+        fb_no:"// utilitarisme pur : maximiser le bonheur total → 5 vies sauvées > 1 perdue",
+        mv:{dx:1,dy:0}
+      },
+      {
+        c:"concept_2/3 · Kant", concept:`<span class="cm">// impératif catégorique — Kant</span>
+<span class="hl">"Agis seulement selon la maxime</span>
+<span class="hl"> que tu pourrais vouloir universelle."</span>
+<span class="kw">ex</span> mentir → si tout le monde mentait, la confiance disparaît
+   → le mensonge ne peut pas être universalisé → <span class="hl">toujours faux</span>`,
+        q:"Kant dirait-il qu'on peut mentir pour protéger un innocent ?",
+        ch:["oui — si les conséquences sont bonnes","non — mentir ne peut jamais être universalisé","oui — dans des cas extrêmes"],
+        ok:1,hint:"pour Kant, certains actes sont mauvais en eux-mêmes, indépendamment des conséquences",
+        fb_ok:"// correct — pour Kant, le mensonge est toujours faux, même pour sauver quelqu'un.",
+        fb_no:"// Kant : le mensonge ne peut pas être universalisé → toujours faux, quelle que soit la conséquence",
+        mv:{dx:0,dy:-1}
+      },
+      {
+        c:"concept_3/3 · vertus", concept:`<span class="cm">// éthique des vertus — Aristote</span>
+pas "quelle action faire ?" mais <span class="hl">"quel genre de personne être ?"</span>
+<span class="kw">vertus</span> = courage · justice · prudence · tempérance
+<span class="cm">// la vertu est un juste milieu entre deux extrêmes</span>
+courage = juste milieu entre lâcheté et témérité`,
+        q:"Pour Aristote, la générosité est un juste milieu entre :",
+        ch:["avarice et prodigalité","égoïsme et altruisme","pauvreté et richesse"],
+        ok:0,hint:"la vertu est toujours un juste milieu entre deux extrêmes opposés",
+        fb_ok:"// correct — avarice (trop peu) ← générosité → prodigalité (trop)",
+        fb_no:"// Aristote : vertu = milieu entre deux extrêmes → générosité entre avarice et prodigalité",
+        mv:{dx:1,dy:0}
+      }
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+let currentGame = null;
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let rX = 0, rY = 5;
+const GOAL = {x:5, y:0};
+let traces = new Set();
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function showCats() {
+  document.getElementById('cats').style.display = 'flex';
+}
+
+function goHome() {
+  document.getElementById('win-screen').classList.remove('show');
+  show('home');
+}
+
+function showCat(cat) {
+  const data = CATS[cat];
+  document.getElementById('cat-title').textContent = data.label;
+  const list = document.getElementById('games-list');
+  list.innerHTML = '';
+  data.games.forEach(gid => {
+    const ext = EXTERNAL_GAMES[gid];
+    if (ext) {
+      // external game card
+      const card = document.createElement('div');
+      card.className = 'game-card';
+      card.innerHTML = `
+        <div class="game-dot" style="background:${ext.color}"></div>
+        <div class="game-info">
+          <div class="game-name">${ext.name}</div>
+          <div class="game-desc">${ext.desc}</div>
+        </div>
+        <div class="game-badge external">↗ ouvrir</div>
+      `;
+      card.onclick = () => window.location.href = ext.external;
+      list.appendChild(card);
+      return;
+    }
+    const g = GAMES[gid];
+    if (!g) return;
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML = `
+      <div class="game-dot" style="background:${g.color}"></div>
+      <div class="game-info">
+        <div class="game-name">${g.name}</div>
+        <div class="game-desc">${g.desc}</div>
+      </div>
+      <div class="game-badge">${g.questions.length} niveaux</div>
+    `;
+    card.onclick = () => startGame(gid);
+    list.appendChild(card);
+  });
+  show('cat');
+}
+
+function backFromGame() {
+  document.getElementById('win-screen').classList.remove('show');
+  const prev = document.getElementById('cat-title').textContent;
+  if (prev) show('cat');
+  else show('home');
+}
+
+// ══════════════════════════════════════════════════
+//  JEU
+// ══════════════════════════════════════════════════
+function startGame(gid) {
+  currentGame = gid;
+  currentQ = 0;
+  score = 0;
+  answered = false;
+  rX = 0; rY = 5;
+  traces = new Set();
+  const g = GAMES[gid];
+  document.getElementById('game-title').textContent = g.name;
+  document.getElementById('pts').textContent = '0 pts';
+  document.getElementById('win-screen').classList.remove('show');
+  buildGrid();
+  loadQ();
+  show('game');
+}
+
+function loadQ() {
+  answered = false;
+  const g = GAMES[currentGame];
+  const q = g.questions[currentQ];
+  document.getElementById('game-mod').textContent = `· ${currentQ+1}/${g.questions.length}`;
+  document.getElementById('ctag').textContent = q.c;
+  document.getElementById('concept-body').innerHTML = q.concept;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('fb').className = 'fb';
+  document.getElementById('fb').textContent = '';
+  document.getElementById('btn-next').style.display = 'none';
+
+  const dr = document.getElementById('dots-row');
+  dr.innerHTML = '';
+  g.questions.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < currentQ ? ' done' : i === currentQ ? ' cur' : '');
+    dr.appendChild(d);
+  });
+
+  const cc = document.getElementById('choices');
+  cc.innerHTML = '';
+  q.ch.forEach((t,i) => {
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.textContent = t;
+    b.onclick = () => answer(i);
+    cc.appendChild(b);
+  });
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = GAMES[currentGame].questions[currentQ];
+  const ok = idx === q.ok;
+  document.querySelectorAll('.choice').forEach((b,i) => {
+    if (i === q.ok) b.classList.add('ok');
+    else if (i === idx && !ok) b.classList.add('no');
+    else b.classList.add('dim');
+    b.onclick = null;
+  });
+  const fb = document.getElementById('fb');
+  fb.className = 'fb show ' + (ok ? 'ok' : 'no');
+  fb.textContent = ok ? q.fb_ok : q.fb_no;
+  if (ok) { score += 10; document.getElementById('pts').textContent = score + ' pts'; sparks(); }
+  moveRobot(q.mv.dx, q.mv.dy, ok);
+  document.getElementById('btn-next').style.display = 'inline-block';
+}
+
+function doHint() {
+  const fb = document.getElementById('fb');
+  fb.className = 'fb show hint';
+  fb.textContent = '? ' + GAMES[currentGame].questions[currentQ].hint;
+}
+
+function nextQ() {
+  currentQ++;
+  const g = GAMES[currentGame];
+  if (currentQ >= g.questions.length) { showWin(); return; }
+  loadQ();
+}
+
+function showWin() {
+  const g = GAMES[currentGame];
+  document.getElementById('win-title').textContent = `// ${g.name} · complété`;
+  const ul = document.getElementById('win-msgs-list');
+  ul.innerHTML = '';
+  g.takeaway.forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+  document.getElementById('win-screen').classList.add('show');
+}
+
+function restartGame() {
+  document.getElementById('win-screen').classList.remove('show');
+  startGame(currentGame);
+}
+
+// ══════════════════════════════════════════════════
+//  GRILLE
+// ══════════════════════════════════════════════════
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
+    const d = document.createElement('div');
+    d.id = `gc${x}${y}`; d.className = 'gcell';
+    if (x === GOAL.x && y === GOAL.y) d.classList.add('goal');
+    g.appendChild(d);
+  }
+  renderRobot();
+}
+
+function renderRobot() {
+  document.querySelectorAll('.gcell').forEach(c => {
+    c.classList.remove('robot');
+    c.textContent = '';
+  });
+  traces.forEach(k => {
+    const el = document.getElementById(k);
+    if (el) el.classList.add('trace');
+  });
+  const cell = document.getElementById(`gc${rX}${rY}`);
+  if (cell) { cell.classList.add('robot'); cell.textContent = '🤖'; }
+  const goal = document.getElementById(`gc${GOAL.x}${GOAL.y}`);
+  if (goal) goal.classList.add('goal');
+}
+
+function moveRobot(dx, dy, ok) {
+  if (!ok) {
+    document.getElementById('mlog').textContent = `× erreur — position inchangée`;
+    return;
+  }
+  traces.add(`gc${rX}${rY}`);
+  rX = Math.max(0, Math.min(5, rX + dx));
+  rY = Math.max(0, Math.min(5, rY + dy));
+  renderRobot();
+  document.getElementById('mlog').textContent = `→ déplacé vers (${rX}, ${rY})`;
+}
+
+function sparks() {
+  const colors = ['#7a9e87','#e8a598','#8fb4c8','#c8a870','#a89ec8'];
+  for (let i = 0; i < 6; i++) {
+    const p = document.createElement('div');
+    p.className = 'pt';
+    p.style.cssText = `width:6px;height:6px;left:${Math.random()*100}vw;top:${Math.random()*60+20}vh;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.3}s`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+</script>
+</body>
+</html>

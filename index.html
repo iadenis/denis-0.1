@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis — portail</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --bg2: #f0ebe2;
+  --ink: #1a1814;
+  --ink2: #6b6760;
+  --ink3: #b5b2ac;
+  --sage: #7a9e87;
+  --blush: #e8a598;
+  --sky: #8fb4c8;
+  --amber: #c8a870;
+  --lav: #a89ec8;
+  --line: rgba(26,24,20,0.08);
+}
+html, body { min-height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ── header ── */
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 2.5rem 3rem 0;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.header-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.header-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+}
+
+/* ── section ── */
+.sections {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2.5rem 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: all 0.13s;
+}
+.card:hover {
+  border-color: var(--ink3);
+  background: var(--bg2);
+  transform: translateY(-1px);
+}
+.card-dot-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.card-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+.card-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.card-desc {
+  font-size: 12px;
+  color: var(--ink2);
+  font-weight: 300;
+  line-height: 1.5;
+}
+.card-badge {
+  margin-top: 6px;
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink3);
+  align-self: flex-start;
+}
+
+/* big card for denis main */
+.card.main {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding: 1.4rem 1.6rem;
+}
+.card.main:hover { opacity: 0.88; transform: translateY(-1px); background: var(--ink); border-color: var(--ink); }
+.card.main .card-name { font-size: 20px; color: var(--bg); }
+.card.main .card-desc { color: rgba(250,248,244,0.55); }
+.card.main .card-badge { border-color: rgba(250,248,244,0.2); color: rgba(250,248,244,0.5); background: rgba(250,248,244,0.05); }
+.card.main .card-tag { color: rgba(250,248,244,0.4); }
+.main-arrow { margin-left: auto; font-size: 24px; color: rgba(250,248,244,0.4); }
+
+/* ── footer ── */
+.footer {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 3rem 2.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+}
+
+@media(max-width:600px) {
+  .header, .sections, .footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .header { flex-direction: column; gap: 4px; padding-top: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">denis</div>
+  <div class="header-sub">portail · apprendre progressivement</div>
+</div>
+
+<div class="sections">
+
+  <!-- ── ENTRÉE PRINCIPALE ── -->
+  <div>
+    <div class="section-label">entrée principale</div>
+    <div class="cards">
+      <a href="denis.html" class="card main">
+        <div>
+          <div class="card-tag">hub · tous les jeux</div>
+          <div class="card-name">denis</div>
+          <div class="card-desc">sciences · langues · philosophie · informatique</div>
+          <div class="card-badge">module_0 inclus · épistémologie</div>
+        </div>
+        <div class="main-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── INFORMATIQUE ── -->
+  <div>
+    <div class="section-label">💻 informatique</div>
+    <div class="cards">
+      <a href="quantum_robot_avec_correctifs_.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#7c3aed"></div>
+          <div class="card-tag">qiskit · python</div>
+        </div>
+        <div class="card-name">quantum robot</div>
+        <div class="card-desc">qubits, portes quantiques, superposition, intrication</div>
+        <div class="card-badge">5 modules</div>
+      </a>
+      <a href="quantum_robot_qsharp.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#5c2aed"></div>
+          <div class="card-tag">microsoft Q#</div>
+        </div>
+        <div class="card-name">quantum robot Q#</div>
+        <div class="card-desc">portes, mesure, types, opérations en langage Q#</div>
+        <div class="card-badge">5 modules</div>
+      </a>
+      <a href="python_learn.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#3a7a6a"></div>
+          <div class="card-tag">programmation</div>
+        </div>
+        <div class="card-name">python robot</div>
+        <div class="card-desc">variables, conditions, boucles, listes, fonctions</div>
+        <div class="card-badge">5 modules</div>
+      </a>
+      <a href="crypto_robot_web.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#c8a870"></div>
+          <div class="card-tag">cryptographie</div>
+        </div>
+        <div class="card-name">crypto robot</div>
+        <div class="card-desc">césar, vigenère, RSA, chiffrement asymétrique</div>
+        <div class="card-badge">3 modules</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── MÉDECINE ── -->
+  <div>
+    <div class="section-label">🏥 médecine</div>
+    <div class="cards">
+      <a href="denis_cbip.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#e8a598"></div>
+          <div class="card-tag">pharmacologie · EBM</div>
+        </div>
+        <div class="card-name">médecine · CBIP</div>
+        <div class="card-desc">cardio, sang, GI, respiratoire, hormones, douleur…</div>
+        <div class="card-badge">10 chapitres</div>
+      </a>
+      <a href="diagnostic_medical.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#1a3a5c"></div>
+          <div class="card-tag">aide au diagnostic · EBM</div>
+        </div>
+        <div class="card-name">diagnostic différentiel</div>
+        <div class="card-desc">Tableau clinique → diagnostics différentiels avec probabilités, examens, drapeaux rouges</div>
+        <div class="card-badge">PubMed · Cochrane · Guidelines</div>
+      </a>
+      <a href="pico_medical.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#1a4a2e"></div>
+          <div class="card-tag">aide au traitement · EBM</div>
+        </div>
+        <div class="card-name">PICO · aide clinique</div>
+        <div class="card-desc">recherche guidée par l'EBM, gradation des preuves, sources libres</div>
+        <div class="card-badge">OpenAlex · PubMed · Cochrane</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── CHIMIE ── -->
+  <div>
+    <div class="section-label">⚗️ chimie</div>
+    <div class="cards">
+      <a href="denis_chimie_generale.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#a89ec8"></div>
+          <div class="card-tag">bases · progressif</div>
+        </div>
+        <div class="card-name">chimie générale</div>
+        <div class="card-desc">atomes, liaisons, pH, réactions, thermodynamique</div>
+        <div class="card-badge">modules 1→5</div>
+      </a>
+      <a href="denis_chimie_organique.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#c8a870"></div>
+          <div class="card-tag">organique · progressif</div>
+        </div>
+        <div class="card-name">chimie organique</div>
+        <div class="card-desc">hydrocarbures, fonctions, réactions, mécanismes</div>
+        <div class="card-badge">chapitres progressifs</div>
+      </a>
+      <a href="denis_biochimie.html" class="card">
+        <div class="card-dot-row">
+          <div class="card-dot" style="background:#7a9e87"></div>
+          <div class="card-tag">biochimie · progressif</div>
+        </div>
+        <div class="card-name">biochimie</div>
+        <div class="card-desc">acides aminés, enzymes, métabolisme, ADN, signalisation</div>
+        <div class="card-badge">chapitres progressifs</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  denis · apprendre n'importe quoi, progressivement · hébergé sur GitHub Pages · <a href="sources.html" style="color:var(--sky);text-decoration:none;font-family:'DM Mono',monospace;font-size:10px;">voir les sources →</a>
+</div>
+
+</body>
+</html>
