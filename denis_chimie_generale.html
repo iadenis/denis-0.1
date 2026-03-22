@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · chimie générale</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;
+  --ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;
+  --sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;
+  --line:rgba(26,24,20,0.08);
+}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2rem;font-weight:300;text-align:center;max-width:440px;line-height:1.6;}
+.chap-list{max-width:520px;width:100%;display:flex;flex-direction:column;}
+.chap-section{margin-bottom:1.5rem;}
+.chap-section-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.chap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.5;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:20px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-level{font-size:10px;color:var(--ink3);padding:1px 8px;border-radius:999px;border:1px solid var(--line);}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.topbar{display:flex;align-items:center;gap:10px;padding:0.7rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.btnback:hover{color:var(--ink);}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+.dots-row{display:flex;gap:3px;padding:0.4rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .r{color:#c85a5a;}
+.cbody .b{color:#5a7ec8;}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);}
+.cbody .why{display:block;background:rgba(168,158,200,0.1);border:1px solid rgba(168,158,200,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#4a4470;line-height:1.6;}
+.qbadge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:inline-block;margin-bottom:6px;}
+.qbadge.open{border-color:rgba(168,158,200,0.4);color:#4a4470;background:rgba(168,158,200,0.08);}
+.qbadge.qcm{border-color:rgba(122,158,135,0.4);color:#3d6b4f;background:rgba(122,158,135,0.08);}
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.open-wrap{display:flex;gap:7px;align-items:center;}
+.open-input{flex:1;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);outline:none;}
+.open-input:focus{border-color:var(--lav);}
+.open-btn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:8px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.open-btn:hover{opacity:0.75;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;}
+.btnhint:hover{color:var(--ink2);}
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;overflow-y:auto;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:480px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · chimie générale</div>
+  <div class="home-title">chimie</div>
+  <div class="home-sub">18 chapitres · du zéro absolu au niveau universitaire<br>atome → liaisons → thermo → équilibres → cinétique → solutions → redox → gaz → nucléaire → stœchiométrie</div>
+  <div class="chap-list" id="chap-list"></div>
+</div>
+
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← chimie</button>
+    <span style="color:var(--ink3);font-size:12px;">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div>
+        <div class="qbadge" id="g-qbadge"></div>
+        <div class="qtext" id="g-q"></div>
+      </div>
+      <div class="choices" id="g-choices"></div>
+      <div class="open-wrap" id="g-open" style="display:none;">
+        <input class="open-input" id="g-input" placeholder="tape ta réponse..." onkeydown="if(event.key==='Enter')checkOpen()">
+        <button class="open-btn" onclick="checkOpen()">→</button>
+      </div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  PHILOSOPHIE : 4 à 6 questions par notion, du plus simple au
+//  plus complexe. Chaque question est un pas.
+//  Reconnaissance → Application → Calcul → Piège → Cas clinique
+// ════════════════════════════════════════════════════════════════
+
+const CHAPTERS = [
+
+// ══════════════════════════════════════════════════════
+// MODULE 1 — L'ATOME
+// ══════════════════════════════════════════════════════
+{
+  id:"m1", section:"module 1 · l'atome",
+  num:"1", name:"constituants de l'atome", level:"zéro",
+  takeaway:[
+    "L'atome = noyau (protons + neutrons) + électrons en orbite",
+    "Z = numéro atomique = nombre de protons = identité de l'élément",
+    "A = nombre de masse = protons + neutrons",
+    "N = A − Z = nombre de neutrons",
+    "Un atome neutre a autant d'électrons que de protons"
+  ],
+  questions:[
+    {c:"notion · constituants", type:"qcm",
+     code:`<span class="cm">// l'atome — première approche</span>
+Un atome est composé de trois types de particules :
+<span class="hl">protons</span>   → charge <span class="r">positive (+)</span>, dans le noyau
+<span class="hl">neutrons</span>  → charge <span class="cm">nulle (0)</span>,  dans le noyau
+<span class="hl">électrons</span> → charge <span class="b">négative (−)</span>, autour du noyau
+<span class="why">// le noyau concentre presque toute la masse
+// les électrons occupent un espace immense mais quasi-vide
+// si le noyau = bille de 1 cm → électrons à ~1 km</span>`,
+     q:"Quelle particule porte une charge positive ?",
+     ch:["L'électron","Le neutron","Le proton","Aucune — l'atome est neutre"],
+     ok:2, hint:"pro-ton → charge positive",
+     fb_ok:"// correct — les protons portent la charge +1. Les neutrons sont neutres.",
+     fb_no:"// le PROTON porte la charge +. L'électron porte −. Le neutron est neutre.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · numéro atomique Z", type:"qcm",
+     code:`<span class="cm">// Z = numéro atomique</span>
+<span class="hl">Z = nombre de protons</span>
+C'est ce qui définit l'élément chimique.
+Si Z change → c'est un autre élément.
+<span class="ex">Z=1 → hydrogène H
+Z=6 → carbone C
+Z=8 → oxygène O
+Z=26 → fer Fe</span>
+<span class="why">// même Z = même élément, quelle que soit la masse
+// c'est pourquoi l'or (Z=79) est toujours de l'or</span>`,
+     q:"L'azote (N) a Z=7. Combien de protons dans le noyau d'un atome d'azote ?",
+     ch:["14","7","6","8"],
+     ok:1, hint:"Z = nombre de protons, par définition",
+     fb_ok:"// correct — Z=7 → 7 protons. Simple comme ça.",
+     fb_no:"// Z = nombre de protons. Z=7 → 7 protons dans le noyau.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · nombre de masse A", type:"qcm",
+     code:`<span class="cm">// A = nombre de masse</span>
+<span class="hl">A = Z + N</span>
+Z = protons · N = neutrons
+→ <span class="hl">N = A − Z</span>
+<span class="ex">¹²C : A=12, Z=6 → N = 12−6 = 6 neutrons
+¹⁴N : A=14, Z=7 → N = 14−7 = 7 neutrons
+¹⁶O : A=16, Z=8 → N = 16−8 = 8 neutrons</span>`,
+     q:"Le phosphore ³¹P a Z=15. Combien de neutrons ?",
+     ch:["15","16","31","46"],
+     ok:1, hint:"N = A − Z = 31 − 15",
+     fb_ok:"// correct — N = 31 − 15 = 16 neutrons dans ³¹P.",
+     fb_no:"// N = A − Z = 31 − 15 = 16. Ne pas confondre A et N.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · atome neutre", type:"open",
+     code:`<span class="cm">// atome neutre</span>
+Un atome neutre a autant d'électrons que de protons.
+charge totale = <span class="hl">Z protons(+) + Z électrons(−) = 0</span>
+Si l'atome perd des électrons → ion positif (cation)
+Si l'atome gagne des électrons → ion négatif (anion)
+<span class="ex">Na (Z=11) neutre → 11 protons, 11 électrons
+Na⁺ → 11 protons, 10 électrons (a perdu 1 e⁻)</span>`,
+     q:"Le calcium Ca²⁺ a Z=20. Combien d'électrons possède l'ion Ca²⁺ ?",
+     keys:["18","dix-huit","18 electrons","18 électrons"],
+     hint:"Ca²⁺ a perdu 2 électrons par rapport à Ca neutre (20 e⁻)",
+     fb_ok:"// correct — Ca neutre : 20 e⁻. Ca²⁺ a perdu 2 e⁻ → 18 e⁻.",
+     fb_no:"// Ca neutre = 20 e⁻. Ca²⁺ = perd 2 e⁻ → 20−2 = 18 électrons.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · Z vs A", type:"qcm",
+     code:`<span class="cm">// erreur classique — Z vs A</span>
+Z = protons → <span class="hl">identité</span> de l'élément
+A = protons + neutrons → <span class="hl">masse</span> de l'atome
+<span class="ex">⁵⁶Fe : Z=26 (fer), A=56
+→ N = 56−26 = 30 neutrons
+→ 26 électrons (si neutre)</span>
+<span class="cm">// piège : A n'est pas le nombre de neutrons !</span>`,
+     q:"On dit qu'un atome a A=23 et Z=11. Quelle affirmation est FAUSSE ?",
+     ch:["Il a 11 protons","Il a 12 neutrons","Il a 23 neutrons","C'est du sodium (Na)"],
+     ok:2, hint:"N = A − Z = 23 − 11 = 12, pas 23",
+     fb_ok:"// correct — A=23 est la masse totale (protons+neutrons), pas le nombre de neutrons seul.",
+     fb_no:"// N = A − Z = 23 − 11 = 12. L'affirmation fausse est 'il a 23 neutrons'.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{
+  id:"m2", section:"module 1 · l'atome",
+  num:"2", name:"isotopes", level:"zéro",
+  takeaway:[
+    "Isotopes = même Z (même élément), N différent (masse différente)",
+    "Les isotopes ont des propriétés chimiques quasi-identiques",
+    "Certains isotopes sont radioactifs (noyau instable)",
+    "¹⁴C : datation archéologique (t½ = 5730 ans)",
+    "En médecine : ¹⁸F (PET scan), ⁹⁹ᵐTc (scintigraphie), ¹³¹I (thyroïde)"
+  ],
+  questions:[
+    {c:"notion · définition isotope", type:"qcm",
+     code:`<span class="cm">// isotopes — même élément, masses différentes</span>
+Isotopes d'un élément =
+  même <span class="hl">Z</span> (même nombre de protons)
+  différent <span class="hl">N</span> (nombre de neutrons différent)
+<span class="ex">Hydrogène : ¹H (Z=1, N=0) · ²H (Z=1, N=1) · ³H (Z=1, N=2)
+Carbone   : ¹²C (Z=6, N=6) · ¹³C (Z=6, N=7) · ¹⁴C (Z=6, N=8)</span>
+<span class="why">// même Z → même comportement chimique
+// N différent → masse différente → propriétés physiques légèrement différentes</span>`,
+     q:"Deux atomes ont Z=8 mais A différents (A=16 et A=18). Que sont-ils ?",
+     ch:["Deux éléments différents","Deux isotopes de l'oxygène","Un atome et son ion","Deux allotropes"],
+     ok:1, hint:"même Z = même élément. A différent = isotopes.",
+     fb_ok:"// correct — même Z=8 (oxygène) mais A différent → ¹⁶O et ¹⁸O sont deux isotopes.",
+     fb_no:"// même Z = même élément (O). A différent = masse différente = isotopes.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · neutrons dans un isotope", type:"open",
+     code:`<span class="cm">// calculer N pour un isotope donné</span>
+<span class="hl">N = A − Z</span>
+<span class="ex">¹⁸O : Z=8, A=18 → N = 18−8 = 10 neutrons
+¹³C : Z=6, A=13 → N = 13−6 = 7 neutrons</span>`,
+     q:"Le ²³⁵U (uranium) a Z=92. Combien de neutrons ?",
+     keys:["143","143 neutrons"],
+     hint:"N = A − Z = 235 − 92",
+     fb_ok:"// correct — ²³⁵U : N = 235 − 92 = 143 neutrons. Isotope fissile (réacteur nucléaire).",
+     fb_no:"// N = 235 − 92 = 143 neutrons dans ²³⁵U.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · propriétés chimiques", type:"qcm",
+     code:`<span class="cm">// isotopes et propriétés chimiques</span>
+Les isotopes ont des propriétés chimiques <span class="hl">quasi-identiques</span>
+(même Z → même configuration électronique → même chimie)
+Propriétés physiques légèrement différentes :
+  masse différente → densité, vitesse de diffusion légèrement ≠
+<span class="ex">H₂O normale vs D₂O (eau lourde, ²H)
+  même formule, même chimie de base
+  mais Tfusion D₂O = 3.8°C vs 0°C pour H₂O</span>`,
+     q:"¹²C et ¹³C sont deux isotopes du carbone. Forment-ils les mêmes types de liaisons chimiques ?",
+     ch:["Non — ¹³C forme plus de liaisons car plus lourd","Oui — même Z → même configuration électronique → même chimie","Non — ¹²C est plus réactif","Oui — mais seulement avec l'oxygène"],
+     ok:1, hint:"la chimie dépend des électrons, pas de la masse du noyau",
+     fb_ok:"// correct — même Z → même structure électronique → même chimie. C'est pourquoi les isotopes sont si utiles en traçage.",
+     fb_no:"// la chimie = électrons. Même Z = mêmes électrons = même chimie. La masse du noyau importe peu.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · ¹⁴C et datation", type:"qcm",
+     code:`<span class="cm">// ¹⁴C radioactif — datation archéologique</span>
+¹⁴C : Z=6, N=8 → noyau instable → désintégration spontanée
+<span class="hl">t½(¹⁴C) = 5730 ans</span>
+→ après 5730 ans : 50% de ¹⁴C initial reste
+→ après 11 460 ans : 25% reste
+Ratio ¹⁴C/¹²C d'un organisme vivant est constant.
+À sa mort : plus de renouvellement → ¹⁴C décroît.
+<span class="why">// mesurer le ratio ¹⁴C/¹²C actuel vs initial → âge de l'échantillon
+// utilisable jusqu'à ~50 000 ans (après, trop peu de ¹⁴C reste détectable)</span>`,
+     q:"Un os préhistorique contient 25% du ¹⁴C initial. Quel est son âge approximatif ?",
+     ch:["2865 ans","5730 ans","11 460 ans","22 920 ans"],
+     ok:2, hint:"25% = (1/2)² → 2 demi-vies se sont écoulées",
+     fb_ok:"// correct — 100%→50%→25% = 2 × t½ = 2 × 5730 = 11 460 ans.",
+     fb_no:"// 25% = (1/2)² → 2 demi-vies = 2 × 5730 = 11 460 ans.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application médicale · isotopes radioactifs", type:"qcm",
+     code:`<span class="cm">// isotopes en médecine nucléaire</span>
+<span class="hl">¹⁸F</span> (t½=110min)  → PET scan (cancer, neurologie)
+<span class="hl">⁹⁹ᵐTc</span> (t½=6h)    → scintigraphie (os, thyroïde, cœur)
+<span class="hl">¹³¹I</span> (t½=8j)     → traitement cancer thyroïde
+<span class="hl">⁶⁰Co</span> (t½=5.3ans) → radiothérapie gamma
+<span class="why">// t½ courte = moins d'irradiation pour le patient
+// mais doit être produit près de l'hôpital (¹⁸F : cyclotron sur site)
+// ¹³¹I : thyroïde concentre l'iode → irradiation ciblée des cellules tumorales</span>`,
+     q:"Pourquoi choisit-on des isotopes à demi-vie courte pour le diagnostic médical (PET scan, scintigraphie) ?",
+     ch:["Ils sont moins chers à produire","Ils émettent plus de radioactivité","Ils irradient le patient moins longtemps — l'activité diminue rapidement","Ils ont de meilleures propriétés chimiques"],
+     ok:2, hint:"t½ courte → désintégration rapide → dose reçue plus faible",
+     fb_ok:"// correct — t½ courte = moins d'irradiation pour le patient. ¹⁸F disparaît en quelques heures.",
+     fb_no:"// t½ courte = l'isotope disparaît vite → patient irradié moins longtemps = moins de risque.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{
+  id:"m3", section:"module 1 · l'atome",
+  num:"3", name:"configuration électronique", level:"débutant",
+  takeaway:[
+    "Les électrons occupent des sous-couches s, p, d, f d'énergie croissante",
+    "Ordre de remplissage : 1s, 2s, 2p, 3s, 3p, 4s, 3d... (règle de Aufbau)",
+    "Chaque sous-couche : s=2, p=6, d=10, f=14 électrons max",
+    "Les électrons de valence (dernière couche) déterminent la réactivité",
+    "Gaz nobles : couche de valence complète → totalement inertes"
+  ],
+  questions:[
+    {c:"notion · niveaux d'énergie", type:"qcm",
+     code:`<span class="cm">// sous-couches et capacités</span>
+n=1 : <span class="hl">1s</span>           → max 2 e⁻
+n=2 : <span class="hl">2s</span>, <span class="hl">2p</span>       → max 2 + 6 = 8 e⁻
+n=3 : <span class="hl">3s</span>, <span class="hl">3p</span>, <span class="hl">3d</span>  → max 2 + 6 + 10 = 18 e⁻
+<span class="kw">règle de Aufbau</span> : remplir du niveau le plus bas
+<span class="ex">H(Z=1)  : 1s¹
+He(Z=2) : 1s²
+Li(Z=3) : 1s² 2s¹
+Be(Z=4) : 1s² 2s²
+B(Z=5)  : 1s² 2s² 2p¹</span>`,
+     q:"Quelle est la capacité maximale d'une sous-couche p ?",
+     ch:["2 électrons","4 électrons","6 électrons","10 électrons"],
+     ok:2, hint:"s=2, p=6, d=10, f=14 — retiens ce schéma",
+     fb_ok:"// correct — une sous-couche p contient 3 orbitales × 2 e⁻ = 6 électrons max.",
+     fb_no:"// sous-couche p : 3 orbitales px, py, pz × 2 e⁻ chacune = 6 e⁻ max.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"calcul · config. de C et O", type:"open",
+     code:`<span class="cm">// configurations simples</span>
+<span class="ex">C (Z=6)  : 1s² 2s² 2p²    → 4 e⁻ de valence
+N (Z=7)  : 1s² 2s² 2p³    → 5 e⁻ de valence
+O (Z=8)  : 1s² 2s² 2p⁴    → 6 e⁻ de valence
+F (Z=9)  : 1s² 2s² 2p⁵    → 7 e⁻ de valence
+Ne (Z=10): 1s² 2s² 2p⁶    → 8 e⁻ de valence (plein)</span>
+<span class="why">// les électrons de valence = ceux de la couche n la plus élevée
+// ils participent aux liaisons chimiques</span>`,
+     q:"Combien d'électrons de valence possède l'oxygène (Z=8) ?",
+     keys:["6","six","6 electrons","6 électrons"],
+     hint:"config O : 1s² 2s² 2p⁴ → couche n=2 contient 2+4 électrons",
+     fb_ok:"// correct — O : 1s² 2s² 2p⁴ → 6 e⁻ de valence (n=2). Veut en capturer 2 → O²⁻.",
+     fb_no:"// O : 1s²|2s² 2p⁴. Couche de valence (n=2) : 2s²(2) + 2p⁴(4) = 6 e⁻ de valence.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · gaz nobles", type:"qcm",
+     code:`<span class="cm">// gaz nobles — couche pleine = inertie chimique</span>
+<span class="hl">He</span> (Z=2)  : 1s²              (2 e⁻ de valence)
+<span class="hl">Ne</span> (Z=10) : 1s² 2s² 2p⁶      (8 e⁻ de valence)
+<span class="hl">Ar</span> (Z=18) : [Ne] 3s² 3p⁶      (8 e⁻ de valence)
+<span class="hl">Kr</span> (Z=36) : [Ar] 3d¹⁰ 4s² 4p⁶  (8 e⁻ de valence)
+Couche pleine → aucun gain ni perte d'électrons favorables
+<span class="why">// règle de l'octet : les éléments tendent vers 8 e⁻ de valence
+// (ou 2 pour H et He)
+// c'est le moteur de toutes les liaisons chimiques</span>`,
+     q:"Pourquoi l'argon (Ar, Z=18) est-il chimiquement inerte ?",
+     ch:["Il est trop lourd pour réagir","Sa couche de valence est complète (8 e⁻) — aucun gain ni perte n'est favorable","Il est radioactif","Il n'a pas d'électrons de valence"],
+     ok:1, hint:"configuration Ar : [Ne] 3s² 3p⁶ → couche n=3 complète",
+     fb_ok:"// correct — Ar : couche de valence pleine (3s² 3p⁶ = 8 e⁻) → aucune raison de réagir.",
+     fb_no:"// couche de valence pleine (8 e⁻) = configuration la plus stable → pas de tendance à réagir.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · électrons de valence et groupe", type:"qcm",
+     code:`<span class="cm">// groupe du tableau périodique = e⁻ de valence</span>
+<span class="kw">groupe 1</span>  (Li, Na, K...)  : 1 e⁻ de valence → donneurs
+<span class="kw">groupe 2</span>  (Be, Mg, Ca...) : 2 e⁻ de valence
+<span class="kw">groupe 16</span> (O, S, Se...)   : 6 e⁻ de valence → veulent en capturer 2
+<span class="kw">groupe 17</span> (F, Cl, Br...)  : 7 e⁻ de valence → veulent en capturer 1
+<span class="kw">groupe 18</span> (He, Ne, Ar...) : couche pleine   → inertes
+<span class="why">// tableau périodique = carte des configurations électroniques
+// même groupe = même nombre d'e⁻ de valence = propriétés similaires</span>`,
+     q:"Le chlore Cl est dans le groupe 17. Quelle est sa tendance naturelle ?",
+     ch:["Perdre 7 électrons → Cl⁷⁺","Gagner 1 électron → Cl⁻ (couche pleine à 8)","Former 7 liaisons covalentes","Rester inerte comme les gaz nobles"],
+     ok:1, hint:"groupe 17 = 7 e⁻ de valence. Il manque combien pour atteindre 8 ?",
+     fb_ok:"// correct — Cl (7 e⁻ de valence) + 1 e⁻ = 8 e⁻ → Cl⁻. Règle de l'octet satisfaite.",
+     fb_no:"// 7 e⁻ de valence → il manque 1 pour atteindre 8 → Cl capte 1 e⁻ → Cl⁻.",
+     mv:{dx:1,dy:0}},
+
+    {c:"piège · ordre de remplissage 4s avant 3d", type:"qcm",
+     code:`<span class="cm">// ordre de remplissage — attention !</span>
+Ordre : 1s 2s 2p 3s 3p <span class="hl">4s</span> <span class="hl">3d</span> 4p 5s 4d...
+→ 4s se remplit AVANT 3d (énergie légèrement plus basse)
+<span class="ex">Ca (Z=20) : [Ar] 4s²        (pas [Ar] 3d²)
+Ti (Z=22) : [Ar] 4s² 3d²    (4s rempli d'abord)
+Fe (Z=26) : [Ar] 4s² 3d⁶</span>
+<span class="cm">// exception : Cu, Cr préfèrent 1 seul e⁻ en 4s (stabilité 3d plein)</span>`,
+     q:"Quelle est la configuration du calcium Ca (Z=20) ?",
+     ch:["[Ar] 3d²","[Ar] 4s²","[Ar] 3d¹ 4s¹","[Ar] 4p²"],
+     ok:1, hint:"après Ar (Z=18), les 2 électrons suivants vont en 4s (pas en 3d)",
+     fb_ok:"// correct — Ca : [Ar] 4s². Le 4s se remplit avant le 3d.",
+     fb_no:"// l'énergie du 4s est légèrement inférieure à 3d → Ca : [Ar] 4s², pas [Ar] 3d².",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ══════════════════════════════════════════════════════
+// MODULE 2 — LIAISONS CHIMIQUES
+// ══════════════════════════════════════════════════════
+{
+  id:"m4", section:"module 2 · liaisons chimiques",
+  num:"4", name:"électronégativité et polarité", level:"débutant",
+  takeaway:[
+    "Électronégativité χ = tendance à attirer les électrons d'une liaison",
+    "Échelle de Pauling : F(4.0) > O(3.5) > N(3.0) > Cl(3.0) > C(2.5) > H(2.1)",
+    "Δχ < 0.4 → covalente apolaire ; 0.4–1.7 → polaire ; > 1.7 → ionique",
+    "Une liaison polaire crée un dipôle : δ+ vers le moins électronégatif",
+    "La polarité moléculaire dépend de la géométrie (symétrie peut annuler les dipôles)"
+  ],
+  questions:[
+    {c:"notion · définition électronégativité", type:"qcm",
+     code:`<span class="cm">// électronégativité χ — échelle de Pauling</span>
+= tendance d'un atome à <span class="hl">attirer les électrons</span> d'une liaison
+<span class="hl">F(4.0) > O(3.5) > N(3.0) ≈ Cl(3.0) > C(2.5) > H(2.1) > Na(0.9)</span>
+Augmente : → dans une période (gauche vers droite)
+Diminue  : ↓ dans un groupe (haut vers bas)
+<span class="why">// plus un atome est petit et a un noyau chargé → plus il attire les e⁻
+// F est le plus électronégatif de tous les éléments
+// Na est très peu électronégatif → donne facilement ses e⁻</span>`,
+     q:"Dans la liaison C−F, quel atome attire davantage les électrons ?",
+     ch:["C — car il est plus grand","F — car χ(F)=4.0 >> χ(C)=2.5","Ils attirent également","Aucun — la liaison est ionique"],
+     ok:1, hint:"comparer les χ : F=4.0, C=2.5",
+     fb_ok:"// correct — F (χ=4.0) attire beaucoup plus que C (χ=2.5). La liaison C−F est très polaire.",
+     fb_no:"// χ(F)=4.0 >> χ(C)=2.5 → F attire les électrons → F est δ−, C est δ+.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · Δχ et type de liaison", type:"open",
+     code:`<span class="cm">// Δχ détermine le type de liaison</span>
+<span class="hl">Δχ = |χ(A) − χ(B)|</span>
+Δχ < 0.4  → <span class="kw">covalente apolaire</span>  (C−H : Δχ=0.4)
+0.4 < Δχ < 1.7 → <span class="kw">covalente polaire</span> (O−H : Δχ=1.4)
+Δχ > 1.7  → <span class="kw">ionique</span>             (Na−Cl : Δχ=2.1)
+<span class="ex">H−F : |4.0 − 2.1| = 1.9 → ionique partiel (très polaire)</span>`,
+     q:"Calcule Δχ pour la liaison N−H. χ(N)=3.0, χ(H)=2.1. Quel type de liaison ?",
+     keys:["0.9","covalente polaire","polaire","0,9"],
+     hint:"|3.0 − 2.1| = ?",
+     fb_ok:"// correct — Δχ = 0.9 → covalente polaire. N est δ−, H est δ+. Crucial dans NH₃ et protéines.",
+     fb_no:"// |3.0 − 2.1| = 0.9. 0.4 < 0.9 < 1.7 → covalente polaire. N est δ−.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · dipôle de liaison", type:"qcm",
+     code:`<span class="cm">// dipôle de liaison</span>
+Une liaison polaire crée un <span class="hl">dipôle électrique</span>
+Le pôle δ− est du côté de l'atome le plus électronégatif
+Le pôle δ+ est du côté du moins électronégatif
+<span class="ex">H−O−H : O est δ−, les 2 H sont δ+
+H−N−... : N est δ−, H est δ+</span>
+<span class="why">// les dipôles de liaison sont vectoriels
+// si la molécule est symétrique → les dipôles s'annulent → apolaire
+// c'est le cas de CO₂ (linéaire) et CCl₄ (tétraédrique)</span>`,
+     q:"Dans HCl, χ(H)=2.1 et χ(Cl)=3.0. Quel atome porte la charge δ− ?",
+     ch:["H — il est plus petit","Cl — il est plus électronégatif","Les deux également","Aucun — HCl est apolaire"],
+     ok:1, hint:"δ− = côté du plus électronégatif",
+     fb_ok:"// correct — Cl (χ=3.0) > H (χ=2.1) → Cl est δ−, H est δ+. HCl est une liaison très polaire.",
+     fb_no:"// l'atome le plus électronégatif attire les e⁻ → porte δ−. Cl (3.0) > H (2.1) → Cl est δ−.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · polarité moléculaire vs liaison", type:"qcm",
+     code:`<span class="cm">// polarité moléculaire ≠ polarité des liaisons</span>
+Une molécule est polaire si :
+  1. liaisons polaires ET
+  2. géométrie <span class="hl">asymétrique</span> (dipôles ne s'annulent pas)
+<span class="ex">CO₂ : O=C=O, liaisons polaires MAIS linéaire et symétrique
+→ les dipôles s'annulent → <span class="hl">molécule APOLAIRE</span>
+H₂O : O−H polaires + géométrie coudée (104.5°)
+→ dipôles ne s'annulent pas → <span class="hl">molécule POLAIRE</span></span>`,
+     q:"BF₃ (bore + 3 fluors) a une géométrie plane et trigonale (120°, parfaitement symétrique). La molécule est-elle polaire ?",
+     ch:["Oui — les liaisons B−F sont très polaires (Δχ élevé)","Non — la symétrie parfaite annule les dipôles de liaison","Oui — le bore est au centre","Non — le bore n'est pas électronégatif"],
+     ok:1, hint:"symétrie plane trigonale parfaite → chaque dipôle B−F est compensé par les deux autres",
+     fb_ok:"// correct — BF₃ apolaire malgré liaisons B−F polaires. Même logique que CO₂.",
+     fb_no:"// liaisons polaires + symétrie parfaite → dipôles s'annulent → molécule apolaire.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · eau vs CO₂", type:"qcm",
+     code:`<span class="cm">// le piège classique : eau polaire, CO₂ apolaire</span>
+<span class="hl">H₂O</span> : 2 liaisons O−H polaires + <span class="r">géométrie coudée</span>
+→ µ ≠ 0 → polaire → miscible avec alcool, dissout NaCl
+<span class="hl">CO₂</span>  : 2 liaisons C=O polaires + <span class="b">géométrie linéaire</span>
+→ µ = 0 → apolaire → dissout dans huile, peu soluble dans eau
+<span class="why">// la géométrie coudée de H₂O vient des 2 paires libres sur O
+// qui repoussent les liaisons O−H
+// sans cette géométrie, la vie telle qu'on la connaît n'existerait pas</span>`,
+     q:"SO₂ (soufre + 2 oxygènes) a une géométrie coudée (comme H₂O, car S a une paire libre). SO₂ est-il polaire ?",
+     ch:["Non — symétrie entre les 2 O","Oui — géométrie coudée → dipôles ne s'annulent pas","Non — les liaisons S=O sont apolaires","Oui — mais moins que H₂O"],
+     ok:1, hint:"même raisonnement que H₂O : géométrie coudée → asymétrie → polaire",
+     fb_ok:"// correct — SO₂ coudé → dipôles S=O ne s'annulent pas → molécule polaire. Même logique que H₂O.",
+     fb_no:"// géométrie coudée = asymétrie = dipôles non compensés = molécule polaire. SO₂ est polaire.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{
+  id:"m5", section:"module 2 · liaisons chimiques",
+  num:"5", name:"liaison ionique et covalente", level:"débutant",
+  takeaway:[
+    "Liaison ionique : transfert d'électrons, métal + non-métal, réseau cristallin",
+    "Liaison covalente : partage d'électrons, non-métaux entre eux",
+    "L'énergie réticulaire mesure la stabilité d'un cristal ionique",
+    "MgO >> NaCl en énergie réticulaire car charges doubles et ions plus petits",
+    "Propriétés ioniques : point de fusion élevé, conducteur si dissous ou fondu"
+  ],
+  questions:[
+    {c:"notion · liaison ionique", type:"qcm",
+     code:`<span class="cm">// liaison ionique — transfert d'électrons</span>
+métal (faible χ) → <span class="hl">donne</span> des e⁻ → cation (charge +)
+non-métal (fort χ) → <span class="hl">reçoit</span> des e⁻ → anion (charge −)
+→ attraction électrostatique entre ions de signes opposés
+<span class="ex">Na (Z=11, 1 e⁻ de valence) → Na⁺ + e⁻
+Cl (Z=17, 7 e⁻ de valence) + e⁻ → Cl⁻
+Na⁺ + Cl⁻ → NaCl (réseau cristallin)</span>
+<span class="why">// Na atteint la config de Ne (8 e⁻ valence)
+// Cl atteint la config de Ar (8 e⁻ valence)
+// règle de l'octet satisfaite pour les deux</span>`,
+     q:"Dans CaO, le calcium (Z=20, groupe 2) perd 2 électrons. Quelle est la charge de l'ion calcium ?",
+     ch:["Ca⁺","Ca²⁺","Ca²⁻","Ca⁰"],
+     ok:1, hint:"groupe 2 = 2 e⁻ de valence → perd 2 e⁻ → charge 2+",
+     fb_ok:"// correct — Ca²⁺. Le calcium perd ses 2 e⁻ de valence pour atteindre la config d'Ar.",
+     fb_no:"// Ca : groupe 2 → perd 2 e⁻ → Ca²⁺. O : groupe 16 → gagne 2 e⁻ → O²⁻.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · liaison covalente", type:"qcm",
+     code:`<span class="cm">// liaison covalente — partage d'électrons</span>
+deux non-métaux (χ proches) → <span class="hl">partagent</span> des électrons
+chaque liaison simple = 1 paire d'e⁻ partagée (doublet liant)
+<span class="ex">H−H  : H partage 1 e⁻ avec H → doublet liant
+H−Cl : H (1 e⁻) + Cl (1 e⁻) → doublet partagé
+O=O  : 2 doublets liants (double liaison)
+N≡N  : 3 doublets liants (triple liaison)</span>
+<span class="why">// plus il y a de doublets liants → plus la liaison est forte et courte
+// N≡N : très forte (945 kJ/mol) → N₂ très stable → peu réactif</span>`,
+     q:"Dans H₂O, l'oxygène forme 2 liaisons O−H. Combien de paires d'électrons partagées y a-t-il au total ?",
+     ch:["1","2","4","6"],
+     ok:1, hint:"chaque liaison O−H = 1 paire partagée. Il y a 2 liaisons O−H.",
+     fb_ok:"// correct — 2 liaisons O−H = 2 paires d'électrons partagées. Plus 2 paires libres sur O.",
+     fb_no:"// 2 liaisons O−H × 1 paire chacune = 2 paires partagées au total.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · prévoir le type de liaison", type:"qcm",
+     code:`<span class="cm">// prévoir le type de liaison</span>
+<span class="hl">métal + non-métal</span>     → ionique (ex: NaCl, CaO, MgBr₂)
+<span class="hl">non-métal + non-métal</span>  → covalente (ex: H₂O, CO₂, NH₃)
+<span class="hl">métal + métal</span>          → métallique
+<span class="cm">// exceptions : NH₄⁺ est ionique mais contient H−N covalent</span>`,
+     q:"K₂O (potassium + oxygène). Quel type de liaison entre K et O ?",
+     ch:["Covalente — l'oxygène est électronégatif","Ionique — K est un métal (groupe 1) et O est un non-métal","Métallique","Covalente polaire"],
+     ok:1, hint:"K = métal (groupe 1), O = non-métal (groupe 16) → ?",
+     fb_ok:"// correct — K (métal) + O (non-métal) → liaison ionique. K→K⁺, O→O²⁻.",
+     fb_no:"// métal (K) + non-métal (O) → liaison ionique. K perd 1 e⁻ → K⁺, O gagne 2 → O²⁻.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · énergie réticulaire", type:"qcm",
+     code:`<span class="cm">// énergie réticulaire — stabilité du cristal ionique</span>
+<span class="hl">E_ret ∝ q₊ × q₋ / r</span>
+q = charges des ions · r = distance entre ions
+↑ charges → énergie ↑ → cristal plus stable → Tfusion plus haute
+↓ taille des ions (r plus petit) → énergie ↑
+<span class="ex">NaCl  : Na⁺(1+) Cl⁻(1−), Tfusion=801°C
+MgO   : Mg²⁺(2+) O²⁻(2−), Tfusion=2852°C</span>
+<span class="why">// MgO : charges doubles → énergie ×4 vs NaCl (à taille comparable)
+// utilisé comme réfractaire industriel (fours, creusets) grâce à sa stabilité</span>`,
+     q:"CaO (Tfusion 2613°C) vs NaF (Tfusion 993°C). Pourquoi CaO a-t-il un point de fusion bien plus élevé ?",
+     ch:["CaO est plus lourd","Ca²⁺ et O²⁻ ont des charges 2× plus élevées que Na⁺ et F⁻ → énergie réticulaire bien plus grande","CaO est un métal","NaF contient du fluor, plus réactif"],
+     ok:1, hint:"charges de Ca²⁺/O²⁻ vs Na⁺/F⁻ — comparer",
+     fb_ok:"// correct — CaO : (2+)(2−) vs NaF : (1+)(1−). Énergie ∝ q₊×q₋ → CaO ≈ 4× plus stable.",
+     fb_no:"// E_ret ∝ q×q. CaO : 2×2=4. NaF : 1×1=1. Rapport ~4 explique le point de fusion bien plus élevé.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · propriétés ioniques vs covalentes", type:"qcm",
+     code:`<span class="cm">// propriétés macroscopiques — ionique vs covalente</span>
+<span class="kw">ionique</span>    : Tfusion élevée · dur et cassant · conducteur si dissous/fondu
+<span class="kw">covalente</span>  : Tfusion variable · peut être gaz ou liquide à T ambiante
+<span class="ex">NaCl : solide dur, Tfusion 801°C, conducteur dans l'eau
+HCl  : gaz à T ambiante, très soluble dans eau → acide fort</span>
+<span class="why">// NaCl dans l'eau → Na⁺ et Cl⁻ libres → conduisent l'électricité
+// NaCl solide → ions fixes → ne conduit PAS l'électricité</span>`,
+     q:"NaCl solide ne conduit pas l'électricité, mais NaCl dissous dans l'eau le fait. Pourquoi ?",
+     ch:["L'eau apporte des électrons","Dissous, les ions Na⁺ et Cl⁻ sont libres de se déplacer","Le solide est trop dur pour laisser passer le courant","L'eau est un conducteur"],
+     ok:1, hint:"la conduction électrique nécessite des charges mobiles",
+     fb_ok:"// correct — en solution, Na⁺ et Cl⁻ sont libres de migrer vers les électrodes → conduction ionique.",
+     fb_no:"// conducteur = charges mobiles. Solide : ions fixes dans le réseau. Dissous : ions libres → conduction.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{
+  id:"m6", section:"module 2 · liaisons chimiques",
+  num:"6", name:"géométrie moléculaire — VSEPR", level:"intermédiaire",
+  takeaway:[
+    "VSEPR : les groupes d'électrons se repoussent → géométrie qui maximise les distances",
+    "2 groupes → linéaire (180°) ; 3 → plan trigonal (120°) ; 4 → tétraédrique (109.5°)",
+    "Les paires libres compriment les angles (paire libre > liante en répulsion)",
+    "NH₃ : pyramidal (107°) ; H₂O : coudé (104.5°) car paires libres",
+    "La géométrie de H₂O (coudée, polaire) est à la base de la chimie du vivant"
+  ],
+  questions:[
+    {c:"notion · principe VSEPR", type:"qcm",
+     code:`<span class="cm">// VSEPR — Valence Shell Electron Pair Repulsion</span>
+Les paires d'électrons autour d'un atome central
+se repoussent → se placent <span class="hl">le plus loin possible</span>
+<span class="kw">compter</span> : paires liantes + paires libres = groupes
+2 groupes → <span class="hl">linéaire</span>      180°
+3 groupes → <span class="hl">plan trigonal</span> 120°
+4 groupes → <span class="hl">tétraédrique</span>  109.5°
+<span class="why">// la géométrie moléculaire détermine :
+// la polarité de la molécule
+// les interactions avec d'autres molécules
+// la fonction biologique (récepteurs = forme précise)</span>`,
+     q:"BeCl₂ (béryllium + 2 chlores). Be a 2 liaisons et aucune paire libre. Quelle géométrie ?",
+     ch:["Plan trigonal","Linéaire","Tétraédrique","Coudée"],
+     ok:1, hint:"2 groupes (2 liaisons, 0 paire libre) → ?",
+     fb_ok:"// correct — 2 groupes → linéaire (180°). Be est une exception à la règle de l'octet (4 e⁻ seulement).",
+     fb_no:"// 2 groupes (2 liaisons, 0 libre) → linéaire, angle 180°. C'est aussi la géométrie de CO₂.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · compter les groupes", type:"qcm",
+     code:`<span class="cm">// méthode pour trouver la géométrie</span>
+1. Écrire la structure de Lewis
+2. Compter autour de l'atome central :
+   → paires liantes (chaque liaison simple ou double = 1 groupe)
+   → paires libres
+3. Appliquer VSEPR
+<span class="ex">CH₄ : C fait 4 liaisons, 0 paire libre → 4 groupes → tétraédrique
+NH₃ : N fait 3 liaisons, 1 paire libre → 4 groupes → tétraédrique de base
+H₂O : O fait 2 liaisons, 2 paires libres → 4 groupes → tétraédrique de base</span>`,
+     q:"NH₃ a 3 liaisons N−H et 1 paire libre sur N. Combien de groupes autour de N ?",
+     ch:["3","4","5","2"],
+     ok:1, hint:"groupes = liaisons + paires libres = 3 + 1",
+     fb_ok:"// correct — 4 groupes (3 liants + 1 libre). Géométrie de base tétraédrique.",
+     fb_no:"// groupes = liaisons (3) + paires libres (1) = 4. Base tétraédrique.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · angles et paires libres", type:"qcm",
+     code:`<span class="cm">// paires libres compriment les angles</span>
+paire libre occupe plus d'espace qu'une paire liante
+→ comprime les angles H−X−H
+<span class="hl">CH₄</span>  : 0 paire libre → angle 109.5° (tétraédrique)
+<span class="hl">NH₃</span>  : 1 paire libre → angle 107° (pyramidal, un peu comprimé)
+<span class="hl">H₂O</span>  : 2 paires libres → angle 104.5° (coudé, très comprimé)
+<span class="why">// la géométrie coudée de H₂O rend la molécule polaire
+// → propriétés extraordinaires de l'eau (solvant universel, cohésion)
+// sans ce détail géométrique, pas de vie possible sur Terre</span>`,
+     q:"L'eau H₂O a un angle H−O−H de 104.5°. Si O n'avait pas de paires libres (hypothétique), l'angle serait ?",
+     ch:["Plus petit — les H se repousseraient","Plus grand — sans compression par les paires libres → retour vers 109.5°","Identique","180°"],
+     ok:1, hint:"les paires libres compriment les angles. Sans elles → angle tétraédrique normal",
+     fb_ok:"// correct — sans paires libres, l'angle serait 109.5° (tétraédrique normal, comme dans CH₄).",
+     fb_no:"// les paires libres compriment l'angle. Sans elles → 109.5°. Avec 2 paires libres → 104.5°.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · géométrie de CO₂ et H₂O", type:"qcm",
+     code:`<span class="cm">// résumé des géométries clés</span>
+<span class="hl">CO₂</span>  : O=C=O, 2 groupes (2 doubles liaisons), 0 libre
+     → linéaire (180°) → symétrique → <span class="r">apolaire</span>
+<span class="hl">H₂O</span>  : 4 groupes (2 liants + 2 libres)
+     → tétraédrique déformé → coudé → <span class="b">polaire</span>
+<span class="hl">NH₃</span>  : 4 groupes (3 liants + 1 libre)
+     → tétraédrique déformé → pyramidal → <span class="b">polaire</span>
+<span class="hl">CH₄</span>  : 4 groupes (4 liants, 0 libre)
+     → tétraédrique parfait → symétrique → <span class="r">apolaire</span>`,
+     q:"SF₂ (soufre + 2 fluors) a la même structure que H₂O (2 liaisons + 2 paires libres sur S). Quelle géométrie ?",
+     ch:["Linéaire","Plan trigonal","Coudée","Tétraédrique"],
+     ok:2, hint:"même structure que H₂O → même géométrie",
+     fb_ok:"// correct — SF₂ est coudé (comme H₂O) et polaire. La paire libre sur S joue le même rôle.",
+     fb_no:"// SF₂ = structure identique à H₂O (2 liaisons + 2 paires libres) → coudé → polaire.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · double liaison = 1 groupe", type:"qcm",
+     code:`<span class="cm">// double liaison = 1 seul groupe VSEPR</span>
+Une double liaison ou triple liaison
+= 1 groupe (pas 2 ou 3 !)
+<span class="ex">CO₂ : O=C=O
+  C a 2 double liaisons → 2 groupes → linéaire (pas tétraédrique)
+C₂H₄ (éthylène) : chaque C a 1 double C=C + 2 simple C−H
+  → 3 groupes → plan trigonal (120°)</span>`,
+     q:"Dans SO₃ (soufre + 3 oxygènes, toutes doubles liaisons S=O, aucune paire libre sur S). Géométrie ?",
+     ch:["Tétraédrique — 3 liaisons + 1 paire libre","Plan trigonal — 3 groupes (3 doubles liaisons), aucune paire libre","Pyramidale","Linéaire"],
+     ok:1, hint:"3 doubles liaisons = 3 groupes, 0 paire libre → ?",
+     fb_ok:"// correct — SO₃ : 3 groupes, 0 libre → plan trigonal (120°). Molécule apolaire.",
+     fb_no:"// 3 doubles liaisons S=O = 3 groupes. 0 paire libre. 3 groupes → plan trigonal (120°).",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ══════════════════════════════════════════════════════
+// MODULE 3 — THERMOCHIMIE
+// ══════════════════════════════════════════════════════
+{
+  id:"m7", section:"module 3 · thermochimie",
+  num:"7", name:"enthalpie et loi de Hess", level:"intermédiaire",
+  takeaway:[
+    "ΔH = chaleur échangée à pression constante (ΔH < 0 = exothermique)",
+    "ΔH est une fonction d'état — ne dépend pas du chemin réactionnel",
+    "Loi de Hess : additivité des enthalpies de réaction",
+    "ΔH°rxn = Σ ΔH°f(produits) − Σ ΔH°f(réactifs)",
+    "ΔH°f des éléments à l'état standard = 0 par convention"
+  ],
+  questions:[
+    {c:"notion · exo vs endothermique", type:"qcm",
+     code:`<span class="cm">// enthalpie ΔH — chaleur à P constante</span>
+<span class="hl">ΔH = H(produits) − H(réactifs)</span>
+<span class="hl">ΔH < 0</span> : exothermique → chaleur <span class="r">libérée</span> vers le milieu
+<span class="hl">ΔH > 0</span> : endothermique → chaleur <span class="b">absorbée</span> depuis le milieu
+<span class="ex">combustion méthane : ΔH = −890 kJ/mol  (exothermique)
+dissolution NH₄Cl  : ΔH = +14.8 kJ/mol (endothermique)</span>
+<span class="why">// la dissolution de NH₄Cl refroidit la solution
+// base des packs réfrigérants de premiers secours</span>`,
+     q:"La réaction A → B a ΔH = −120 kJ/mol. Les produits ont-ils plus ou moins d'énergie que les réactifs ?",
+     ch:["Plus — car la réaction est exothermique","Moins — l'énergie a été libérée vers le milieu","Identique — l'énergie est conservée","Cela dépend de la température"],
+     ok:1, hint:"ΔH = H(produits) − H(réactifs) = −120 → H(produits) < H(réactifs)",
+     fb_ok:"// correct — ΔH < 0 → H(produits) < H(réactifs). L'excès d'énergie est libéré (chaleur).",
+     fb_no:"// ΔH = H(prod) − H(réact) = −120 → H(prod) = H(réact) − 120 → produits moins énergétiques.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · ΔH proportionnel à n", type:"open",
+     code:`<span class="cm">// ΔH est extensif — proportionnel à n</span>
+Si CH₄ + 2O₂ → CO₂ + 2H₂O  ΔH = −890 kJ/mol
+Alors 3 mol de CH₄ brûlées → ΔH = <span class="hl">3 × (−890) = −2670 kJ</span>
+Inverse de la réaction → ΔH change de signe :
+CO₂ + 2H₂O → CH₄ + 2O₂  ΔH = <span class="hl">+890 kJ/mol</span>
+<span class="why">// ΔH extensif → crucial pour les calculs calorimétrique
+// ΔH changer de signe → fondement de la loi de Hess</span>`,
+     q:"La combustion du propane : C₃H₈ + 5O₂ → 3CO₂ + 4H₂O, ΔH = −2220 kJ/mol. Si on brûle 0.5 mol de propane, quelle est la chaleur dégagée (valeur absolue, en kJ) ?",
+     keys:["1110","1110 kj","1110kj","1 110"],
+     hint:"ΔH ∝ n → 0.5 × 2220",
+     fb_ok:"// correct — 0.5 × 2220 = 1110 kJ dégagés.",
+     fb_no:"// 0.5 mol × 2220 kJ/mol = 1110 kJ dégagés.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · loi de Hess", type:"qcm",
+     code:`<span class="cm">// loi de Hess — additivité des ΔH</span>
+ΔH est une <span class="hl">fonction d'état</span> :
+ne dépend que des états initial et final, pas du chemin
+→ on peut additionner des réactions
+<span class="ex">Voie directe A → C  : ΔH_total
+Voie indirecte via B :
+  A → B  ΔH₁
+  B → C  ΔH₂
+  → ΔH_total = ΔH₁ + ΔH₂</span>
+<span class="why">// permet de calculer ΔH de réactions impossibles à mesurer directement
+// ex: formation du diamant à partir du graphite</span>`,
+     q:"A→B ΔH₁ = −100 kJ. B→C ΔH₂ = +40 kJ. Quel est ΔH pour A→C ?",
+     ch:["−140 kJ","−60 kJ","+60 kJ","+140 kJ"],
+     ok:1, hint:"additionner les deux réactions : ΔH = ΔH₁ + ΔH₂",
+     fb_ok:"// correct — ΔH(A→C) = −100 + 40 = −60 kJ. Loi de Hess.",
+     fb_no:"// Hess : ΔH(A→C) = ΔH₁ + ΔH₂ = −100 + (+40) = −60 kJ.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · enthalpies de formation", type:"qcm",
+     code:`<span class="cm">// calcul par enthalpies de formation ΔH°f</span>
+<span class="hl">ΔH°rxn = Σ ΔH°f(produits) − Σ ΔH°f(réactifs)</span>
+ΔH°f(élément pur, état standard) = <span class="hl">0</span> par convention
+<span class="ex">Données :
+  ΔH°f(CO₂(g))  = −394 kJ/mol
+  ΔH°f(H₂O(l))  = −286 kJ/mol
+  ΔH°f(CH₄(g))  = −75  kJ/mol
+  ΔH°f(O₂(g))   =   0  kJ/mol</span>`,
+     q:"CH₄ + 2O₂ → CO₂ + 2H₂O. En utilisant les données ci-dessus, ΔH°rxn = ?",
+     ch:["−605 kJ/mol","−891 kJ/mol","−966 kJ/mol","+75 kJ/mol"],
+     ok:1, hint:"ΔH = [ΔH°f(CO₂) + 2×ΔH°f(H₂O)] − [ΔH°f(CH₄) + 2×ΔH°f(O₂)]",
+     fb_ok:"// correct — [−394 + 2(−286)] − [−75 + 0] = −966 − (−75) = −891 kJ/mol.",
+     fb_no:"// [−394 + 2×(−286)] − [−75 + 0] = [−394−572] + 75 = −966 + 75 = −891 kJ/mol.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · inverser une réaction", type:"qcm",
+     code:`<span class="cm">// inverser une réaction → changer le signe de ΔH</span>
+A + B → C + D  ΔH = −200 kJ
+C + D → A + B  ΔH = <span class="hl">+200 kJ</span>  (signe inversé !)
+<span class="cm">// piège classique : multiplier par ½</span>
+½ A + ½ B → ½ C + ½ D  ΔH = <span class="hl">−100 kJ</span>  (divisé par 2)`,
+     q:"La formation de HCl : ½H₂ + ½Cl₂ → HCl ΔH = −92 kJ/mol. Quel est ΔH pour H₂ + Cl₂ → 2HCl ?",
+     ch:["−92 kJ","−184 kJ","+92 kJ","−46 kJ"],
+     ok:1, hint:"on a multiplié la réaction par 2 → ΔH est aussi multiplié par 2",
+     fb_ok:"// correct — ×2 la réaction → ΔH ×2 = −184 kJ. Simple mais pièges fréquents aux examens.",
+     fb_no:"// coefficients ×2 → ΔH ×2 : 2 × (−92) = −184 kJ.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{
+  id:"m8", section:"module 3 · thermochimie",
+  num:"8", name:"entropie, énergie libre et spontanéité", level:"avancé",
+  takeaway:[
+    "Entropie S = mesure du désordre et du nombre d'états accessibles",
+    "2ème loi : l'entropie de l'univers ne peut qu'augmenter",
+    "ΔG = ΔH − TΔS détermine la spontanéité (ΔG < 0 → spontané)",
+    "Spontané ≠ rapide : la cinétique est indépendante de la thermodynamique",
+    "ΔG° = −RT ln K : lien entre thermodynamique et équilibre chimique"
+  ],
+  questions:[
+    {c:"notion · entropie S", type:"qcm",
+     code:`<span class="cm">// entropie — mesure du désordre</span>
+S = k_B × ln(Ω)   (Ω = nombre d'états accessibles)
+<span class="hl">ΔS > 0</span> : désordre augmente → gaz libéré, dissolution, chauffage
+<span class="hl">ΔS < 0</span> : désordre diminue → cristallisation, contraction
+<span class="ex">fusion glace    : ΔS > 0  (solide → liquide)
+dissolution sel : ΔS > 0  (réseau ordonné → ions dispersés)
+formation givre : ΔS < 0  (vapeur → solide ordonné)</span>
+<span class="why">// 2ème loi : ΔS(univers) ≥ 0 pour tout processus spontané
+// explique pourquoi le verre cassé ne se reconstitue pas
+// et pourquoi la chaleur va toujours du chaud vers le froid</span>`,
+     q:"CaCO₃(s) → CaO(s) + CO₂(g). Quel est le signe de ΔS ?",
+     ch:["ΔS < 0 — on produit un solide","ΔS > 0 — on libère un gaz (beaucoup plus d'états accessibles)","ΔS = 0 — les masses se conservent","Impossible à prévoir sans données"],
+     ok:1, hint:"un gaz a infiniment plus d'états accessibles qu'un solide",
+     fb_ok:"// correct — libération d'un gaz → ΔS >> 0. CO₂(g) a ~10²³ fois plus d'états accessibles qu'un solide.",
+     fb_no:"// gaz libéré = explosion de désordre → ΔS > 0. Passage solide → gaz = gain d'entropie énorme.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · énergie libre de Gibbs", type:"qcm",
+     code:`<span class="cm">// critère de spontanéité — Gibbs (1873)</span>
+<span class="hl">ΔG = ΔH − T·ΔS</span>   (à P et T constantes)
+<span class="hl">ΔG < 0</span> → spontané  → réaction peut se produire seule
+<span class="hl">ΔG > 0</span> → non spontané → nécessite apport d'énergie
+<span class="hl">ΔG = 0</span> → équilibre thermodynamique
+<span class="why">// "spontané" ≠ "instantané" — diamant → graphite : ΔG < 0 mais ∞ lent
+// l'ATP (ΔG_hydrolyse = −30 kJ/mol) est spontané → moteur du métabolisme
+// couplage thermodynamique : réaction non-spontanée + ATP → spontanée</span>`,
+     q:"Réaction avec ΔH = −50 kJ/mol et ΔS = +100 J/mol/K. À 298 K, ΔG = ?",
+     ch:["−20 kJ/mol","−80 kJ/mol","−79.8 kJ/mol","+20 kJ/mol"],
+     ok:2, hint:"ΔG = ΔH − TΔS. Attention aux unités : J vs kJ",
+     fb_ok:"// correct — ΔG = −50 000 − 298×100 = −50 000 − 29 800 = −79 800 J/mol ≈ −79.8 kJ/mol.",
+     fb_no:"// ΔG = −50 000 J − 298 × 100 J/K = −50 000 − 29 800 = −79 800 J = −79.8 kJ/mol.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · 4 cas de ΔG", type:"qcm",
+     code:`<span class="cm">// les 4 cas selon ΔH et ΔS</span>
+ΔH < 0, ΔS > 0 → ΔG < 0 <span class="hl">toujours spontané</span>
+ΔH > 0, ΔS < 0 → ΔG > 0 <span class="r">jamais spontané</span>
+ΔH < 0, ΔS < 0 → spontané si T <span class="hl">basse</span> (ΔH domine)
+ΔH > 0, ΔS > 0 → spontané si T <span class="hl">haute</span> (TΔS domine)
+<span class="ex">dissolution NaCl : ΔH > 0, ΔS > 0
+→ spontané seulement si T suffisamment haute</span>`,
+     q:"La fusion de la glace : H₂O(s) → H₂O(l). ΔH > 0 (endothermique) et ΔS > 0 (désordre ↑). À 25°C, c'est spontané. Pourquoi ?",
+     ch:["Parce que ΔH > 0 force la spontanéité","Parce que T×ΔS > ΔH à 25°C → ΔG < 0","Parce que l'eau est plus stable que la glace","Parce que la pression atmosphérique aide"],
+     ok:1, hint:"ΔG = ΔH − TΔS < 0 quand TΔS > ΔH",
+     fb_ok:"// correct — à 25°C (298K), TΔS > ΔH → ΔG < 0 → fusion spontanée. En dessous de 0°C → ΔG > 0.",
+     fb_no:"// ΔG = ΔH − TΔS. Si TΔS > ΔH → ΔG < 0 → spontané. C'est le cas à T > 0°C pour la glace.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · température de basculement", type:"open",
+     code:`<span class="cm">// température de basculement (T où ΔG change de signe)</span>
+ΔG = 0 quand <span class="hl">T = ΔH / ΔS</span>
+→ au-dessus de cette T : le signe de −TΔS domine
+<span class="ex">si ΔH = +40 kJ/mol et ΔS = +100 J/mol/K
+T_bascule = 40 000 J / 100 J/K = 400 K</span>
+<span class="cm">// attention : convertir ΔH en Joules (pas kJ) !</span>`,
+     q:"ΔH = +60 kJ/mol, ΔS = +150 J/mol/K. En Kelvin, à quelle température ΔG = 0 ? (arrondi à l'unité)",
+     keys:["400","400 K","400K"],
+     hint:"T = ΔH/ΔS = 60 000 J / 150 J/K",
+     fb_ok:"// correct — T = 60 000 / 150 = 400 K. Au-dessus : spontané. En dessous : non spontané.",
+     fb_no:"// T = ΔH/ΔS = 60 000 J ÷ 150 J/K = 400 K.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application clinique · ATP et couplage", type:"qcm",
+     code:`<span class="cm">// ATP — monnaie énergétique cellulaire</span>
+ATP + H₂O → ADP + Pᵢ   ΔG = <span class="hl">−30 kJ/mol</span>  (spontané)
+<span class="kw">couplage thermodynamique</span> :
+réaction non-spontanée (ΔG > 0) + hydrolyse ATP (ΔG < 0)
+→ si ΔG_total < 0 → le tout est spontané
+<span class="ex">synthèse protéine : ΔG = +20 kJ/mol (non spontané seul)
+couplé à ATP : +20 + (−30) = −10 kJ/mol → spontané !</span>
+<span class="why">// c'est pourquoi la cellule consomme ~40 kg d'ATP par jour
+// et doit constamment synthétiser de l'ATP (glycolyse + Krebs + chaîne resp.)</span>`,
+     q:"Une réaction cellulaire a ΔG = +15 kJ/mol. Combien de molécules d'ATP (ΔG_hydrolyse = −30 kJ/mol) sont-elles nécessaires au minimum pour la rendre spontanée ?",
+     ch:["0 — elle est déjà spontanée","1 — car 15 + (−30) = −15 < 0","2 — pour être sûr","3 — règle de sécurité biologique"],
+     ok:1, hint:"il faut que ΔG_total = ΔG_rxn + n × (−30) < 0",
+     fb_ok:"// correct — 1 ATP suffit : +15 + (−30) = −15 kJ/mol < 0 → spontané.",
+     fb_no:"// 1 ATP : 15 + (−30) = −15 < 0 → spontané. 1 ATP suffit.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ══════════════════════════════════════════════════════
+// MODULE 4 — ÉQUILIBRES CHIMIQUES
+// ══════════════════════════════════════════════════════
+{
+  id:"m9", section:"module 4 · équilibres",
+  num:"9", name:"constante d'équilibre K", level:"intermédiaire",
+  takeaway:[
+    "À l'équilibre : vitesses directe et inverse égales — concentrations constantes",
+    "K = [produits]^stoech / [réactifs]^stoech (solides et liquides purs exclus)",
+    "K >> 1 : équilibre vers les produits ; K << 1 : vers les réactifs",
+    "Q < K → réaction vers droite ; Q > K → vers gauche",
+    "ΔG° = −RT ln K (lien thermodynamique)"
+  ],
+  questions:[
+    {c:"notion · état d'équilibre", type:"qcm",
+     code:`<span class="cm">// équilibre chimique — état dynamique</span>
+À l'équilibre :
+- la réaction directe et inverse <span class="hl">se produisent toutes les deux</span>
+- les concentrations sont <span class="hl">constantes</span> (pas nulles !)
+- la réaction n'est <span class="hl">pas arrêtée</span> mais les vitesses sont égales
+<span class="ex">H₂ + I₂ ⇌ 2HI
+  À l'équilibre : H₂, I₂ et HI coexistent tous les trois</span>
+<span class="why">// l'équilibre est dynamique, pas statique
+// comme une escalator : autant de gens montent que descendent
+// → nombre de gens par niveau reste constant mais ils bougent</span>`,
+     q:"À l'équilibre de N₂ + 3H₂ ⇌ 2NH₃, quelle affirmation est correcte ?",
+     ch:["Toutes les molécules de N₂ ont été converties en NH₃","La réaction s'est arrêtée","N₂, H₂ et NH₃ coexistent, les vitesses directe et inverse sont égales","Les concentrations de N₂ et NH₃ sont égales"],
+     ok:2, hint:"l'équilibre est dynamique — les deux sens continuent",
+     fb_ok:"// correct — les trois espèces coexistent. L'équilibre est dynamique, pas statique.",
+     fb_no:"// à l'équilibre : 3 espèces coexistent, vitesse directe = vitesse inverse, concentrations constantes.",
+     mv:{dx:1,dy:0}},
+
+    {c:"calcul · expression de K", type:"qcm",
+     code:`<span class="cm">// expression de la constante d'équilibre K</span>
+Pour aA + bB ⇌ cC + dD :
+<span class="hl">K = [C]ᶜ [D]ᵈ / [A]ᵃ [B]ᵇ</span>
+Règles importantes :
+- exposants = coefficients stœchiométriques
+- solides purs et liquides purs : <span class="hl">non inclus</span> (activité = 1)
+<span class="ex">CaCO₃(s) ⇌ CaO(s) + CO₂(g)
+K = [CO₂]   (les deux solides ne figurent pas)</span>`,
+     q:"Pour 2SO₂(g) + O₂(g) ⇌ 2SO₃(g), quelle est l'expression correcte de K ?",
+     ch:["K = [SO₃] / [SO₂][O₂]","K = [SO₃]² / ([SO₂]²[O₂])","K = 2[SO₃] / (2[SO₂][O₂])","K = [SO₃]² / [SO₂][O₂]"],
+     ok:1, hint:"exposants = coefficients stœchiométriques : SO₃ ×2, SO₂ ×2, O₂ ×1",
+     fb_ok:"// correct — K = [SO₃]² / ([SO₂]²[O₂]). Réaction de fabrication de l'acide sulfurique.",
+     fb_no:"// exposants = coefficients : K = [SO₃]² / ([SO₂]²[O₂]).",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · interpréter K", type:"qcm",
+     code:`<span class="cm">// interpréter la valeur de K</span>
+K >> 1   → équilibre très déplacé vers les <span class="hl">produits</span>
+K ≈ 1    → quantités comparables de réactifs et produits
+K << 1   → équilibre très déplacé vers les <span class="hl">réactifs</span>
+<span class="ex">H₂ + I₂ ⇌ 2HI       K = 794  (à 25°C) → majorité HI
+N₂ + O₂ ⇌ 2NO       K = 10⁻³⁰ (à 25°C) → presque rien de NO
+NH₃ ⇌ ½N₂ + 3/2H₂   K = 10⁷   → NH₃ se décompose facilement</span>`,
+     q:"Pour une réaction A ⇌ B, K = 10⁻⁸ à 25°C. Que trouve-t-on majoritairement à l'équilibre ?",
+     ch:["B — le produit","A — le réactif (K très petit → équilibre côté réactifs)","Un mélange 50/50","Cela dépend des concentrations initiales"],
+     ok:1, hint:"K << 1 → équilibre vers les réactifs → A majoritaire",
+     fb_ok:"// correct — K = 10⁻⁸ << 1 → presque tout reste sous forme de A à l'équilibre.",
+     fb_no:"// K << 1 → très peu de produit B formé → A est majoritaire à l'équilibre.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · quotient réactionnel Q", type:"qcm",
+     code:`<span class="cm">// quotient réactionnel Q — état actuel du système</span>
+Q = expression de K <span class="hl">calculée avec les concentrations actuelles</span>
+(pas forcément à l'équilibre)
+<span class="hl">Q < K</span> → pas encore à l'équilibre → réaction vers la <span class="kw">droite</span> (→ produits)
+<span class="hl">Q > K</span> → réaction vers la <span class="r">gauche</span> (→ réactifs)
+<span class="hl">Q = K</span> → déjà à l'équilibre
+<span class="why">// Q permet de prévoir le sens d'évolution sans connaître l'état final
+// crucial en chimie analytique et en biochimie (sens des réactions enzymatiques)</span>`,
+     q:"Pour A ⇌ B, K = 100. On mélange A et B avec [A]=1M et [B]=5M. Q = [B]/[A] = 5. Sens d'évolution ?",
+     ch:["Vers B (droite) — car B est minoritaire","Vers A (gauche) — car Q=5 < K=100","Aucune évolution — système à l'équilibre","Vers B car [A] > [B]"],
+     ok:1, hint:"Q=5 vs K=100. Q < K → vers les produits (droite, vers B)",
+     fb_ok:"// correct — Q=5 < K=100 → réaction vers droite (vers B) pour augmenter Q jusqu'à K.",
+     fb_no:"// Q < K → système pas encore à l'équilibre → évolue vers les produits (droite) pour atteindre K.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · modifier K vs déplacer l'équilibre", type:"qcm",
+     code:`<span class="cm">// ce qui modifie K vs ce qui déplace l'équilibre</span>
+<span class="hl">Modifie K</span>           → changer la <span class="r">température</span> uniquement
+<span class="hl">Déplace l'équilibre</span> → changer concentration, pression, volume
+                    (mais K reste constant !)
+<span class="ex">ajouter NH₃ à N₂+3H₂⇌2NH₃ → équilibre se déplace vers gauche
+mais K ne change pas (T inchangée)</span>
+<span class="cm">// un catalyseur n'affecte ni K ni ΔG — il accélère l'atteinte de l'équilibre</span>`,
+     q:"On ajoute un catalyseur à une réaction à l'équilibre. Quel est l'effet sur K ?",
+     ch:["K augmente — plus de produits formés","K diminue — la réaction inverse est favorisée","K ne change pas — le catalyseur accélère les deux sens également","Cela dépend du type de catalyseur"],
+     ok:2, hint:"un catalyseur abaisse Ea des deux sens de façon identique",
+     fb_ok:"// correct — catalyseur : accélère les deux sens également → K inchangé. Seulement T modifie K.",
+     fb_no:"// catalyseur = chemin différent, même état final. K inchangé. Seule T modifie K.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ══════════════════════════════════════════════════════
+// MODULE 5 — CINÉTIQUE CHIMIQUE
+// ══════════════════════════════════════════════════════
+{
+  id:"m10", section:"module 5 · cinétique",
+  num:"10", name:"vitesse de réaction et loi de vitesse", level:"intermédiaire",
+  takeaway:[
+    "Vitesse de réaction : v = −d[A]/dt = k[A]ᵐ[B]ⁿ",
+    "Les ordres partiels (m, n) sont déterminés EXPÉRIMENTALEMENT",
+    "Ordre 0 : v indépendante de [A] (ex: alcool éthylique, aspirine)",
+    "Ordre 1 : v ∝ [A], demi-vie t½ = ln2/k indépendante de [A]₀",
+    "Ordre 2 : v ∝ [A]², doubler [A] → vitesse ×4"
+  ],
+  questions:[
+    {c:"notion · définition de la vitesse", type:"qcm",
+     code:`<span class="cm">// vitesse de réaction</span>
+Pour A → produits :
+v = <span class="hl">−d[A]/dt</span>  (diminution de [A] par unité de temps)
+unités : mol/L/s  ou  M/s
+<span class="kw">facteurs qui influencent v</span> :
+  · concentration des réactifs
+  · température
+  · catalyseurs
+  · surface de contact (solides)
+<span class="why">// la vitesse est indépendante de ΔG (thermodynamique)
+// une réaction très favorable (ΔG << 0) peut être infiniment lente
+// ex : H₂ + O₂ → H₂O est favorable mais ne se produit pas seule à T ambiante</span>`,
+     q:"On observe que la concentration de A passe de 1.0 M à 0.4 M en 3 secondes. Quelle est la vitesse moyenne de disparition de A ?",
+     ch:["0.4 M/s","0.2 M/s","0.6 M/s","1.4 M/s"],
+     ok:1, hint:"v = Δ[A]/Δt = (1.0 − 0.4) / 3",
+     fb_ok:"// correct — v = (1.0 − 0.4) / 3 = 0.6/3 = 0.2 M/s.",
+     fb_no:"// v = |Δ[A]|/Δt = (1.0−0.4)/3 = 0.6/3 = 0.2 M/s.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · loi de vitesse et ordres", type:"qcm",
+     code:`<span class="cm">// loi de vitesse — déterminée expérimentalement</span>
+<span class="hl">v = k [A]ᵐ [B]ⁿ</span>
+k = constante de vitesse (dépend de T)
+m, n = ordres partiels (≠ coefficients stœchiométriques !)
+m+n = ordre global
+<span class="ex">2A + B → C
+Expériences :
+[A] double, [B] fixe → v double : ordre 1 en A
+[B] double, [A] fixe → v ×4 : ordre 2 en B
+→ v = k[A]¹[B]²</span>
+<span class="cm">// l'ordre DOIT être déterminé expérimentalement
+// on ne peut pas le lire sur l'équation bilan !</span>`,
+     q:"Si l'ordre en A est 2 et [A] triple, la vitesse est multipliée par :",
+     ch:["3","6","9","2"],
+     ok:2, hint:"v ∝ [A]². Si [A]→3[A] : v → k(3[A])² = 9k[A]²",
+     fb_ok:"// correct — v ∝ [A]². Triple [A] → v ×3² = ×9.",
+     fb_no:"// ordre 2 : v ∝ [A]². (3[A])² = 9[A]² → v ×9.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"calcul · demi-vie ordre 1", type:"open",
+     code:`<span class="cm">// réaction d'ordre 1 : [A](t) = [A]₀ e^(−kt)</span>
+<span class="hl">t½ = ln(2) / k = 0.693 / k</span>
+t½ est <span class="hl">indépendante</span> de [A]₀ (caractéristique de l'ordre 1)
+<span class="ex">t½ = 10 min → k = 0.693/10 = 0.0693 min⁻¹
+Après 3 demi-vies : [A] = [A]₀ × (1/2)³ = 12.5% de [A]₀</span>
+<span class="why">// pharmacocinétique : élimination de la plupart des médicaments = ordre 1
+// t½ détermine la fréquence de prise optimale
+// après 5×t½ : moins de 3% de la dose initiale reste</span>`,
+     q:"Un médicament a k = 0.0693 h⁻¹ (élimination ordre 1). Quelle est sa demi-vie ?",
+     keys:["10","10h","10 h","10 heures","dix heures"],
+     hint:"t½ = ln(2)/k = 0.693/0.0693",
+     fb_ok:"// correct — t½ = 0.693/0.0693 = 10 h. Après 10h, 50% du médicament reste.",
+     fb_no:"// t½ = ln(2)/k = 0.693/0.0693 = 10 heures.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · pharmacocinétique", type:"qcm",
+     code:`<span class="cm">// demi-vie et posologie</span>
+Si t½ = 8h → après 8h : 50% reste → prendre toutes les 8h ?
+En pratique : état stationnaire (plateau) atteint après ~5×t½
+<span class="ex">ibuprofène : t½ ≈ 2h → posologie toutes les 6-8h
+paracétamol : t½ ≈ 2h → toutes les 4-6h
+digoxine : t½ ≈ 36h → 1×/jour
+amiodarone : t½ ≈ 40 jours ! → effets résiduels très longs</span>
+<span class="why">// si on dose trop fréquemment (< t½) : accumulation → toxicité
+// si trop espacé : concentration sub-thérapeutique entre les prises</span>`,
+     q:"Un patient prend 500 mg d'aspirine (t½ ≈ 4h). Après 12h (sans nouvelle dose), quelle fraction approximative reste-t-il ?",
+     ch:["50%","25%","12.5%","6.25%"],
+     ok:2, hint:"12h = 3 × t½. Après 3 demi-vies : (1/2)³ = ?",
+     fb_ok:"// correct — 3 demi-vies : (1/2)³ = 1/8 = 12.5%. 500 × 12.5% = 62.5 mg reste.",
+     fb_no:"// 12h / 4h par t½ = 3 demi-vies. (1/2)³ = 1/8 = 12.5%.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · ordre 0 et cinétique de saturation", type:"qcm",
+     code:`<span class="cm">// ordre 0 — vitesse indépendante de la concentration</span>
+v = k[A]⁰ = <span class="hl">k</span>   (constante, quelle que soit [A])
+<span class="ex">alcool éthylique : métabolisé à ~0.1 g/L/h (ordre 0)
+→ doubler l'alcoolémie ne double pas la vitesse d'élimination !</span>
+<span class="kw">pourquoi ordre 0 ?</span>
+enzyme saturée : toutes les enzymes occupées → vitesse max Vmax
+→ augmenter [substrat] ne change plus rien
+<span class="why">// l'alcool est métabolisé par l'alcool-déshydrogénase (ADH)
+// ADH est saturée dès faible alcoolémie → cinétique d'ordre 0
+// explique pourquoi boire 2× plus = rester ivre 2× plus longtemps
+// (pas proportionnel comme un ordre 1)</span>`,
+     q:"L'alcool est éliminé à vitesse constante (ordre 0). Une personne a 1.0 g/L dans le sang, et l'enzyme élimine 0.15 g/L/h. En combien d'heures sera-t-elle à 0.25 g/L (limite légale) ?",
+     ch:["Environ 3h","Environ 5h","Environ 7h","Cela dépend de son poids"],
+     ok:1, hint:"ordre 0 → [A](t) = [A]₀ − k×t. Résoudre pour t.",
+     fb_ok:"// correct — [A] = 1.0 − 0.15t = 0.25 → t = 0.75/0.15 = 5h.",
+     fb_no:"// ordre 0 : [A](t) = 1.0 − 0.15×t. 0.25 = 1.0 − 0.15t → t = 0.75/0.15 = 5h.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+{id:"m4b",sec:"module 4 · équilibres chimiques",num:"11",name:"équilibres acido-basiques",level:"intermédiaire",
+takeaway:["Brønsted : acide = donneur de H⁺ · base = accepteur de H⁺","pH = −log[H⁺] ; chaque unité de pH = facteur 10 de [H⁺]","Ka : HA + H₂O ⇌ H₃O⁺ + A⁻ ; pKa = −log Ka","Acide fort : pKa < 0 (dissociation totale) ; acide faible : pKa > 0","Henderson-Hasselbalch : pH = pKa + log([A⁻]/[HA])"],
+questions:[
+{c:"notion · acides et bases de Brønsted",type:"qcm",
+code:`<span class="cm">// Brønsted-Lowry</span>
+<span class="hl">acide</span>  = donneur de proton H⁺
+<span class="hl">base</span>   = accepteur de proton H⁺
+<span class="ex">HCl + H₂O → H₃O⁺ + Cl⁻
+  HCl = acide, H₂O = base</span>`,
+q:"NH₃ + H₂O ⇌ NH₄⁺ + OH⁻. Quel est le comportement de NH₃ ?",
+ch:["Acide — donne un proton","Base — accepte un proton de H₂O","Ni acide ni base","Oxydant"],ok:1,
+hint:"NH₃ capte un H⁺ de H₂O → base",
+fb_ok:"// correct — NH₃ accepte H⁺ de H₂O → base (et H₂O joue le rôle d'acide).",
+fb_no:"// NH₃ + H⁺(de H₂O) → NH₄⁺. NH₃ accepte un proton = base.",mv:{dx:1,dy:0}},
+
+{c:"calcul · pH",type:"open",
+code:`<span class="cm">// pH = −log₁₀[H⁺]</span>
+[H⁺] = 10⁻ᵖᴴ
+<span class="ex">pH=1 : [H⁺]=0.1 M   (acide fort 0.1M)
+pH=7 : [H⁺]=10⁻⁷ M  (eau pure à 25°C)
+pH=14: [H⁺]=10⁻¹⁴ M</span>`,
+q:"Si [H⁺] = 10⁻⁴ mol/L, quel est le pH ?",
+keys:["4","pH 4","pH=4"],
+hint:"pH = −log(10⁻⁴) = 4",
+fb_ok:"// correct — pH = −log(10⁻⁴) = 4.",
+fb_no:"// pH = −log[H⁺] = −log(10⁻⁴) = 4.",mv:{dx:0,dy:-1}},
+
+{c:"application · Henderson-Hasselbalch",type:"qcm",
+code:`<span class="cm">// Henderson-Hasselbalch</span>
+<span class="hl">pH = pKa + log([A⁻]/[HA])</span>
+si [A⁻] = [HA] → log(1) = 0 → <span class="hl">pH = pKa</span>
+<span class="ex">acide acétique : pKa = 4.76
+solution tampon pH=4.76 : [CH₃COO⁻]=[CH₃COOH]</span>`,
+q:"Acide acétique pKa=4.76. Si [CH₃COO⁻]=[CH₃COOH], pH = ?",
+ch:["2.38","4.76","7.00","9.52"],ok:1,
+hint:"log([A⁻]/[HA]) = log(1) = 0 → pH = pKa",
+fb_ok:"// correct — [A⁻]=[HA] → pH = pKa = 4.76.",
+fb_no:"// [A⁻]=[HA] → log(1)=0 → pH = pKa = 4.76.",mv:{dx:1,dy:0}},
+
+{c:"application · acide fort vs faible",type:"qcm",
+code:`<span class="cm">// acide fort vs faible</span>
+<span class="hl">acide fort</span>  : pKa < 0, dissociation totale dans H₂O
+  HCl, H₂SO₄, HNO₃
+<span class="hl">acide faible</span> : pKa > 0, dissociation partielle
+  CH₃COOH (pKa=4.76), H₂CO₃ (pKa=6.35), NH₄⁺ (pKa=9.25)`,
+q:"HCl 0.1 M a pH=1. CH₃COOH 0.1 M a pH≈2.9. Pourquoi HCl donne un pH plus bas ?",
+ch:["HCl est plus concentré","HCl est totalement dissocié → [H⁺]=0.1 M. CH₃COOH partiellement → [H⁺] << 0.1 M","HCl est plus lourd","HCl est un gaz à T ambiante"],ok:1,
+hint:"acide fort = dissociation totale, acide faible = partielle",
+fb_ok:"// correct — HCl totalement dissocié : [H⁺]=0.1 M → pH=1. CH₃COOH partiellement : [H⁺]<0.1 M → pH>1.",
+fb_no:"// acide fort = dissociation totale → [H⁺] = C_initiale. Acide faible = partielle → [H⁺] < C.",mv:{dx:0,dy:-1}},
+
+{c:"clinique · pKa et pharmacologie",type:"qcm",
+code:`<span class="cm">// pKa et absorption médicament</span>
+Henderson-Hasselbalch : pH = pKa + log([forme ionisée]/[forme neutre])
+<span class="hl">forme neutre</span>    → traverse les membranes (lipophile)
+<span class="hl">forme ionisée</span>   → reste en solution (hydrophile)
+<span class="why">// aspirine (pKa=3.5) dans estomac (pH=2) :
+// pH < pKa → forme neutre majoritaire → absorbée dans l'estomac !</span>`,
+q:"Un médicament acide a pKa=4. Dans l'estomac (pH=2), quelle forme est majoritaire ?",
+ch:["Forme ionisée (A⁻) — pH acide favorise l'ionisation","Forme neutre (HA) — pH < pKa → HA dominant","50/50 — pH loin du pKa","Cela dépend de la dose"],ok:1,
+hint:"pH < pKa → côté HA (forme neutre) selon Henderson-Hasselbalch",
+fb_ok:"// correct — pH=2 < pKa=4 → forme neutre HA dominante → absorbée dans l'estomac.",
+fb_no:"// pH < pKa → [HA] > [A⁻] → forme neutre dominant → absorption gastrique.",mv:{dx:1,dy:0}},
+]},
+
+{id:"m4c",sec:"module 4 · équilibres chimiques",num:"12",name:"solubilité et produit de solubilité Ks",level:"intermédiaire",
+takeaway:["Ks = produit des concentrations ioniques à l'équilibre (solide non inclus)","Pour AB : Ks = [A⁺][B⁻] = s² → s = √Ks","Effet d'ion commun : ajout d'un ion diminue la solubilité","Précipitation si Q > Ks (sursaturation)","Applications : calculs rénaux, analyse qualitative, radiologie"],
+questions:[
+{c:"notion · expression de Ks",type:"qcm",
+code:`<span class="cm">// produit de solubilité Ks</span>
+MₘXₙ(s) ⇌ m M^(n+)(aq) + n X^(m−)(aq)
+<span class="hl">Ks = [M^n+]^m × [X^m−]^n</span>   (solide non inclus)
+<span class="ex">AgCl(s) ⇌ Ag⁺ + Cl⁻ → Ks=[Ag⁺][Cl⁻]=1.8×10⁻¹⁰
+Ag₂S(s) ⇌ 2Ag⁺ + S²⁻ → Ks=[Ag⁺]²[S²⁻]</span>`,
+q:"PbCl₂(s) ⇌ Pb²⁺ + 2Cl⁻. Expression de Ks ?",
+ch:["Ks=[Pb²⁺][Cl⁻]","Ks=[Pb²⁺][Cl⁻]²","Ks=[Pb²⁺]²[Cl⁻]","Ks=[Pb²⁺][2Cl⁻]"],ok:1,
+hint:"exposants = coefficients stœchiométriques : Pb²⁺×1, Cl⁻×2",
+fb_ok:"// correct — Ks=[Pb²⁺][Cl⁻]².",
+fb_no:"// Ks = [Pb²⁺]¹ × [Cl⁻]² = [Pb²⁺][Cl⁻]².",mv:{dx:1,dy:0}},
+
+{c:"calcul · solubilité s",type:"open",
+code:`<span class="cm">// solubilité s à partir de Ks</span>
+AgCl ⇌ Ag⁺ + Cl⁻
+[Ag⁺]=[Cl⁻]=s
+Ks = s² = 1.8×10⁻¹⁰
+s = √(1.8×10⁻¹⁰) ≈ <span class="hl">1.34×10⁻⁵</span> mol/L`,
+q:"BaSO₄ : Ks=1.0×10⁻¹⁰. Exprimer Ks en fonction de s (solubilité).",
+keys:["s²","s au carré","Ks=s2"],
+hint:"BaSO₄ ⇌ Ba²⁺ + SO₄²⁻ → [Ba²⁺]=[SO₄²⁻]=s",
+fb_ok:"// correct — Ks = s². → s = √(10⁻¹⁰) = 10⁻⁵ mol/L.",
+fb_no:"// [Ba²⁺]=[SO₄²⁻]=s → Ks = s × s = s².",mv:{dx:0,dy:-1}},
+
+{c:"application · effet d'ion commun",type:"qcm",
+code:`<span class="cm">// effet d'ion commun</span>
+ajout d'un ion déjà présent → <span class="hl">solubilité diminue</span>
+<span class="ex">AgCl dans NaCl(aq) :
+[Cl⁻] déjà élevé → Q=[Ag⁺][Cl⁻] > Ks → précipitation
+→ AgCl encore moins soluble que dans l'eau pure</span>`,
+q:"On dissout AgCl dans une solution déjà à [Cl⁻]=0.1 M. Comparé à l'eau pure, AgCl est :",
+ch:["Plus soluble — les ions Cl⁻ solubilisent AgCl","Moins soluble — ion commun Cl⁻ déplace l'équilibre vers la précipitation","Identique","Dépend de la T"],ok:1,
+hint:"ion commun Cl⁻ → Q augmente → précipitation",
+fb_ok:"// correct — [Cl⁻] déjà élevée → Ks = [Ag⁺] × 0.1 → [Ag⁺] très faible → moins soluble.",
+fb_no:"// ion commun : [Cl⁻] déjà élevée → [Ag⁺] doit diminuer pour respecter Ks → moins soluble.",mv:{dx:1,dy:0}},
+
+{c:"application · précipitation",type:"qcm",
+code:`<span class="cm">// critère de précipitation</span>
+Q = [M^n+][X^m−]  (concentrations actuelles)
+Q > Ks → <span class="r">précipitation</span>
+Q < Ks → solution non saturée (pas de précipité)
+Q = Ks → saturation (équilibre)`,
+q:"AgCl : Ks=1.8×10⁻¹⁰. On mélange [Ag⁺]=10⁻⁴ M et [Cl⁻]=10⁻⁴ M. Q = ?",
+ch:["Q=10⁻⁴ < Ks → pas de précipité","Q=10⁻⁸ > Ks → précipitation de AgCl","Q=10⁻⁸ = Ks → équilibre","Q=10⁻⁴ > Ks → précipitation"],ok:1,
+hint:"Q=[Ag⁺][Cl⁻] = 10⁻⁴ × 10⁻⁴ = 10⁻⁸. Comparer à Ks=1.8×10⁻¹⁰",
+fb_ok:"// correct — Q=10⁻⁸ > Ks=1.8×10⁻¹⁰ → précipitation de AgCl.",
+fb_no:"// Q=10⁻⁴×10⁻⁴=10⁻⁸. 10⁻⁸ > 1.8×10⁻¹⁰ → Q > Ks → précipitation.",mv:{dx:0,dy:-1}},
+
+{c:"clinique · calculs rénaux",type:"qcm",
+code:`<span class="cm">// calculs rénaux — CaC₂O₄ (oxalate de calcium)</span>
+Ks(CaC₂O₄) = 2.3×10⁻⁹
+<span class="why">// calcul rénal = précipitation si Q > Ks
+// traitement : ↑ diurèse → dilue Ca²⁺ et C₂O₄²⁻ → Q < Ks
+// régime : ↓ aliments riches en oxalate (épinards, rhubarbe)
+// calcium alimentaire lie l'oxalate intestinal → ↓ absorption oxalate</span>`,
+q:"Un patient a des calculs rénaux oxaliques (CaC₂O₄). Pourquoi lui conseille-t-on de boire beaucoup d'eau ?",
+ch:["Pour diluer les médicaments","↑ volume urinaire → ↓ [Ca²⁺] et [C₂O₄²⁻] → Q < Ks → pas de précipitation","Pour éliminer le calcium par la transpiration","L'eau dissout les calculs existants"],ok:1,
+hint:"dilution → concentrations ioniques ↓ → Q diminue",
+fb_ok:"// correct — hydratation → ↓ concentrations → Q < Ks → prévention de la précipitation.",
+fb_no:"// dilution → ↓ [Ca²⁺] et [C₂O₄²⁻] → Q diminue → reste sous Ks → pas de calcul.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 5 — CINÉTIQUE CHIMIQUE
+// ══════════════════════════════════════════════════════
+{id:"m5a",sec:"module 5 · cinétique chimique",num:"13",name:"vitesse de réaction et loi de vitesse",level:"intermédiaire",
+takeaway:["v = k[A]ᵐ[B]ⁿ : ordres déterminés expérimentalement, pas depuis la stœchiométrie","Ordre 0 : v constante, [A](t) = [A]₀ − kt (alcool, enzymes saturées)","Ordre 1 : t½ = ln2/k, indépendante de [A]₀ (pharmacocinétique)","Ordre 2 : v ∝ [A]², doubler [A] → vitesse ×4","Arrhenius : k = A·e^(−Ea/RT) ; +10°C ≈ vitesse ×2-3"],
+questions:[
+{c:"notion · vitesse moyenne",type:"qcm",
+code:`<span class="cm">// vitesse de réaction</span>
+v = <span class="hl">−d[A]/dt</span>  (mol/L/s)
+<span class="cm">// cinétique ≠ thermodynamique</span>
+<span class="cm">// spontané (ΔG<0) peut être infiniment lent</span>
+<span class="ex">H₂+O₂→H₂O : ΔG<<0 mais ne se produit pas seul à 25°C</span>`,
+q:"[A] passe de 1.0M à 0.4M en 3 secondes. Vitesse moyenne ?",
+ch:["0.4 M/s","0.2 M/s","0.6 M/s","1.4 M/s"],ok:1,
+hint:"v = |Δ[A]|/Δt = (1.0−0.4)/3",
+fb_ok:"// correct — v = 0.6/3 = 0.2 M/s.",
+fb_no:"// v = (1.0−0.4)/3 = 0.2 M/s.",mv:{dx:1,dy:0}},
+
+{c:"notion · ordres de réaction",type:"qcm",
+code:`<span class="cm">// loi de vitesse v = k[A]ᵐ[B]ⁿ</span>
+ordres : <span class="hl">déterminés expérimentalement</span> ≠ stoech.
+doubler [A] ordre 0 → v <span class="hl">inchangée</span>
+doubler [A] ordre 1 → v <span class="hl">×2</span>
+doubler [A] ordre 2 → v <span class="hl">×4</span>`,
+q:"Ordre en A = 2. On triple [A]. La vitesse est multipliée par :",
+ch:["3","6","9","2"],ok:2,
+hint:"v ∝ [A]². (3[A])² = 9[A]²",
+fb_ok:"// correct — ordre 2 : triple [A] → v ×9.",
+fb_no:"// (3[A])² = 9[A]² → v ×9.",mv:{dx:0,dy:-1}},
+
+{c:"calcul · demi-vie ordre 1",type:"open",
+code:`<span class="cm">// ordre 1 : t½ = ln(2)/k = 0.693/k</span>
+t½ indépendante de [A]₀
+<span class="ex">k = 0.1 h⁻¹ → t½ = 0.693/0.1 = 6.93 h</span>`,
+q:"Médicament : k=0.0693 h⁻¹ (ordre 1). Demi-vie ?",
+keys:["10","10h","10 h","10 heures"],
+hint:"t½ = 0.693/0.0693",
+fb_ok:"// correct — t½ = 0.693/0.0693 = 10 h.",
+fb_no:"// t½ = ln(2)/k = 0.693/0.0693 = 10 h.",mv:{dx:1,dy:0}},
+
+{c:"application · demi-vies successives",type:"qcm",
+code:`<span class="cm">// demi-vies successives (ordre 1)</span>
+après 1 t½ : 50% · après 2 t½ : 25%
+après 3 t½ : 12.5% · après 4 t½ : 6.25%
+après 5 t½ : 3.1%  ← pratiquement éliminé`,
+q:"Aspirine t½=4h. Après 12h, quelle fraction reste ?",
+ch:["50%","25%","12.5%","6.25%"],ok:2,
+hint:"12h = 3×t½ → (1/2)³",
+fb_ok:"// correct — (1/2)³ = 12.5%.",
+fb_no:"// 12/4 = 3 demi-vies. (1/2)³ = 12.5%.",mv:{dx:0,dy:-1}},
+
+{c:"piège · ordre 0 alcool + Arrhenius",type:"qcm",
+code:`<span class="cm">// ordre 0 : v = k (constante)</span>
+alcool : éliminé à ~0.1 g/L/h (ordre 0, ADH saturée)
+→ [A](t) = [A]₀ − kt  (linéaire !)
+<span class="kw">Arrhenius</span> : k = A·e^(−Ea/RT)
+→ +10°C ≈ vitesse ×2-3 (règle de van't Hoff)`,
+q:"Alcoolémie 1.0 g/L, élimination 0.15 g/L/h (ordre 0). Temps pour atteindre 0.25 g/L ?",
+ch:["~3h","~5h","~7h","~10h"],ok:1,
+hint:"[A](t) = 1.0 − 0.15t = 0.25 → t = 0.75/0.15",
+fb_ok:"// correct — t = 0.75/0.15 = 5h. Ordre 0 = décroissance linéaire.",
+fb_no:"// ordre 0 : 1.0 − 0.15t = 0.25 → t = 5h.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 6 — CHIMIE DES SOLUTIONS
+// ══════════════════════════════════════════════════════
+{id:"m6a",sec:"module 6 · chimie des solutions",num:"14",name:"concentration et dilution",level:"débutant",
+takeaway:["Molarité C = n/V (mol/L) ; Masse molaire M (g/mol)","n = m/M ; C = m/(M×V)","Dilution : C₁V₁ = C₂V₂ (conservation des moles)","Titre en masse : % = (m_soluté/m_solution) × 100","Osmolarité = Σ (Ci × ni) — important en médecine"],
+questions:[
+{c:"notion · molarité",type:"qcm",
+code:`<span class="cm">// molarité C = n / V</span>
+C en mol/L (M) · n en mol · V en L
+n = m / M   (m en g, M = masse molaire g/mol)
+<span class="ex">58.5 g NaCl dans 1L → n = 58.5/58.5 = 1 mol → C = 1 M</span>`,
+q:"On dissout 40 g de NaOH (M=40 g/mol) dans 500 mL d'eau. Concentration ?",
+ch:["0.5 M","1 M","2 M","0.1 M"],ok:2,
+hint:"n = 40/40 = 1 mol. C = n/V = 1/0.5",
+fb_ok:"// correct — n=1 mol, V=0.5L → C=1/0.5 = 2 M.",
+fb_no:"// n=40/40=1 mol. C=n/V=1/0.5L = 2 M.",mv:{dx:1,dy:0}},
+
+{c:"calcul · masse à dissoudre",type:"open",
+code:`<span class="cm">// masse à dissoudre</span>
+m = <span class="hl">C × V × M</span>
+<span class="ex">préparer 250 mL de NaCl 0.9 M (M=58.5 g/mol)
+n = 0.9 × 0.25 = 0.225 mol
+m = 0.225 × 58.5 = 13.2 g</span>`,
+q:"Préparer 500 mL de glucose 0.1 M (M=180 g/mol). Masse de glucose (g) ?",
+keys:["9","9g","9 g","9 grammes"],
+hint:"m = C × V × M = 0.1 × 0.5 × 180",
+fb_ok:"// correct — m = 0.1 × 0.5 × 180 = 9 g.",
+fb_no:"// m = C × V × M = 0.1 × 0.5 × 180 = 9 g.",mv:{dx:0,dy:-1}},
+
+{c:"application · dilution",type:"qcm",
+code:`<span class="cm">// dilution : C₁V₁ = C₂V₂</span>
+les moles de soluté sont conservées
+<span class="ex">100 mL de HCl 12 M dilué à 1200 mL
+C₂ = C₁V₁/V₂ = 12×100/1200 = 1 M</span>`,
+q:"On prend 25 mL de H₂SO₄ 18 M et on dilue à 450 mL. Concentration finale ?",
+ch:["1 M","0.5 M","2 M","9 M"],ok:0,
+hint:"C₂ = C₁V₁/V₂ = 18×25/450",
+fb_ok:"// correct — C₂ = 18×25/450 = 450/450 = 1 M.",
+fb_no:"// C₂ = C₁V₁/V₂ = (18×25)/450 = 1 M.",mv:{dx:1,dy:0}},
+
+{c:"clinique · soluté physiologique",type:"qcm",
+code:`<span class="cm">// osmolalité et solutions médicales</span>
+NaCl 0.9% (soluté isotonique) = sérum physiologique
+→ 9 g NaCl / L → C = 9/58.5 ≈ 0.154 M
+→ NaCl → Na⁺ + Cl⁻ → osmolalité = 2 × 154 = 308 mosm/L
+Plasma humain : ~290 mosm/L
+<span class="why">// solution hypotonique : gonflement cellulaire (hémolyse)
+// solution hypertonique : déshydratation cellulaire</span>`,
+q:"On perfuse accidentellement de l'eau pure (eau distillée) dans une veine. Que se passe-t-il aux globules rouges ?",
+ch:["Rien — l'eau est neutre","Ils éclatent (hémolyse) — solution très hypotonique","Ils rétrécissent","Ils se solidifient"],ok:1,
+hint:"eau distillée : très hypotonique → eau entre dans les cellules par osmose",
+fb_ok:"// correct — eau distillée hypotonique → entrée d'eau dans les GR → gonflement → hémolyse.",
+fb_no:"// eau pure : osmolalité=0. GR : ~290 mosm. Eau entre dans les GR par osmose → gonflement → hémolyse.",mv:{dx:0,dy:-1}},
+
+{c:"piège · dilution en série",type:"qcm",
+code:`<span class="cm">// dilutions en série (immunologie, pharmacologie)</span>
+dilution 1/10 × 1/10 × 1/10 = 1/1000
+C finale = C initiale × (f.d.)ⁿ
+<span class="ex">ELISA : dilution 1/1000 de sérum
+  1 mL sérum + 9 mL tampon → ×1/10
+  prendre 1 mL + 9 mL → ×1/10
+  prendre 1 mL + 9 mL → ×1/10 → total 1/1000</span>`,
+q:"Anticorps à 10 mg/mL. Après 3 dilutions successives de 1/10. Concentration finale ?",
+ch:["0.1 mg/mL","0.01 mg/mL","0.001 mg/mL","1 mg/mL"],ok:1,
+hint:"(1/10)³ = 1/1000",
+fb_ok:"// correct — 10 × (1/10)³ = 10/1000 = 0.01 mg/mL.",
+fb_no:"// (1/10)³ = 1/1000. 10 mg/mL ÷ 1000 = 0.01 mg/mL.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 7 — OXYDORÉDUCTION
+// ══════════════════════════════════════════════════════
+{id:"m7a",sec:"module 7 · oxydoréduction",num:"15",name:"nombres d'oxydation et réactions redox",level:"intermédiaire",
+takeaway:["Nombre d'oxydation (n.o.) : charge formelle si tous les e⁻ étaient ioniques","Oxydation = perte d'e⁻ = augmentation n.o. (OIL)","Réduction = gain d'e⁻ = diminution n.o. (RIG)","Oxydant se réduit · réducteur s'oxyde — toujours en paire","Équilibrer en milieu acide : H₂O pour O, H⁺ pour H, e⁻ pour les charges"],
+questions:[
+{c:"notion · règles du n.o.",type:"qcm",
+code:`<span class="cm">// règles du nombre d'oxydation</span>
+élément pur      : n.o. = <span class="hl">0</span>
+ion monoatomique : n.o. = charge de l'ion
+H dans composé   : <span class="hl">+1</span> (sauf hydrures métalliques : −1)
+O dans composé   : <span class="hl">−2</span> (sauf peroxyde : −1)
+somme n.o.       = charge totale de la molécule/ion`,
+q:"Dans H₂SO₄, n.o. de S = ?",
+ch:["+2","+4","+6","−2"],ok:2,
+hint:"2(+1) + n.o.(S) + 4(−2) = 0 → n.o.(S) = ?",
+fb_ok:"// correct — 2(+1) + S + 4(−2) = 0 → 2 + S − 8 = 0 → S = +6.",
+fb_no:"// 2×(+1) + n.o.(S) + 4×(−2) = 0 → n.o.(S) = 8 − 2 = +6.",mv:{dx:1,dy:0}},
+
+{c:"notion · oxydation vs réduction",type:"qcm",
+code:`<span class="cm">// OIL RIG</span>
+<span class="hl">O</span>xydation = perte d'e⁻ = ↑ n.o. (<span class="hl">OIL</span> = Oxidation Is Loss)
+<span class="hl">R</span>éduction = gain d'e⁻ = ↓ n.o. (<span class="hl">RIG</span> = Reduction Is Gain)
+oxydant : se réduit (gagne e⁻) · réducteur : s'oxyde (perd e⁻)`,
+q:"Dans Zn + CuSO₄ → ZnSO₄ + Cu : n.o.(Zn) passe de 0 à +2. Zn est :",
+ch:["Réduit — gagne des e⁻","Oxydé — perd 2 e⁻","Ni oxydé ni réduit","L'oxydant"],ok:1,
+hint:"n.o. augmente de 0 à +2 → perd 2 e⁻ → oxydation",
+fb_ok:"// correct — Zn : 0→+2 = perd 2 e⁻ = oxydé. Cu²⁺ : +2→0 = gagne 2 e⁻ = réduit.",
+fb_no:"// n.o. augmente → perte e⁻ → oxydation. Zn est oxydé (et le réducteur).",mv:{dx:0,dy:-1}},
+
+{c:"application · équilibrer une demi-réaction",type:"qcm",
+code:`<span class="cm">// équilibrer en milieu acide</span>
+1. Équilibrer les atomes ≠ O et H
+2. Ajouter H₂O pour équilibrer O
+3. Ajouter H⁺ pour équilibrer H
+4. Ajouter e⁻ pour équilibrer les charges
+<span class="ex">MnO₄⁻ → Mn²⁺  (réduction)
+MnO₄⁻+8H⁺+5e⁻ → Mn²⁺+4H₂O</span>`,
+q:"Demi-réaction de réduction : Cr₂O₇²⁻ → 2Cr³⁺ (milieu acide). Combien d'électrons ?",
+ch:["2 e⁻","4 e⁻","6 e⁻","8 e⁻"],ok:2,
+hint:"n.o.(Cr) dans Cr₂O₇²⁻ = +6. Cr³⁺ = +3. Variation par Cr = 3. Pour 2 Cr = ?",
+fb_ok:"// correct — 2 Cr passent de +6 à +3 : 2×3 = 6 e⁻ gagnés.",
+fb_no:"// chaque Cr : +6→+3 = gain de 3 e⁻. 2 Cr → 6 e⁻ au total.",mv:{dx:1,dy:0}},
+
+{c:"application · pile électrochimique",type:"qcm",
+code:`<span class="cm">// pile Daniell (Zn/Cu)</span>
+anode (oxydation)   : Zn → Zn²⁺ + 2e⁻   E°=−0.76V
+cathode (réduction) : Cu²⁺ + 2e⁻ → Cu   E°=+0.34V
+<span class="hl">E°pile = E°cathode − E°anode = 0.34−(−0.76) = 1.10V</span>
+<span class="why">// E° > 0 → réaction spontanée (ΔG = −nFE°)
+// n = nb d'e⁻ échangés · F = 96485 C/mol</span>`,
+q:"Pour la pile Zn/Cu : E°(Zn²⁺/Zn)=−0.76V, E°(Cu²⁺/Cu)=+0.34V. E°pile = ?",
+ch:["−0.42 V","1.10 V","0.42 V","−1.10 V"],ok:1,
+hint:"E°pile = E°cathode(réduction) − E°anode(oxydation). Zn s'oxyde, Cu²⁺ se réduit.",
+fb_ok:"// correct — E° = 0.34 − (−0.76) = 1.10 V. Réaction spontanée.",
+fb_no:"// E° = E°(cathode) − E°(anode) = 0.34 − (−0.76) = 1.10 V.",mv:{dx:0,dy:-1}},
+
+{c:"clinique · redox en biochimie",type:"qcm",
+code:`<span class="cm">// couples redox biologiques</span>
+O₂/H₂O  : E°= +0.82V  (accepteur final d'e⁻)
+NAD⁺/NADH: E°= −0.32V  (transporteur d'e⁻)
+<span class="hl">chaîne respiratoire</span> : NADH → complexes → O₂
+→ gradient H⁺ → ATP synthase → ATP
+<span class="why">// chaque NADH transfère 2 e⁻ jusqu'à O₂
+// ΔE° = 0.82−(−0.32) = 1.14V → ΔG = −220 kJ/mol → ~2.5 ATP</span>`,
+q:"Dans la chaîne respiratoire, O₂ est l'accepteur final d'électrons. Sa réduction produit :",
+ch:["CO₂","H₂O₂","H₂O","O₃"],ok:2,
+hint:"O₂ + 4H⁺ + 4e⁻ → 2H₂O",
+fb_ok:"// correct — O₂ + 4H⁺ + 4e⁻ → 2H₂O. C'est pourquoi on respire O₂ et expire H₂O.",
+fb_no:"// réduction de O₂ : O₂ + 4H⁺ + 4e⁻ → 2H₂O. Produit final : eau.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 8 — CHIMIE DES GAZ
+// ══════════════════════════════════════════════════════
+{id:"m8a",sec:"module 8 · chimie des gaz",num:"16",name:"gaz parfait et lois des gaz",level:"intermédiaire",
+takeaway:["PV = nRT (R = 8.314 J/mol/K, T en Kelvin)","Loi de Dalton : P_totale = Σ P_partielles","Si T double à n,V fixes → P double (loi de Gay-Lussac)","Si V double à n,T fixes → P diminue de moitié (Boyle-Mariotte)","Gaz parfait : molécules ponctuelles, pas d'interactions — approximation valide à basse P"],
+questions:[
+{c:"notion · loi des gaz parfaits",type:"qcm",
+code:`<span class="cm">// PV = nRT</span>
+P en Pa · V en m³ · n en mol
+T en <span class="hl">Kelvin</span> · R = 8.314 J/mol/K
+T(K) = T(°C) + 273.15
+<span class="ex">1 mol de gaz à 0°C (273K) et 1 atm (101325 Pa)
+V = nRT/P = 1×8.314×273/101325 = 22.4 L</span>`,
+q:"Volume molaire d'un gaz parfait à 0°C et 1 atm ?",
+ch:["11.2 L/mol","22.4 L/mol","44.8 L/mol","1 L/mol"],ok:1,
+hint:"PV=nRT → V = nRT/P avec T=273K",
+fb_ok:"// correct — 22.4 L/mol à 0°C, 1 atm (conditions normales, CN).",
+fb_no:"// V = nRT/P = 1×8.314×273/101325 ≈ 0.0224 m³ = 22.4 L.",mv:{dx:1,dy:0}},
+
+{c:"calcul · effet de T sur P",type:"open",
+code:`<span class="cm">// loi de Gay-Lussac : P/T = constante (n,V fixes)</span>
+P₁/T₁ = P₂/T₂   (T en Kelvin !)
+<span class="ex">si T double (ex: 300K→600K) et n,V fixes
+P₂ = P₁ × T₂/T₁ = P₁ × 2 → P double</span>`,
+q:"Pneu : P=2.0 bar à 20°C (293K). Après trajet : T=60°C (333K). Nouvelle pression (bar) ? (arrondi à 1 décimale)",
+keys:["2.3","2.3 bar","2,3"],
+hint:"P₂ = P₁ × T₂/T₁ = 2.0 × 333/293",
+fb_ok:"// correct — P₂ = 2.0 × 333/293 ≈ 2.27 ≈ 2.3 bar.",
+fb_no:"// P₂ = P₁ × T₂/T₁ = 2.0 × 333/293 ≈ 2.3 bar.",mv:{dx:0,dy:-1}},
+
+{c:"application · loi de Dalton",type:"qcm",
+code:`<span class="cm">// loi de Dalton — pressions partielles</span>
+P_totale = <span class="hl">Σ Pᵢ = Σ nᵢRT/V</span>
+fraction molaire : xᵢ = nᵢ/n_total
+Pᵢ = xᵢ × P_totale
+<span class="ex">air : 78% N₂, 21% O₂, 1% Ar à 1 atm
+P(O₂) = 0.21 × 1 = 0.21 atm</span>`,
+q:"Un mélange contient 2 mol N₂ et 1 mol O₂ à P_totale=3 atm. P(O₂) = ?",
+ch:["3 atm","1 atm","2 atm","0.5 atm"],ok:1,
+hint:"fraction molaire O₂ = 1/3 → P(O₂) = 1/3 × 3",
+fb_ok:"// correct — x(O₂)=1/3 → P(O₂)=1/3×3=1 atm.",
+fb_no:"// x(O₂) = 1/(1+2) = 1/3. P(O₂) = 1/3 × 3 = 1 atm.",mv:{dx:1,dy:0}},
+
+{c:"clinique · anesthésie et pression",type:"qcm",
+code:`<span class="cm">// anesthésie — loi de Henry (gaz dissous)</span>
+C_dissous = k_H × P_gaz  (loi de Henry)
+↑ P → ↑ gaz dissous dans le sang
+<span class="why">// plongée sous-marine : ↑ P → + N₂ dissous dans sang
+// remontée rapide : ↓ P → N₂ se dégage → bulles → accidents de décompression
+// traitement : caisson hyperbare → P ↑ → re-dissolution N₂ → décompression lente</span>`,
+q:"Un plongeur remonte trop vite. Le N₂ dissous dans son sang se dégage sous forme de bulles. Quel est le traitement ?",
+ch:["Aspirer le N₂ avec une seringue","Caisson hyperbare : ↑ P → redissolution du N₂ puis décompression lente","Donner de l'O₂ pur","Repos et anti-inflammatoires"],ok:1,
+hint:"loi de Henry : ↑ P → ↑ gaz dissous → re-dissolution des bulles",
+fb_ok:"// correct — caisson hyperbare : ↑ P → re-dissolution N₂ → décompression lente et contrôlée.",
+fb_no:"// ↑ P → re-dissolution des bulles (Henry). Puis décompression progressive pour éviter re-formation.",mv:{dx:0,dy:-1}},
+
+{c:"piège · gaz réels vs parfaits",type:"qcm",
+code:`<span class="cm">// gaz parfait vs réel (van der Waals)</span>
+gaz parfait : molécules ponctuelles, pas d'interactions
+gaz réel    : [P + a(n/V)²][V − nb] = nRT
+correction <span class="hl">a</span> : interactions attractives (↓ P apparent)
+correction <span class="hl">b</span> : volume propre des molécules (↓ V disponible)
+<span class="why">// gaz parfait ≈ valide à basse P, haute T
+// gaz réel s'en éloigne à haute P (proche liquéfaction)</span>`,
+q:"Dans quelle condition un gaz réel se comporte-t-il le plus comme un gaz parfait ?",
+ch:["Haute pression, basse température","Basse pression, haute température","Haute pression, haute température","Basse pression, basse température"],ok:1,
+hint:"basse P → interactions négligeables ; haute T → énergie thermique >> interactions",
+fb_ok:"// correct — basse P + haute T → les corrections de van der Waals deviennent négligeables.",
+fb_no:"// basse P + haute T → molécules loin les unes des autres → interactions négligeables → gaz parfait.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 9 — CHIMIE NUCLÉAIRE (approfondissement)
+// ══════════════════════════════════════════════════════
+{id:"m9a",sec:"module 9 · chimie nucléaire",num:"17",name:"radioactivité et réactions nucléaires",level:"avancé",
+takeaway:["Désintégration α : émet ⁴He, Z−2, A−4","Désintégration β⁻ : n→p+e⁻, Z+1, A inchangé","Désintégration β⁺ : p→n+e⁺, Z−1, A inchangé","Capture électronique : p+e⁻→n, Z−1, A inchangé","Fission : noyau lourd → 2 noyaux + énergie ; Fusion : 2 noyaux légers → noyau lourd + énergie"],
+questions:[
+{c:"notion · désintégration α",type:"qcm",
+code:`<span class="cm">// désintégration alpha</span>
+émet une particule α = ⁴₂He
+Z_fils = Z_père − 2
+A_fils = A_père − 4
+<span class="ex">²³⁸U → ²³⁴Th + ⁴He
+  Z : 92 → 90 + 2 ✓
+  A : 238 → 234 + 4 ✓</span>`,
+q:"²²⁶Ra (Z=88) subit une désintégration α. Quel est le noyau fils ?",
+ch:["²²²Rn (Z=86)","²²²Ra (Z=88)","²²⁴Fr (Z=87)","²³⁰Th (Z=90)"],ok:0,
+hint:"α = ⁴He → Z−2=86, A−4=222",
+fb_ok:"// correct — ²²⁶Ra → ²²²Rn + ⁴He. C'est la désintégration du radium (Marie Curie).",
+fb_no:"// α : Z−2=86 (Rn), A−4=222 → ²²²Rn.",mv:{dx:1,dy:0}},
+
+{c:"notion · désintégration β⁻",type:"qcm",
+code:`<span class="cm">// désintégration bêta moins</span>
+n → p + e⁻ + ν̄ₑ
+Z_fils = Z_père + 1
+A_fils = A_père  (inchangé !)
+<span class="ex">¹⁴C (Z=6) → ¹⁴N (Z=7) + e⁻
+  A inchangé (14), Z augmente de 1</span>`,
+q:"³H (tritium, Z=1) se désintègre en β⁻. Quel est le produit ?",
+ch:["³He (Z=2)","²H (Z=1)","⁴He (Z=2)","³Li (Z=3)"],ok:0,
+hint:"β⁻ : Z+1=2 (He), A inchangé=3",
+fb_ok:"// correct — ³H → ³He + e⁻. Z+1=2=He, A=3.",
+fb_no:"// β⁻ : Z+1, A inchangé. ³H(Z=1) → ³He(Z=2).",mv:{dx:0,dy:-1}},
+
+{c:"application · t½ et radioactivité",type:"qcm",
+code:`<span class="cm">// activité et demi-vie</span>
+A(t) = A₀ × (1/2)^(t/t½)
+ou A(t) = A₀ × e^(−λt)  avec λ = ln2/t½
+<span class="ex">⁹⁰Sr (Strontium-90) : t½ = 28.8 ans
+→ contaminant radioactif durable (explosion nucléaire)</span>`,
+q:"Un échantillon de ²⁴Na (t½=15h) a une activité de 1000 Bq. Activité après 45h ?",
+ch:["500 Bq","250 Bq","125 Bq","333 Bq"],ok:2,
+hint:"45h = 3×t½ → A = 1000×(1/2)³",
+fb_ok:"// correct — (1/2)³ = 1/8 → 1000/8 = 125 Bq.",
+fb_no:"// 45h = 3×15h = 3 demi-vies → (1/2)³ = 1/8 → 1000×1/8 = 125 Bq.",mv:{dx:1,dy:0}},
+
+{c:"application · fission et fusion",type:"qcm",
+code:`<span class="cm">// fission vs fusion</span>
+<span class="hl">fission</span> : noyau lourd → 2 noyaux + neutrons + énergie
+  ²³⁵U + n → ⁹²Kr + ¹⁴¹Ba + 3n + énergie (~200 MeV)
+  → réacteur nucléaire, bombe A
+<span class="hl">fusion</span>  : 2 noyaux légers → noyau lourd + énergie
+  ²H + ³H → ⁴He + n + 17.6 MeV
+  → étoiles, bombe H, ITER (en développement)</span>`,
+q:"Pourquoi la fusion nucléaire libère-t-elle plus d'énergie par gramme que la fission ?",
+ch:["Les noyaux légers sont plus légers","La perte de masse relative est plus grande pour les noyaux légers (E=mc²)","La fusion utilise plus de neutrons","La fusion se produit plus vite"],ok:1,
+hint:"E = Δm × c². La perte de masse relative (Δm/m) est plus grande pour H que pour U",
+fb_ok:"// correct — Δm/m plus grande pour la fusion (noyaux légers) → plus d'énergie/gramme.",
+fb_no:"// E=mc². Δm/m plus grande pour H que pour U → plus d'énergie par gramme en fusion.",mv:{dx:0,dy:-1}},
+
+{c:"clinique · radioprotection",type:"qcm",
+code:`<span class="cm">// doses et radioprotection</span>
+<span class="hl">Gray (Gy)</span>   : dose absorbée = J/kg
+<span class="hl">Sievert (Sv)</span> : dose efficace = Gy × facteur de pondération
+α : facteur 20 (très dangereux si inhalé)
+β,γ: facteur 1
+<span class="why">// α très ionisant mais courte portée (papier suffit)
+// γ peu ionisant mais grande portée (plomb nécessaire)
+// en médecine nucléaire : γ préféré pour imagerie (sort du corps)</span>`,
+q:"Pourquoi utilise-t-on des émetteurs γ plutôt qu'α pour la scintigraphie médicale ?",
+ch:["Les γ sont moins dangereux pour le personnel","Les γ traversent le corps et peuvent être détectés de l'extérieur","Les émetteurs α sont trop chers","Les γ ont une t½ plus longue"],ok:1,
+hint:"scintigraphie = détecter les rayons depuis l'extérieur du corps",
+fb_ok:"// correct — γ traverse les tissus → détectable à l'extérieur. α s'arrête dans le tissu → inutile pour l'imagerie.",
+fb_no:"// γ = grande portée → sort du corps → détectable par caméra gamma à l'extérieur. α = courte portée → bloqué dans les tissus.",mv:{dx:1,dy:0}},
+]},
+
+// ══════════════════════════════════════════════════════
+// MODULE 10 — STŒCHIOMÉTRIE AVANCÉE
+// ══════════════════════════════════════════════════════
+{id:"m10a",sec:"module 10 · stœchiométrie avancée",num:"18",name:"calculs stœchiométriques et réactif limitant",level:"intermédiaire",
+takeaway:["Le réactif limitant est celui qui est consommé en premier — détermine le rendement","Rendement % = (quantité obtenue / quantité théorique) × 100","Stœchiométrie des solutions : moles = C × V","Titrage : à l'équivalence, n(acide) × coeff = n(base) × coeff","En médecine : calcul de doses et de concentrations therapeutiques"],
+questions:[
+{c:"notion · réactif limitant",type:"qcm",
+code:`<span class="cm">// réactif limitant</span>
+celui qui est consommé en premier → détermine la quantité de produit
+<span class="ex">N₂ + 3H₂ → 2NH₃
+  3 mol N₂ et 6 mol H₂ disponibles
+  N₂ : peut former 6 mol NH₃
+  H₂ : peut former 4 mol NH₃ → H₂ est limitant → 4 mol NH₃</span>`,
+q:"2H₂ + O₂ → 2H₂O. On a 4 mol H₂ et 3 mol O₂. Quel est le réactif limitant ?",
+ch:["H₂ — moins abondant","O₂ — car 3 mol O₂ forment 6 mol H₂O mais 4 mol H₂ ne forment que 4 mol H₂O","Les deux sont limitants","Ni l'un ni l'autre"],ok:1,
+hint:"vérifier les ratios : 4 mol H₂ nécessitent 2 mol O₂. On en a 3 → lequel est limitant ?",
+fb_ok:"// correct — H₂ est limitant : 4 mol H₂ nécessitent 2 mol O₂ (on en a plus). 4 mol H₂O produits.",
+fb_no:"// 4 mol H₂ nécessitent 2 mol O₂ selon la stœchio. On a 3 mol O₂ (excès). H₂ est limitant → 4 mol H₂O.",mv:{dx:1,dy:0}},
+
+{c:"calcul · rendement",type:"open",
+code:`<span class="cm">// rendement = obtenu / théorique × 100%</span>
+<span class="ex">réaction théorique : 10 g produit attendu
+réaction réelle     :  7 g produit obtenu
+rendement = 7/10 × 100 = 70%</span>`,
+q:"On synthétise de l'aspirine. Théoriquement : 18 g. Obtenu : 13.5 g. Rendement (%) ?",
+keys:["75","75%","75 %"],
+hint:"(13.5/18) × 100",
+fb_ok:"// correct — (13.5/18) × 100 = 75%.",
+fb_no:"// rendement = (obtenu/théorique) × 100 = (13.5/18) × 100 = 75%.",mv:{dx:0,dy:-1}},
+
+{c:"application · titrage acido-basique",type:"qcm",
+code:`<span class="cm">// titrage — point d'équivalence</span>
+HCl + NaOH → NaCl + H₂O
+à l'équivalence : n(HCl) = n(NaOH)
+C₁V₁ = C₂V₂
+<span class="ex">20 mL de HCl inconnu titré par NaOH 0.1M
+équivalence atteinte à 25 mL NaOH
+C(HCl) = (0.1 × 25) / 20 = 0.125 M</span>`,
+q:"30 mL de H₂SO₄ inconnu est neutralisé par 45 mL de NaOH 0.2M. Concentration de H₂SO₄ ?",
+ch:["0.15 M","0.10 M","0.30 M","0.05 M"],ok:0,
+hint:"H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O. n(NaOH) = 0.2×0.045 = 0.009 mol → n(H₂SO₄) = ?",
+fb_ok:"// correct — n(NaOH)=0.009 mol → n(H₂SO₄)=0.009/2=0.0045 mol → C=0.0045/0.03=0.15 M.",
+fb_no:"// n(NaOH)=0.2×0.045=0.009. H₂SO₄ + 2NaOH → n(H₂SO₄)=0.0045. C=0.0045/0.030=0.15 M.",mv:{dx:1,dy:0}},
+
+{c:"clinique · calcul de dose",type:"qcm",
+code:`<span class="cm">// calcul de dose médicale</span>
+dose (mg) = dose (mg/kg) × poids (kg)
+concentration solution : C = dose / V_administration
+<span class="ex">amoxicilline : 25 mg/kg/j en 3 prises
+enfant 20 kg → dose/j = 500 mg → 167 mg par prise</span>`,
+q:"Ibuprofène 10 mg/kg pour enfant 15 kg. Suspension à 200 mg/5 mL. Volume à administrer ?",
+ch:["3.75 mL","5 mL","7.5 mL","2.5 mL"],ok:0,
+hint:"dose = 10×15 = 150 mg. Volume = 150/(200/5) = 150×5/200",
+fb_ok:"// correct — dose=150 mg. V=150×5/200=3.75 mL.",
+fb_no:"// dose=10×15=150 mg. V=150/(200mg/5mL)=150×5/200=3.75 mL.",mv:{dx:0,dy:-1}},
+
+{c:"piège · stœchiométrie des gaz",type:"qcm",
+code:`<span class="cm">// stœchiométrie et volumes de gaz (conditions identiques)</span>
+à même T et P : les volumes sont proportionnels aux coefficients
+<span class="ex">N₂ + 3H₂ → 2NH₃
+  1 L N₂ + 3 L H₂ → 2 L NH₃  (même T, P)</span>
+<span class="why">// loi d'Avogadro : même T, P → même nombre de molécules par unité de volume</span>`,
+q:"2CO(g) + O₂(g) → 2CO₂(g). Si on consomme 4 L de CO et 2 L de O₂, quel volume de CO₂ produit ?",
+ch:["2 L","4 L","6 L","8 L"],ok:1,
+hint:"coefficients : 2 CO + 1 O₂ → 2 CO₂. Volumes proportionnels.",
+fb_ok:"// correct — ratio 2CO:2CO₂. 4 L CO → 4 L CO₂.",
+fb_no:"// 2 volumes CO → 2 volumes CO₂. 4 L CO → 4 L CO₂.",mv:{dx:1,dy:0}},
+]},
+]; // fin CHAPTERS
+
+// ═══════════════════════════════════════
+//  SECTIONS pour le menu
+// ═══════════════════════════════════════
+const SECTIONS = {};
+CHAPTERS.forEach(ch => {
+  if(!SECTIONS[ch.section]) SECTIONS[ch.section] = [];
+  SECTIONS[ch.section].push(ch);
+});
+
+// ═══════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════
+let curChap=null, curQ=0, score=0, answered=false;
+let rX=0, rY=5;
+const GOAL={x:5,y:0};
+let traces=new Set();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){
+  document.getElementById('win').classList.remove('show');
+  show('s-home');
+}
+
+function buildHome(){
+  const list=document.getElementById('chap-list');
+  list.innerHTML='';
+  Object.entries(SECTIONS).forEach(([sec, chaps])=>{
+    const sec_div=document.createElement('div');
+    sec_div.className='chap-section';
+    const lbl=document.createElement('div');
+    lbl.className='chap-section-lbl';
+    lbl.textContent=sec;
+    sec_div.appendChild(lbl);
+    chaps.forEach(ch=>{
+      const row=document.createElement('div');
+      row.className='chap-row';
+      row.innerHTML=`
+        <span class="chap-num">${ch.num}.</span>
+        <span class="chap-name">${ch.name}</span>
+        <span class="chap-level">${ch.level}</span>
+        <span class="chap-count">${ch.questions.length} qs</span>`;
+      row.onclick=()=>startChap(ch);
+      sec_div.appendChild(row);
+    });
+    list.appendChild(sec_div);
+  });
+}
+
+function startChap(ch){
+  curChap=ch; curQ=0; score=0; answered=false;
+  rX=0; rY=5; traces=new Set();
+  document.getElementById('win').classList.remove('show');
+  buildGrid(); loadQ(); show('s-game');
+}
+
+function loadQ(){
+  answered=false;
+  const q=curChap.questions[curQ];
+  document.getElementById('g-title').textContent=curChap.name;
+  document.getElementById('g-pts').textContent=score+' pts';
+  document.getElementById('g-ctag').textContent=q.c;
+  document.getElementById('g-concept').innerHTML=q.code;
+  document.getElementById('g-q').textContent=q.q;
+  document.getElementById('g-fb').className='fb';
+  document.getElementById('g-next').className='btnext';
+
+  const badge=document.getElementById('g-qbadge');
+  badge.textContent=q.type==='qcm'?'QCM':'question ouverte';
+  badge.className='qbadge '+(q.type==='qcm'?'qcm':'open');
+
+  const dr=document.getElementById('dots-row');
+  dr.innerHTML='';
+  curChap.questions.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i<curQ?' done':i===curQ?' cur':'');
+    dr.appendChild(d);
+  });
+
+  const cc=document.getElementById('g-choices');
+  const ow=document.getElementById('g-open');
+  const inp=document.getElementById('g-input');
+  cc.innerHTML='';
+
+  if(q.type==='qcm'){
+    ow.style.display='none';
+    q.ch.forEach((t,i)=>{
+      const b=document.createElement('button');
+      b.className='choice'; b.textContent=t;
+      b.onclick=()=>answerQcm(i);
+      cc.appendChild(b);
+    });
+  } else {
+    ow.style.display='flex';
+    inp.value=''; inp.disabled=false;
+    document.querySelector('.open-btn').disabled=false;
+    setTimeout(()=>inp.focus(),100);
+  }
+}
+
+function answerQcm(idx){
+  if(answered) return;
+  answered=true;
+  const q=curChap.questions[curQ];
+  const ok=idx===q.ok;
+  document.querySelectorAll('.choice').forEach((b,i)=>{
+    if(i===q.ok) b.classList.add('ok');
+    else if(i===idx&&!ok) b.classList.add('no');
+    else b.classList.add('dim');
+    b.onclick=null;
+  });
+  showFb(ok,q);
+}
+
+function checkOpen(){
+  if(answered) return;
+  const q=curChap.questions[curQ];
+  const val=document.getElementById('g-input').value.trim().toLowerCase();
+  if(!val) return;
+  const ok=q.keys.some(k=>val.includes(k.toLowerCase())||k.toLowerCase()===val);
+  answered=true;
+  document.getElementById('g-input').disabled=true;
+  document.querySelector('.open-btn').disabled=true;
+  showFb(ok,q);
+}
+
+function showFb(ok,q){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show '+(ok?'ok':'no');
+  fb.textContent=ok?q.fb_ok:q.fb_no;
+  if(ok){score+=10;document.getElementById('g-pts').textContent=score+' pts';sparks();}
+  moveRobot(q.mv.dx,q.mv.dy);
+  document.getElementById('g-next').className='btnext show';
+}
+
+function doHint(){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show hint';
+  fb.textContent='? '+curChap.questions[curQ].hint;
+}
+
+function nextQ(){
+  curQ++;
+  if(curQ>=curChap.questions.length){showWin();return;}
+  loadQ();
+}
+
+function showWin(){
+  document.getElementById('win-title').textContent=`// ${curChap.name} · maîtrisé`;
+  const ul=document.getElementById('win-list');
+  ul.innerHTML='';
+  curChap.takeaway.forEach(t=>{
+    const li=document.createElement('li');li.textContent=t;ul.appendChild(li);
+  });
+  document.getElementById('win').classList.add('show');
+}
+
+function restartChap(){
+  document.getElementById('win').classList.remove('show');
+  startChap(curChap);
+}
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.createElement('div');
+    d.id=`gc${x}${y}`;d.className='gcell';
+    if(x===GOAL.x&&y===GOAL.y) d.textContent='🏁';
+    g.appendChild(d);
+  }
+  renderGrid();
+}
+
+function renderGrid(){
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.getElementById(`gc${x}${y}`);
+    if(!d) continue;
+    d.className='gcell';d.textContent='';d.innerHTML='';
+    if(x===GOAL.x&&y===GOAL.y){d.classList.add('goal');d.textContent='🏁';continue;}
+    if(traces.has(`${x},${y}`)) d.classList.add('trace');
+    if(x===rX&&y===rY){
+      d.classList.add('robot');
+      d.innerHTML=`<svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/>
+        <rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/>
+        <rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/>
+        <circle cx="16" cy="7" r="2" fill="#c8a870"/>
+        <rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+        <rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+      </svg>`;
+    }
+  }
+}
+
+function moveRobot(dx,dy){
+  traces.add(`${rX},${rY}`);
+  rX=Math.max(0,Math.min(5,rX+dx));
+  rY=Math.max(0,Math.min(5,rY+dy));
+  renderGrid();
+  const dir=dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent=`${curQ+1}/${curChap.questions.length} → ${dir}`;
+}
+
+function sparks(){
+  const cell=document.getElementById(`gc${rX}${rY}`);
+  if(!cell) return;
+  const r=cell.getBoundingClientRect();
+  ['#c8a870','#e8a598','#7a9e87','#a89ec8'].forEach((c,i)=>{
+    const p=document.createElement('div');p.className='pt';
+    const s=3+Math.random()*5;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);
+  });
+}
+
+buildHome();
+</script>
+</body>
+</html>

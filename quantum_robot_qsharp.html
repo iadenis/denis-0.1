@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · quantum robot · Q#</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;
+  --ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;
+  --sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;
+  --sky:#8fb4c8;--line:rgba(26,24,20,0.08);
+  --q:#5c2aed;--q-light:rgba(92,42,237,0.07);--q-border:rgba(92,42,237,0.22);
+  --qi:#8fb4c8;--qs:#7a9e87;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;}
+#app{min-height:100vh;display:flex;flex-direction:column;}
+
+#screen-title,#screen-menu,#screen-game,#screen-final{display:none;flex-direction:column;}
+#screen-title.active,#screen-menu.active,#screen-game.active,#screen-final.active{display:flex;}
+
+/* ── TITLE ── */
+#screen-title{align-items:center;justify-content:center;padding:3rem 1.5rem;gap:1.25rem;min-height:100vh;}
+.logo-q{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);letter-spacing:-0.02em;}
+.logo-r{font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.2em;color:var(--ink3);margin-top:-8px;}
+.title-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);letter-spacing:0.08em;}
+.title-tagline{font-size:13px;color:var(--ink2);font-weight:300;text-align:center;max-width:380px;}
+.edition-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--q);background:var(--q-light);padding:3px 12px;border-radius:999px;border:1px solid var(--q-border);}
+.legend-box{background:white;border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:460px;width:100%;display:flex;flex-direction:column;gap:6px;}
+.legend-box div{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.6;}
+.legend-box span{color:var(--ink);font-weight:500;}
+.lq{color:var(--q)!important;}
+.lqi{color:var(--qi)!important;}
+
+/* ── MENU ── */
+#screen-menu{align-items:center;padding:2rem 1.5rem;gap:1rem;min-height:100vh;justify-content:flex-start;padding-top:3rem;}
+.module-list{max-width:520px;width:100%;display:flex;flex-direction:column;gap:6px;}
+.module-card{background:white;border:1px solid var(--line);border-radius:10px;padding:0.9rem 1.1rem;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
+.module-card:hover{border-color:var(--ink3);background:var(--bg2);}
+.module-card.done{opacity:0.55;}
+.module-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:28px;}
+.module-info{flex:1;}
+.module-title{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink);}
+.module-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);margin-top:2px;}
+.module-score{font-family:'DM Mono',monospace;font-size:10px;color:var(--sage);}
+
+/* ── GAME ── */
+#screen-game{flex:1;flex-direction:column;}
+.progress-wrap{height:2px;background:var(--bg3);}
+.progress-fill{height:2px;background:var(--q);transition:width 0.4s;}
+.game-header{display:flex;align-items:center;gap:10px;padding:0.7rem 1.25rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
+.back-btn{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.back-btn:hover{color:var(--ink);}
+.game-title{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.exercise-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.score-bar{display:flex;align-items:center;gap:6px;}
+#score-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);}
+.score-dots{display:flex;gap:3px;}
+.score-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);}
+.score-dot.hit{background:var(--sage);border-color:var(--sage);}
+.score-dot.miss{background:var(--blush);border-color:var(--blush);}
+
+/* ── LAYOUT ── */
+.game-layout{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.game-layout{grid-template-columns:1fr;}.right-panel{border-left:none;border-top:1px solid var(--line);}}
+#game-content{display:flex;flex-direction:column;}
+.intro-box{padding:1.5rem;background:var(--bg);}
+.intro-title{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);margin-bottom:8px;}
+.intro-box pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.8;white-space:pre-wrap;}
+
+/* ── DUAL CODE ── */
+.dual-code{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:1rem 1.5rem 0.75rem;}
+@media(max-width:700px){.dual-code{grid-template-columns:1fr;}}
+.dual-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);margin:1rem 1.5rem 4px;}
+.code-block{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.code-block-single{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:1rem 1.5rem 0.75rem;}
+.code-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.code-label.qi{color:var(--qi);}
+.code-label.qs{color:var(--qs);}
+.code-block pre,.code-block-single pre{padding:0.85rem 1.1rem;font-family:'DM Mono',monospace;font-size:11px;line-height:1.85;color:var(--ink2);white-space:pre-wrap;}
+.info-box{margin:0 1.5rem 0.75rem;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:0.75rem 1rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.75;white-space:pre-line;}
+
+/* ── MCQ ── */
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;}
+.choice:hover{border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.35;cursor:default;}
+
+/* ── FEEDBACK ── */
+.feedback{font-family:'DM Mono',monospace;font-size:11.5px;line-height:1.7;padding:8px 12px;border-radius:8px;display:none;margin:0 1.5rem 0.75rem;}
+.feedback.success{display:block;border:1px solid rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.feedback.error{display:block;border:1px solid rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+
+/* ── DIR PAD ── */
+.input-area{padding:0.75rem 1.5rem;}
+.input-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);margin-bottom:8px;}
+.input-label span{color:var(--q);}
+.dir-pad{display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(3,40px);gap:4px;width:128px;}
+.dir-btn{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.11s;}
+.dir-btn:hover:not(:disabled){border-color:var(--q);background:var(--q-light);}
+.dir-btn:disabled{opacity:0.4;cursor:default;}
+.dir-btn[data-dir="haut"]{grid-column:2;grid-row:1;}
+.dir-btn[data-dir="gauche"]{grid-column:1;grid-row:2;}
+.dir-btn[data-dir="droite"]{grid-column:3;grid-row:2;}
+.dir-btn[data-dir="bas"]{grid-column:2;grid-row:3;}
+.key-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);margin-top:8px;}
+kbd{background:var(--bg2);border:1px solid var(--line);border-radius:3px;padding:1px 5px;font-family:'DM Mono',monospace;font-size:9px;}
+
+/* ── HINT ── */
+.hint-trigger{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:5px 10px;cursor:pointer;margin-left:8px;}
+.hint-overlay{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.95);z-index:50;align-items:center;justify-content:center;padding:2rem;}
+.hint-overlay.active{display:flex;}
+.hint-panel{background:white;border:1px solid var(--line);border-radius:12px;padding:1.5rem;max-width:500px;width:100%;}
+.hint-header{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.hint-close{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:18px;line-height:1;}
+.hint-close:hover{color:var(--ink);}
+.hint-body{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.9;white-space:pre-wrap;}
+.hint-body .hl{color:var(--ink);font-weight:500;}
+.hint-body .hlg{color:var(--sage);}
+.hint-body .hly{color:var(--amber);}
+.hint-body .hlc{color:var(--qi);}
+.hint-btn{font-family:'DM Mono',monospace;font-size:11px;padding:7px 14px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;margin-top:12px;}
+
+/* ── RIGHT PANEL ── */
+.right-panel{background:var(--bg2);border-left:1px solid var(--line);padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;}
+.grid-panel{display:flex;flex-direction:column;align-items:center;gap:0.75rem;width:100%;}
+.grid-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-legend{display:flex;gap:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.legend-dot.r{background:var(--sage);}
+.legend-dot.g{background:var(--amber);}
+.legend-dot.t{background:rgba(122,158,135,0.35);}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid-container{display:grid;grid-template-columns:repeat(6,34px);grid-template-rows:repeat(6,34px);gap:2px;}
+.cell{width:34px;height:34px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'DM Mono',monospace;transition:all 0.2s;}
+.cell.robot{background:rgba(122,158,135,0.15);border:1.5px solid var(--sage);color:var(--sage);font-size:14px;}
+.cell.goal{background:rgba(200,168,112,0.15);border:1.5px solid var(--amber);color:var(--amber);}
+.cell.trail{background:rgba(122,158,135,0.08);}
+.cell.trail::after{content:'·';color:var(--sage);font-size:14px;}
+.pos-info{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;}
+.pos-info span{color:var(--ink2);}
+
+/* ── FINAL ── */
+#screen-final{align-items:center;justify-content:center;padding:3rem 1.5rem;gap:1.25rem;min-height:100vh;text-align:center;}
+.final-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);}
+.total-score{font-family:'DM Mono',monospace;font-size:56px;font-weight:300;color:var(--ink);}
+.score-table{background:white;border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:440px;width:100%;text-align:left;}
+.score-row{display:flex;justify-content:space-between;padding:5px 0;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);border-bottom:1px solid var(--line);}
+.score-row:last-child{border-bottom:none;}
+.score-row .s{color:var(--sage);}
+.cheatsheet{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:440px;width:100%;text-align:left;}
+.cheatsheet-header{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.cs-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-family:'DM Mono',monospace;font-size:10.5px;}
+.cs-row:last-child{border-bottom:none;}
+.cs-qi{color:var(--qi);}
+.cs-qs{color:var(--qs);}
+
+/* ── BUTTONS ── */
+.btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:9px 22px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;transition:opacity 0.13s;}
+.btn:hover{opacity:0.75;}
+.btn-q{background:var(--q);color:white;}
+.btn-ghost{background:none;color:var(--ink2);border:1px solid var(--line);}
+.btn-ghost:hover{border-color:var(--ink3);color:var(--ink);}
+.continue-wrap{display:flex;justify-content:center;margin:1.5rem;}
+.continue-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:8px 20px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;transition:opacity 0.13s;}
+.continue-btn:hover{opacity:0.75;}
+
+/* ── QUIZ ── */
+.quiz-wrap{max-width:660px;margin:0 auto;padding:1.5rem;}
+.quiz-q-box{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:0.85rem 1rem;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);line-height:1.7;margin-bottom:10px;}
+.quiz-counter{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);margin-bottom:4px;}
+
+/* ── PARTICLES ── */
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── TITLE ── -->
+<div id="screen-title">
+  <div style="text-align:center;">
+    <div class="logo-q">quantum</div>
+    <div class="logo-r">ROBOT · Q#</div>
+  </div>
+  <div class="title-sub">apprends Q# (Microsoft) en jouant</div>
+  <div class="title-tagline">Tu connais Qiskit ? Découvre la syntaxe Q# de Microsoft — chaque qubit est toujours une direction.</div>
+  <div class="edition-badge">Q# · Microsoft Quantum</div>
+  <div class="legend-box">
+    <div><span>Zero</span> → droite &nbsp;·&nbsp; <span>One</span> → haut</div>
+    <div>porte <span class="lq">X(q)</span> = inversion &nbsp;·&nbsp; porte <span class="lq">H(q)</span> = superposition</div>
+    <div>porte <span class="lq">CNOT(ctrl, q)</span> = inverse q si ctrl = One</div>
+    <div style="margin-top:4px;color:var(--ink3);">// <span class="lqi">bleu</span> = Qiskit &nbsp;·&nbsp; <span style="color:var(--qs)">vert</span> = Q#</div>
+  </div>
+  <a href="index.html" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);text-decoration:none;letter-spacing:0.06em;">← denis</a>
+  <button class="btn btn-q" onclick="showMenu()">commencer →</button>
+</div>
+
+<!-- ── MENU ── -->
+<div id="screen-menu">
+  <div style="display:flex;align-items:center;gap:12px;padding:0.75rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;">
+    <button class="back-btn" onclick="showTitle()">← denis</button>
+    <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;">quantum · Q#</span>
+    <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);">5 modules</span>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;gap:0.75rem;flex:1;">
+    <div class="module-list" id="module-list"></div>
+  </div>
+</div>
+
+<!-- ── GAME ── -->
+<div id="screen-game">
+  <div class="progress-wrap"><div class="progress-fill" id="progress-bar"></div></div>
+  <div class="game-header">
+    <button class="back-btn" onclick="showMenu()">← menu</button>
+    <div class="game-title" id="game-title">MODULE 1</div>
+    <div class="exercise-badge" id="exercise-badge">Ex 1/5</div>
+    <div style="flex:1;"></div>
+    <div class="score-bar">
+      <span id="score-label">0 pts</span>
+      <div class="score-dots" id="score-dots"></div>
+    </div>
+  </div>
+  <div id="game-content"></div>
+</div>
+
+<!-- ── FINAL ── -->
+<div id="screen-final">
+  <div class="final-label">Q# maîtrisé</div>
+  <div class="total-score" id="total-score">0</div>
+  <div class="score-table" id="score-table"></div>
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">// récapitulatif Qiskit → Q#</div>
+    <div class="cs-row"><div class="cs-qi">QuantumCircuit(1)</div><div class="cs-qs">use q = Qubit();</div></div>
+    <div class="cs-row"><div class="cs-qi">qc.x(0)</div><div class="cs-qs">X(q);</div></div>
+    <div class="cs-row"><div class="cs-qi">qc.h(0)</div><div class="cs-qs">H(q);</div></div>
+    <div class="cs-row"><div class="cs-qi">qc.cx(0,1)</div><div class="cs-qs">CNOT(q0, q1);</div></div>
+    <div class="cs-row"><div class="cs-qi">qc.measure_all()</div><div class="cs-qs">let r = M(q);</div></div>
+    <div class="cs-row"><div class="cs-qi">résultat : 0 ou 1</div><div class="cs-qs">Zero ou One</div></div>
+    <div class="cs-row"><div class="cs-qi">def ma_fonction():</div><div class="cs-qs">operation MonOp() : Type</div></div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="restartGame()">↺ rejouer</button>
+    <button class="btn btn-ghost" onclick="showTitle()">accueil</button>
+  </div>
+</div>
+
+</div>
+
+<!-- ── HINT OVERLAY ── -->
+<div class="hint-overlay" id="hint-overlay">
+  <div class="hint-panel">
+    <div class="hint-header">
+      <span id="hint-title"></span>
+      <button class="hint-close" onclick="closeHint()">×</button>
+    </div>
+    <div class="hint-body" id="hint-body"></div>
+    <button class="hint-btn" onclick="closeHint()">compris ✓</button>
+  </div>
+</div>
+
+<script>
+const state={ scores:{}, currentModule:null, currentExIndex:0, robot:[0,5], goal:[5,0], traces:new Set() };
+
+// ══════════════════════════════════════════════
+//  MODULES DATA (identiques à l'original)
+// ══════════════════════════════════════════════
+const MODULES=[
+  { id:1,label:'MODULE 1',title:'Syntaxe de base Q#',
+    intro:`Bienvenue dans Q# !\n\nTu connais déjà les concepts (qubit, portes...).\nMaintenant on apprend la SYNTAXE Q#.\n\nPrincipales différences avec Qiskit :\n\n  Qiskit  →  qc = QuantumCircuit(1)\n  Q#      →  use q = Qubit();\n\n  Qiskit  →  qc.x(0)\n  Q#      →  X(q);\n\n  Qiskit  →  qc.measure_all()\n  Q#      →  let r = M(q);\n\nEn Q# :\n  • Majuscule pour les portes : X, H, CNOT\n  • Point-virgule ; à la fin de chaque ligne\n  • 'use' pour déclarer un qubit\n  • Résultat : Zero ou One (pas 0 ou 1)`,
+    exercises:[
+      { title:'Exercice 1/5 — Reconnais la porte', qiskit:'qc = QuantumCircuit(1)\n# qubit vaut 0 par défaut\nqc.measure_all()\n# résultat = 0', qsharp:'use q = Qubit();\n// qubit vaut Zero par défaut\nlet r = M(q);\n// r = Zero', dualTitle:'Déclarer un qubit et le mesurer', info:'En Q#, la mesure renvoie Zero ou One\n(pas 0 ou 1 comme en Python)\n\nZero → DROITE\nOne  → HAUT\n\nLe qubit vaut Zero par défaut.', type:'direction',sequence:[[1,0]],maxScore:1 },
+      { title:'Exercice 2/5 — Porte X en Q#', qiskit:'qc = QuantumCircuit(1)\nqc.x(0)   // minuscule\nqc.measure_all()\n# résultat = 1', qsharp:'use q = Qubit();\nX(q);     // MAJUSCULE !\nlet r = M(q);\n// r = One', dualTitle:'La porte X (NOT)', info:'En Q# : X(q)  avec une MAJUSCULE\nEn Qiskit : qc.x(0) avec minuscule\n\nX inverse Zero → One\nOne → direction ?', type:'mcq', question:'r vaut :', options:['Zero','One'], correct:1, expl:'X(q) inverse Zero → One !', then:{ type:'direction',sequence:[[0,-1]],maxScore:1 } },
+      { title:'Exercice 3/5 — Lire du vrai Q#', qsharp_only:'operation RobotMove() : Result[] {\n    use q0 = Qubit();\n    use q1 = Qubit();\n    use q2 = Qubit();\n    // q0 reste Zero\n    X(q1);          // q1 → One\n    // q2 reste Zero\n    let r0 = M(q0); // Zero\n    let r1 = M(q1); // One\n    let r2 = M(q2); // Zero\n    return [r0, r1, r2];\n}', info:'3 qubits :\n  r0 = Zero → droite\n  r1 = One  → haut\n  r2 = Zero → droite\nEntre les 3 directions dans l\'ordre !', type:'direction',sequence:[[1,0],[0,-1],[1,0]],maxScore:3 },
+      { title:'Exercice 4/5 — Trouve l\'erreur !', qsharp_only:'operation Test() : Result {\n    use q = Qubit();\n    x(q);          // ligne 3\n    let r = M(q);\n    return r;\n}', info:'Ce code Q# contient UNE erreur.\nEn Q#, les portes s\'écrivent avec une MAJUSCULE.\nX(q), H(q), CNOT(q1,q2)...\n\nSur quelle ligne est l\'erreur ?', type:'quiz', questions:[
+          { q:'Sur quelle ligne est l\'erreur ?', opts:['Ligne 2','Ligne 3','Ligne 4'], correct:1, expl:'Ligne 3 ! x(q) doit s\'écrire X(q) — majuscule !' },
+          { q:'Comment corriger x(q) pour respecter la syntaxe Q# ?', opts:['x(q)','X(q)','use x = q;'], correct:1, expl:'X(q) avec majuscule — toujours majuscule en Q# !' },
+        ], maxScore:2 },
+      { title:'Exercice 5/5 — Quiz syntaxe Q#', type:'quiz', questions:[
+          { q:'En Q#, comment déclare-t-on un qubit ?', opts:['use q = qubit();','use q = Qubit();','qubit q;'], correct:1, expl:'use q = Qubit();  (Qubit avec majuscule)' },
+          { q:'Comment s\'écrit la mesure d\'un qubit en Q# ?', opts:['measure(q)','qc.measure_all()','let r = M(q);'], correct:2, expl:'let r = M(q); — M majuscule aussi !' },
+          { q:'Quels sont les résultats possibles d\'une mesure en Q# ?', opts:['0 ou 1','Zero ou One','true ou false'], correct:1, expl:'Zero ou One — avec majuscule !' },
+          { q:'En Q#, comment s\'écrit la porte NOT sur un qubit q ?', opts:['X(q)','x(q)'], correct:0, expl:'X(q) — toujours majuscule pour les portes en Q# !' },
+          { q:'En Q#, comment traduit-on qc.h(0) de Qiskit ?', opts:['h(q)','H(q)','hadamard(q)'], correct:1, expl:'H(q) — même logique que X !' },
+        ], maxScore:5 },
+    ], maxScore:12 },
+
+  { id:2,label:'MODULE 2',title:'Portes X, H, CNOT en Q#',
+    intro:`Récapitulatif des portes en Q# :\n\n  X(q)          →  inverse le qubit (NOT)\n  H(q)          →  superposition (Hadamard)\n  CNOT(ctrl, q) →  intrication\n\nComparaison :\n\n  Qiskit      │  Q#\n  ────────────┼───────────────\n  qc.x(0)     │  X(q);\n  qc.h(0)     │  H(q);\n  qc.cx(0,1)  │  CNOT(q0, q1);\n\nRègle :\n  Qiskit = minuscule + numéro\n  Q#     = Majuscule + variable`,
+    exercises:[
+      { title:'Exercice 1/5 — X et H en Q#', qiskit:'qc.x(0)    # inversion\nqc.h(0)    # superposition\n# mesure → aléatoire', qsharp:'X(q);      // inversion\nH(q);      // superposition\nlet r = M(q); // aléatoire', dualTitle:'Porte X puis porte H', type:'random_h',nb:1,maxScore:1 },
+      { title:'Exercice 2/5 — CNOT en Q#', qiskit:'qc.x(0)\nqc.cx(0,1)  # contrôle=0, cible=1\n# q0=1 → q1 inversé', qsharp:'X(q0);\nCNOT(q0, q1);  // MAJUSCULE !\n// q0=One → q1 inversé', dualTitle:'La porte CNOT', info:'En Q# : CNOT(contrôle, cible)\nEn Qiskit : qc.cx(contrôle, cible)\n\nMême logique, syntaxe différente.\nq0=One → q1 inversé (Zero→One)\nq0=One→haut  q1=One→haut', type:'direction',sequence:[[0,-1],[0,-1]],maxScore:2 },
+      { title:'Exercice 3/5 — Grand parcours M2', qsharp_only:'operation GrandParcours() : Result[] {\n    use qs = Qubit[6];\n    X(qs[0]);           // qs[0] → One\n    X(qs[1]);           // qs[1] → One\n    // qs[2] aléatoire (H)\n    // qs[3] reste Zero\n    // qs[4] aléatoire (H)\n    X(qs[5]);           // qs[5] → One\n    H(qs[2]); H(qs[4]);\n    return ForEach(M, qs);\n}', type:'grand_parcours_m2',maxScore:6 },
+      { title:'Exercice 4/5 — Types Q#', qsharp_only:'operation Types() : (Result, Bool, Int) {\n    use q = Qubit();\n    X(q);\n    let r = M(q);     // type : Result\n    let b = r == One; // type : Bool\n    let n = 42;       // type : Int\n    return (r, b, n);\n}', info:'En Q#, chaque valeur a un type :\n  M(q) → Result (Zero ou One)\n  r == One → Bool (true ou false)\n  42 → Int\n\nX(q) inverse Zero → One → r = One → b = true', type:'quiz', questions:[
+            { q:'let r = M(q); après X(q) — quel est le type de r en Q# ?', opts:['Int','Result','Bool'], correct:1, expl:'Result — le résultat d\'une mesure !' },
+            { q:'let b = r == One; — quel est le type de b en Q# ?', opts:['Result','Bool','Int'], correct:1, expl:'Bool — une comparaison retourne true ou false !' },
+            { q:'X(q) a été appliqué. Que vaut r = M(q) ?', opts:['Zero','One'], correct:1, expl:'X inverse Zero → One !' },
+          ], maxScore:3 },
+      { title:'Exercice 5/5 — Quiz portes Q#', type:'quiz', questions:[
+            { q:'En Q#, qc.cx(0,1) de Qiskit se traduit par :', opts:['cx(q0,q1)','CNOT(q0,q1)','cnot(q0,q1)'], correct:1, expl:'CNOT(q0, q1); — même ordre, majuscule !' },
+            { q:'H(q) a été appliqué puis mesuré = One. Quelle direction ?', opts:['Droite (Zero)','Haut (One)'], correct:1, expl:'One → haut !' },
+            { q:'CNOT(q0, q1) avec q0 = Zero — que se passe-t-il ?', opts:['q1 est inversé','q1 reste pareil','q0 est inversé'], correct:1, expl:'q0=Zero → q1 RESTE PAREIL !' },
+            { q:'En Q#, la porte Hadamard s\'écrit :', opts:['h(q)','Hadamard(q)','H(q)'], correct:2, expl:'H(q) — toujours majuscule !' },
+            { q:'Quelle est la valeur par défaut d\'un Qubit en Q# avant toute opération ?', opts:['One','Zero','aléatoire'], correct:1, expl:'Zero par défaut, comme en Qiskit !' },
+          ], maxScore:5 },
+    ], maxScore:17 },
+
+  { id:3,label:'MODULE 3',title:'Types et variables en Q#',
+    intro:`En Q#, chaque variable a un type :\n\n  Qubit    →  un qubit\n  Result   →  Zero ou One (mesure)\n  Bool     →  true ou false\n  Int      →  nombre entier\n  Result[] →  tableau de résultats\n\nDéclarer une variable :\n  let x = valeur;          // immuable\n  mutable x = valeur;      // modifiable\n  set x = nouvelle_val;    // modifier\n\nComparaison Python/Q# :\n  x = 5   →  let x = 5;\n             ou  mutable x = 5;`,
+    exercises:[
+      { title:'Exercice 1/5 — let vs mutable', qsharp_only:'operation TestLet() : Result {\n    use q = Qubit();\n    mutable count = 0;\n    X(q); set count = count + 1; // count=1\n    X(q); set count = count + 1; // count=2\n    // q : Zero→One→Zero\n    let r = M(q); // r = Zero\n    return r;\n}', info:'X(q) deux fois → retour à Zero\ncount est mutable → peut être modifié\nlet r = M(q) → r est immuable\nr = Zero → direction ?', type:'direction',sequence:[[1,0]],maxScore:1 },
+      { title:'Exercice 2/5 — Tableaux de qubits', qsharp_only:'operation Tableau() : Result[] {\n    use qs = Qubit[3];   // tableau de 3 qubits\n    X(qs[0]);            // qs[0] → One\n    // qs[1] reste Zero\n    X(qs[2]);            // qs[2] → One\n    return ForEach(M, qs);\n    // résultat : [One, Zero, One]\n}', info:'Qubit[3] = tableau de 3 qubits\nqs[0]=One → haut\nqs[1]=Zero → droite\nqs[2]=One → haut', type:'direction',sequence:[[0,-1],[1,0],[0,-1]],maxScore:3 },
+      { title:'Exercice 3/5 — Condition if', qiskit:'m = qc.measure_all()\nif m[0] == 1:\n    robot.move("haut")\nelse:\n    robot.move("droite")', qsharp:'let r = M(q);\nif r == One {\n    // haut\n} else {\n    // droite\n}', dualTitle:'Condition if', type:'if_random',maxScore:1 },
+      { title:'Exercice 4/5 — Analyse de types', qsharp_only:'operation Analyse() : Result[] {\n    use qs = Qubit[4];\n    X(qs[0]);\n    X(qs[0]);  // annulé\n    X(qs[1]);\n    CNOT(qs[1], qs[2]);\n    H(qs[3]);\n    // mesure qs[3] = One\n    return ForEach(M, qs);\n}', info:'Analyse :\n  qs[0] : X+X → s\'annulent → Zero → droite\n  qs[1] : X → One → haut\n  qs[2] : CNOT(One) → inversé → One → haut\n  qs[3] : H → mesure=One → haut', type:'direction',sequence:[[1,0],[0,-1],[0,-1],[0,-1]],maxScore:4 },
+      { title:'Exercice 5/5 — Quiz types Q#', type:'quiz', questions:[
+            { q:'let x = M(q); — quel est le type de la variable x en Q# ?', opts:['Int','Result','Bool'], correct:1, expl:'Result — le résultat d\'une mesure !' },
+            { q:'Pour modifier une variable déjà déclarée en Q#, quels mots-clés utilise-t-on ?', opts:['let','mutable + set','var'], correct:1, expl:'mutable (déclaration) et set (modification) !' },
+            { q:'use qs = Qubit[3]; — combien de qubits ce tableau contient-il ?', opts:['1','3','2'], correct:1, expl:'3 qubits dans un tableau !' },
+            { q:'En Q#, true et false sont de quel type ?', opts:['Result','Bool','Int'], correct:1, expl:'Bool — avec majuscule en Q# !' },
+            { q:'Quelle est la différence entre let et mutable en Q# ?', opts:['Aucune différence','let = valeur fixée, mutable = peut être modifié avec set','let pour les nombres, mutable pour les qubits'], correct:1, expl:'let = fixé, mutable = peut être changé avec set' },
+          ], maxScore:5 },
+    ], maxScore:14 },
+
+  { id:4,label:'MODULE 4',title:'Boucles et Opérations',
+    intro:`Les boucles en Q# :\n\n  for i in 0..n-1 { ... }   // for classique\n  for q in qs { ... }        // for sur tableau\n  repeat { ... } until cond; // boucle quantique\n\nLes opérations (= fonctions en Q#) :\n\n  operation NomOp(args) : TypeRetour {\n      // corps\n  }\n\nComparaison :\n  Python : def ma_fonction(x):\n  Q#     : operation MonOp(x : Int) : Result\n\nEn Q#, le type de chaque paramètre ET du retour\ndoit être spécifié explicitement.`,
+    exercises:[
+      { title:'Exercice 1/5 — Boucle for', qiskit:'for i in range(3):\n    qc.x(i)\n# applique X à q0, q1, q2', qsharp:'for i in 0..2 {\n    X(qs[i]);\n}\n// applique X à qs[0],qs[1],qs[2]', dualTitle:'Boucle for', info:'La boucle applique X à chaque qubit.\nTous valent One → tous HAUT !', type:'direction',sequence:[[0,-1],[0,-1],[0,-1]],maxScore:3 },
+      { title:'Exercice 2/5 — Opération personnalisée', qsharp_only:'operation PrepareOne(q : Qubit) : Unit {\n    X(q);   // met le qubit à One\n}\n\noperation Main() : Result[] {\n    use (q0,q1,q2) = (Qubit(),Qubit(),Qubit());\n    PrepareOne(q0);   // q0 → One\n    // q1 reste Zero\n    PrepareOne(q2);   // q2 → One\n    return [M(q0), M(q1), M(q2)];\n    // [One, Zero, One]\n}', info:'PrepareOne() est une opération custom.\nElle met le qubit à One.\nq0=One→haut  q1=Zero→droite  q2=One→haut', type:'direction',sequence:[[0,-1],[1,0],[0,-1]],maxScore:3 },
+      { title:'Exercice 3/5 — Boucle + superposition', qsharp_only:'use qs = Qubit[4];\nfor q in qs {\n    H(q);   // superposition sur chaque qubit\n}\n// mesures aléatoires !', type:'random_h',nb:4,maxScore:4 },
+      { title:'Exercice 4/5 — Traduction complète !', qiskit:'from qiskit import QuantumCircuit\n\ndef robot_move():\n    qc = QuantumCircuit(3)\n    qc.x(0)\n    qc.h(1)\n    qc.cx(0, 2)\n    return qc', qsharp:'operation RobotMove() : Result[] {\n    use (q0,q1,q2) =\n      (Qubit(),Qubit(),Qubit());\n    X(q0);\n    H(q1);\n    CNOT(q0, q2);\n    return [M(q0),M(q1),M(q2)];\n}', dualTitle:'Circuit complet Qiskit → Q#', type:'quiz', questions:[
+              { q:'En Python, def crée une fonction. Quel mot-clé Q# joue ce rôle pour les fonctions quantiques ?', opts:['function','operation','method'], correct:1, expl:'operation — le mot-clé Q# pour les fonctions quantiques !' },
+              { q:'qc.h(1) en Qiskit, avec la variable q1 en Q#, se traduit par :', opts:['h(q1)','H(q1)','hadamard(q1)'], correct:1, expl:'H(q1); — toujours majuscule !' },
+              { q:'qc.cx(0,2) en Qiskit, avec les variables q0 et q2 en Q#, se traduit par :', opts:['cx(q0,q2)','cnot(q0,q2)','CNOT(q0,q2)'], correct:2, expl:'CNOT(q0, q2); — premier=contrôle, second=cible' },
+            ], maxScore:3 },
+      { title:'Exercice 5/5 — Grand parcours boucle !', qsharp_only:'operation GrandParcours() : Result[] {\n    use qs = Qubit[6];\n    // Boucle : X sur les qubits pairs\n    for i in 0..2..4 {   // 0, 2, 4\n        X(qs[i]);\n    }\n    // H sur qs[2] et qs[4]\n    H(qs[2]); H(qs[4]);\n    CNOT(qs[0], qs[1]);\n    return ForEach(M, qs);\n}', type:'grand_parcours_m4',maxScore:6 },
+    ], maxScore:19 },
+
+  { id:5,label:'MODULE 5',title:'Algorithmes quantiques complets',
+    intro:`Tu connais maintenant :\n\n  ✓ Syntaxe Q# (use, let, mutable, set)\n  ✓ Portes : X(q), H(q), CNOT(q0,q1)\n  ✓ Types : Qubit, Result, Bool, Int\n  ✓ Boucles for et opérations\n\nCe module final mélange tout !\n\nOn verra aussi 2 vrais algorithmes :\n  ★ État de Bell (intrication maximale)\n  ★ MiniAlgo + Grand Final`,
+    exercises:[
+      { title:'Exercice 1/4 — L\'État de Bell', qiskit:'qc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\n# mesure : toujours 00 ou 11', qsharp:'use (q0,q1) = (Qubit(),Qubit());\nH(q0);\nCNOT(q0, q1);\n// mesure : Zero,Zero ou One,One', dualTitle:'État de Bell — intrication maximale', type:'bell_state',maxScore:2 },
+      { title:'Exercice 2/4 — Circuit mystère Q#', qsharp_only:'operation Mystere() : Result[] {\n    use qs = Qubit[4];\n    X(qs[0]);\n    X(qs[0]);       // re-inverse\n    H(qs[1]);\n    CNOT(qs[0], qs[2]);\n    X(qs[3]);\n    CNOT(qs[3], qs[2]); // cible=qs[2] encore !\n    return ForEach(M, qs);\n    // mesure qs[1] = One\n}', info:'Analyse étape par étape :\n  qs[0] : X puis X → s\'annulent → Zero → droite\n  qs[1] : H → mesure=One → haut\n  qs[2] : CNOT(qs[0]=Zero) puis CNOT(qs[3]=One)\n          → 2ème CNOT inverse → One → haut\n  qs[3] : X → One → haut', type:'direction',sequence:[[1,0],[0,-1],[0,-1],[0,-1]],maxScore:4 },
+      { title:'Exercice 3/4 — MiniAlgo(4)', qsharp_only:'operation MiniAlgo(n : Int) : Result[] {\n    use qs = Qubit[n];\n    for i in 0..n-1 {\n        if i % 2 == 0 {\n            X(qs[i]);\n        } else {\n            H(qs[i]);\n        }\n    }\n    return ForEach(M, qs);\n}', type:'mini_algo',maxScore:4 },
+      { title:'Exercice 4/4 — GRAND FINAL Q# !', qsharp_only:'operation GrandFinal() : Result[] {\n    use qs = Qubit[6];\n    // Bloc 1 : état de Bell sur qs[0],qs[1]\n    H(qs[0]);\n    CNOT(qs[0], qs[1]);\n    // Bloc 2 : X + double X (net = X)\n    X(qs[2]);\n    X(qs[2]); X(qs[2]);\n    // Bloc 3 : H sur qs[3], qs[4]\n    H(qs[3]); H(qs[4]);\n    // Bloc 4 : CNOT final\n    X(qs[5]);\n    CNOT(qs[5], qs[3]);  // qs[3] inversé\n    return ForEach(M, qs);\n}', type:'grand_final',maxScore:6 },
+    ], maxScore:16 },
+];
+
+// ══════════════════════════════════════════════
+//  HINTS
+// ══════════════════════════════════════════════
+const HINTS={
+  syntaxe_base:{ title:'// Syntaxe de base Q#', body:`<span class="hl">Différences clés Qiskit → Q# :</span>\n\n  <span class="hlc">Qiskit</span>                     <span class="hl">Q#</span>\n  QuantumCircuit(1)    →  use q = Qubit();\n  qc.x(0)             →  X(q);\n  qc.h(0)             →  H(q);\n  qc.cx(0,1)          →  CNOT(q0, q1);\n  qc.measure_all()    →  let r = M(q);\n  résultat 0 ou 1     →  Zero ou One\n\nRègles :\n  • Portes en <span class="hlg">MAJUSCULE</span> : X, H, CNOT, M\n  • Point-virgule <span class="hly">;</span> à la fin de chaque ligne\n  • <span class="hly">use</span> pour déclarer un qubit\n  • Résultat = <span class="hl">Zero</span> ou <span class="hl">One</span>\n\n<span class="hlg">Zero → DROITE\nOne  → HAUT</span>` },
+  portes_qsharp:{ title:'// Les portes en Q#', body:`<span class="hl">X(q)</span>  — inversion (NOT)\n  Zero → One  |  One → Zero\n\n<span class="hl">H(q)</span>  — superposition (Hadamard)\n  → mesure aléatoire : 50% Zero, 50% One\n\n<span class="hl">CNOT(contrôle, cible)</span>  — intrication\n  Si contrôle = One  → cible est inversée\n  Si contrôle = Zero → cible reste pareille` },
+  types_qsharp:{ title:'// Types et variables en Q#', body:`<span class="hl">Types courants :</span>\n  <span class="hlg">Result</span>   →  résultat mesure (Zero/One)\n  <span class="hlg">Qubit</span>    →  un qubit\n  <span class="hlg">Int</span>      →  nombre entier\n  <span class="hlg">Bool</span>     →  true ou false\n  <span class="hlg">Result[]</span> →  tableau de résultats\n\n<span class="hl">Déclarer :</span>\n  <span class="hly">let x = valeur;</span>         → immuable\n  <span class="hly">mutable x = valeur;</span>     → modifiable\n  <span class="hly">set x = nouvelle_val;</span>   → modifier` },
+  boucles_operations:{ title:'// Boucles et opérations', body:`<span class="hl">Boucle for :</span>\n  <span class="hly">for i in 0..n-1 { ... }</span>   // classique\n  <span class="hly">for q in qs { ... }</span>        // sur tableau\n\n<span class="hl">Opérations :</span>\n  <span class="hlc">Python</span> : def ma_fonction(x):\n  <span class="hly">Q#</span>     : operation MonOp(x : Int) : Result { ... }\n\n  <span class="hly">Unit</span> = ne retourne rien (comme void)` },
+  bell_state:{ title:'// État de Bell', body:`L'état de Bell : <span class="hl">intrication maximale</span>\n\nCircuit :\n  <span class="hly">H(q0);         // superposition</span>\n  <span class="hly">CNOT(q0, q1);  // intrication</span>\n\nRésultat :\n  q0 et q1 sont <span class="hlg">TOUJOURS égaux</span> après mesure.\n  Si q0=Zero → q1=Zero aussi.\n  Si q0=One  → q1=One  aussi.` },
+};
+
+const EXERCISE_HINTS={
+  '1-0':'syntaxe_base','1-1':'syntaxe_base','1-2':'syntaxe_base','1-3':'syntaxe_base','1-4':'syntaxe_base',
+  '2-0':'portes_qsharp','2-1':'portes_qsharp','2-2':'portes_qsharp','2-3':'syntaxe_base','2-4':'portes_qsharp',
+  '3-0':'types_qsharp','3-1':'types_qsharp','3-2':'types_qsharp','3-3':'types_qsharp','3-4':'types_qsharp',
+  '4-0':'boucles_operations','4-1':'boucles_operations','4-2':'portes_qsharp','4-3':'boucles_operations','4-4':'boucles_operations',
+  '5-0':'bell_state','5-1':'portes_qsharp','5-2':'boucles_operations','5-3':'portes_qsharp',
+};
+
+function getHintKey(){ const m=state.currentModule;return m?`${m.id}-${state.currentExIndex}`:null; }
+function showHint(){
+  const k=getHintKey();const hid=EXERCISE_HINTS[k];const h=hid?HINTS[hid]:null;if(!h)return;
+  document.getElementById('hint-title').textContent=h.title;
+  document.getElementById('hint-body').innerHTML=h.body;
+  document.getElementById('hint-overlay').classList.add('active');
+}
+function closeHint(){ document.getElementById('hint-overlay').classList.remove('active'); }
+
+// ── SCREEN SWITCHES ──
+function showTitle(){ setActive('screen-title'); }
+function showMenu(){ setActive('screen-menu');renderMenu(); }
+function showGame(){ setActive('screen-game'); }
+function showFinal(){ setActive('screen-final');renderFinal(); }
+function setActive(id){ ['screen-title','screen-menu','screen-game','screen-final'].forEach(s=>{ const el=document.getElementById(s);el.classList.remove('active');el.style.display='none'; }); const el=document.getElementById(id);el.style.display='flex';setTimeout(()=>el.classList.add('active'),10); }
+function restartGame(){ state.scores={};showMenu(); }
+
+// ── MENU ──
+function renderMenu(){
+  document.getElementById('module-list').innerHTML=MODULES.map(m=>{
+    const s=state.scores[m.id];const done=s!==undefined;
+    return `<div class="module-card${done?' done':''}" onclick="startModule(${m.id})">
+      <div class="module-num">${m.id}</div>
+      <div class="module-info"><div class="module-title">${m.label} — ${m.title}</div><div class="module-sub">${m.exercises.length} exercices</div></div>
+      <div class="module-score">${done?s+' pts':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── GRID ──
+function renderGrid(robot,goal,traces){
+  let h='<div class="grid-container">';
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const isR=robot[0]===x&&robot[1]===y;const isG=goal[0]===x&&goal[1]===y;const isT=traces&&traces.has(`${x},${y}`);
+    let cls='cell',txt='';
+    if(isR){cls+=' robot';txt='🤖';}else if(isG){cls+=' goal';txt='✦';}else if(isT){cls+=' trail';}
+    h+=`<div class="${cls}">${txt}</div>`;
+  }
+  return h+'</div>';
+}
+function gridPanel(robot,goal,traces){
+  return `<div class="grid-panel">
+    <div class="grid-lbl">déplacement</div>
+    <div class="grid-outer">${renderGrid(robot,goal,traces)}</div>
+    <div class="grid-legend">
+      <div class="legend-item"><div class="legend-dot r"></div>robot</div>
+      <div class="legend-item"><div class="legend-dot g"></div>goal</div>
+      <div class="legend-item"><div class="legend-dot t"></div>chemin</div>
+    </div>
+    <div class="pos-info">pos : <span>(${robot[0]},${robot[1]})</span></div>
+  </div>`;
+}
+
+// ── DUAL CODE HTML ──
+function dualCodeHtml(ex){
+  if(ex.qiskit&&ex.qsharp){
+    return `${ex.dualTitle?`<div class="dual-title">// ${ex.dualTitle}</div>`:''}
+    <div class="dual-code">
+      <div class="code-block"><div class="code-label qi">◈ Qiskit (Python)</div><pre>${ex.qiskit}</pre></div>
+      <div class="code-block"><div class="code-label qs">◈ Q# (Microsoft)</div><pre>${ex.qsharp}</pre></div>
+    </div>`;
+  }
+  if(ex.qsharp_only) return `<div class="code-block-single"><div class="code-label qs">◈ Code Q#</div><pre>${ex.qsharp_only}</pre></div>`;
+  return '';
+}
+
+// ── MODULE START ──
+let moduleSessionScore=0;
+function startModule(id){
+  const mod=MODULES.find(m=>m.id===id);
+  state.currentModule=mod;state.currentExIndex=-1;
+  state.robot=[0,5];state.goal=[5,0];state.traces=new Set();
+  moduleSessionScore=0;showGame();
+  document.getElementById('game-title').textContent=`${mod.label} — ${mod.title}`;
+  updateProgress(0,mod.exercises.length+1);renderIntro(mod);
+}
+function renderIntro(mod){
+  document.getElementById('exercise-badge').textContent='Intro';
+  document.getElementById('score-dots').innerHTML='';
+  document.getElementById('score-label').textContent='0 pts';
+  document.getElementById('game-content').innerHTML=`<div style="max-width:720px;margin:0 auto;">
+    <div class="intro-box"><div class="intro-title">// ${mod.label} — ${mod.title}</div><pre>${mod.intro}</pre></div>
+    <div style="display:flex;justify-content:center;margin-top:20px;">
+      <button class="btn btn-q" onclick="nextExercise()">commencer →</button>
+    </div>
+  </div>`;
+}
+function nextExercise(){
+  state.currentExIndex++;const mod=state.currentModule;
+  if(state.currentExIndex>=mod.exercises.length){ state.scores[mod.id]=moduleSessionScore;if(MODULES.every(m=>state.scores[m.id]!==undefined))showFinal();else showMenu();return; }
+  updateProgress(state.currentExIndex+1,mod.exercises.length+1);renderExercise(mod.exercises[state.currentExIndex]);
+}
+function updateProgress(c,t){ document.getElementById('progress-bar').style.width=(c/t*100)+'%'; }
+
+// ── DIRECTION ENGINE ──
+let dirSeqIdx=0,dirSeq=[],dirMaxScore=0,dirScore=0,dirDots=[],pendingThen=null;
+let savedCodeHtml='',savedInfoHtml='';
+
+function startDirectionSequence(seq,max,codeHtml,infoHtml,then){
+  dirSeqIdx=0;dirSeq=seq;dirMaxScore=max;dirScore=0;dirDots=new Array(max).fill('pending');pendingThen=then;
+  savedCodeHtml=codeHtml||'';savedInfoHtml=infoHtml||'';renderDirStep();
+}
+function renderDirStep(){
+  const step=dirSeqIdx,total=dirSeq.length;updateScoreDisplay();
+  document.getElementById('game-content').innerHTML=`
+    <div class="game-layout">
+      <div style="display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--line);">
+        ${savedCodeHtml}
+        ${savedInfoHtml?`<div class="info-box">${savedInfoHtml}</div>`:''}
+        <div class="feedback" id="feedback"></div>
+        <div class="input-area">
+          <div class="input-label">mouvement <span>${step+1}/${total}</span> — quelle direction ?</div>
+          <div class="dir-pad" style="margin-top:8px;">
+            <button class="dir-btn" data-dir="haut" onclick="submitDir('haut')">↑</button>
+            <button class="dir-btn" data-dir="gauche" onclick="submitDir('gauche')">←</button>
+            <button class="dir-btn" data-dir="droite" onclick="submitDir('droite')">→</button>
+            <button class="dir-btn" data-dir="bas" onclick="submitDir('bas')">↓</button>
+          </div>
+          <div class="key-hint" style="margin-top:8px;">touches : <kbd>↑</kbd> <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd></div>
+        </div>
+      </div>
+      <div class="right-panel">${gridPanel(state.robot,state.goal,state.traces)}</div>
+    </div>`;
+}
+function submitDir(dir){
+  const map={droite:[1,0],gauche:[-1,0],haut:[0,-1],bas:[0,1]};
+  const delta=map[dir];const expected=dirSeq[dirSeqIdx];const correct=delta[0]===expected[0]&&delta[1]===expected[1];
+  const names={'1,0':'droite','-1,0':'gauche','0,-1':'haut','0,1':'bas'};const expName=names[expected.join(',')];
+  const fb=document.getElementById('feedback');const hk=getHintKey();const hasHint=hk&&EXERCISE_HINTS[hk];
+  if(correct){fb.className='feedback success';fb.textContent=`✓ correct — ${expName}`;dirScore++;dirDots[dirSeqIdx]='hit';sparks();}
+  else{fb.className='feedback error';fb.innerHTML=`✗ c'était ${expName}`+(hasHint?` <button class="hint-trigger" onclick="showHint()">? indice</button>`:'');dirDots[dirSeqIdx]='miss';}
+  state.traces.add(`${state.robot[0]},${state.robot[1]}`);
+  state.robot=[Math.max(0,Math.min(5,state.robot[0]+expected[0])),Math.max(0,Math.min(5,state.robot[1]+expected[1]))];
+  const gp=document.querySelector('.grid-panel');if(gp){const t=document.createElement('div');t.innerHTML=gridPanel(state.robot,state.goal,state.traces);gp.replaceWith(t.firstElementChild);}
+  updateScoreDisplay();document.querySelectorAll('.dir-btn').forEach(b=>b.disabled=true);dirSeqIdx++;
+  setTimeout(()=>{
+    if(dirSeqIdx>=dirSeq.length){moduleSessionScore+=dirScore;if(pendingThen){const th=pendingThen;pendingThen=null;state.robot=[0,5];state.traces=new Set();startDirectionSequence(th.sequence,th.maxScore,null,null,null);}else showContinueBtn(()=>nextExercise());}
+    else renderDirStep();
+  },800);
+}
+
+// ── EXERCISE RENDERER ──
+function renderExercise(ex){
+  document.getElementById('exercise-badge').textContent=`Ex ${state.currentExIndex+1}/${state.currentModule.exercises.length}`;
+  state.robot=[0,5];state.traces=new Set();
+  if(ex.type==='direction') startDirectionSequence(ex.sequence,ex.maxScore,dualCodeHtml(ex),ex.info||'',null);
+  else if(ex.type==='mcq') renderMCQ(ex);
+  else if(ex.type==='quiz'){quizIdx=0;quizScore=0;renderQuizQ(ex);}
+  else if(ex.type==='random_h') startRandomH(ex);
+  else if(ex.type==='if_random') startIfRandom(ex);
+  else if(ex.type==='bell_state') startBellState(ex);
+  else if(ex.type==='grand_parcours_m2') startGrandParcoursM2(ex);
+  else if(ex.type==='grand_parcours_m4') startGrandParcoursM4(ex);
+  else if(ex.type==='mini_algo') startMiniAlgo(ex);
+  else if(ex.type==='grand_final') startGrandFinal(ex);
+}
+
+function renderMCQ(ex){
+  updateScoreDisplay();
+  document.getElementById('game-content').innerHTML=`
+    <div class="game-layout">
+      <div style="display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--line);">
+        ${dualCodeHtml(ex)}
+        ${ex.info?`<div class="info-box">${ex.info}</div>`:''}
+        <div style="margin:0.5rem 1.5rem 0.75rem;">
+          <div class="input-label" style="margin-bottom:8px;">${ex.question}</div>
+          <div class="choices" id="mcq-opts" style="margin:0;">
+            ${ex.options.map((o,i)=>`<button class="choice" onclick="submitMCQ(${i})">${o}</button>`).join('')}
+          </div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="right-panel">${gridPanel(state.robot,state.goal,state.traces)}</div>
+    </div>`;
+}
+function submitMCQ(idx){
+  const ex=state.currentModule.exercises[state.currentExIndex];
+  const btns=document.querySelectorAll('.choice');btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');const hk=getHintKey();const hasHint=hk&&EXERCISE_HINTS[hk];
+  if(idx===ex.correct){btns[idx].classList.add('ok');fb.className='feedback success';fb.textContent=`✓ ${ex.expl||'correct !'}`;moduleSessionScore++;sparks();}
+  else{btns[idx].classList.add('no');btns[ex.correct].classList.add('ok');fb.className='feedback error';fb.innerHTML=`✗ ${ex.expl||'réessaie !'}`+(hasHint?` <button class="hint-trigger" onclick="showHint()">? indice</button>`:'');}
+  setTimeout(()=>{if(ex.then){state.robot=[0,5];state.traces=new Set();startDirectionSequence(ex.then.sequence,ex.then.maxScore,null,null,null);}else nextExercise();},1000);
+}
+
+let quizIdx=0,quizScore=0;
+function renderQuizQ(ex){
+  const q=ex.questions[quizIdx];updateScoreDisplay();
+  document.getElementById('game-content').innerHTML=`
+    <div class="quiz-wrap">
+      ${dualCodeHtml(ex)}
+      ${ex.info?`<div class="info-box" style="margin:0.75rem 0;">${ex.info}</div>`:''}
+      <div class="quiz-counter">question ${quizIdx+1}/${ex.questions.length}</div>
+      <div class="quiz-q-box">${q.q}</div>
+      <div class="choices" id="quiz-opts" style="margin:0 0 0.75rem;">
+        ${q.opts.map((o,i)=>`<button class="choice" onclick="submitQuiz(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>`;
+}
+function submitQuiz(idx){
+  const ex=state.currentModule.exercises[state.currentExIndex];const q=ex.questions[quizIdx];
+  const btns=document.querySelectorAll('#quiz-opts .choice');btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');const hk=getHintKey();const hasHint=hk&&EXERCISE_HINTS[hk];
+  if(idx===q.correct){btns[idx].classList.add('ok');fb.className='feedback success';fb.textContent=`✓ ${q.expl}`;quizScore++;moduleSessionScore++;sparks();}
+  else{btns[idx].classList.add('no');btns[q.correct].classList.add('ok');fb.className='feedback error';fb.innerHTML=`✗ ${q.expl}`+(hasHint?` <button class="hint-trigger" onclick="showHint()">? indice</button>`:'');}
+  quizIdx++;setTimeout(()=>{ if(quizIdx<ex.questions.length)renderQuizQ(ex);else showContinueBtn(()=>nextExercise()); },1200);
+}
+
+function startRandomH(ex){
+  const mesures=Array.from({length:ex.nb},()=>Math.random()<0.5?'Zero':'One');
+  const seq=mesures.map(m=>m==='Zero'?[1,0]:[0,-1]);
+  const measInfo=mesures.map((m,i)=>`  qs[${i}] = ${m}  (${m==='Zero'?'droite':'haut'})`).join('\n');
+  savedCodeHtml=dualCodeHtml(ex)||'';savedInfoHtml=`résultats simulés (aléatoires) :\n${measInfo}`;
+  startDirectionSequence(seq,ex.nb,savedCodeHtml,savedInfoHtml,null);
+}
+function startIfRandom(ex){
+  const m=Math.random()<0.5?'Zero':'One';const seq=m==='Zero'?[[1,0]]:[[0,-1]];
+  const info=`mesure simulée : ${m}\n\n${m==='Zero'?'Zero → DROITE':'One → HAUT'}`;
+  startDirectionSequence(seq,1,dualCodeHtml(ex),info,null);
+}
+function startBellState(ex){
+  const m=Math.random()<0.5?'Zero':'One';const seq=[[m==='Zero'?1:0,m==='Zero'?0:-1],[m==='Zero'?1:0,m==='Zero'?0:-1]];
+  const info=`état de Bell — q0 et q1 TOUJOURS égaux !\n\nmesure q0 : ${m}\nmesure q1 : ${m}  (forcément pareil)\n\n${m==='Zero'?'Zero → droite (×2)':'One → haut (×2)'}`;
+  startDirectionSequence(seq,2,dualCodeHtml(ex),info,null);
+}
+function startGrandParcoursM2(ex){
+  const rands=[Math.random()<0.5?'Zero':'One',Math.random()<0.5?'Zero':'One'];
+  const etats=['One','One',rands[0],'Zero',rands[1],'One'];
+  const seq=etats.map(e=>e==='One'?[0,-1]:[1,0]);
+  const measInfo=etats.map((e,i)=>`  qs[${i}] = ${e}  (${e==='One'?'haut':'droite'})`).join('\n');
+  startDirectionSequence(seq,6,dualCodeHtml(ex)||'',`mesures simulées :\n${measInfo}`,null);
+}
+function startGrandParcoursM4(ex){
+  const rands=[Math.random()<0.5?'Zero':'One',Math.random()<0.5?'Zero':'One'];
+  const etats=['One','One',rands[0],'Zero',rands[1],'One'];
+  const seq=etats.map(e=>e==='One'?[0,-1]:[1,0]);
+  const measInfo=etats.map((e,i)=>`  qs[${i}] = ${e}  (${e==='One'?'haut':'droite'})`).join('\n');
+  startDirectionSequence(seq,6,dualCodeHtml(ex)||'',`mesures simulées :\n${measInfo}`,null);
+}
+function startMiniAlgo(ex){
+  const randsImp=[Math.random()<0.5?'Zero':'One',Math.random()<0.5?'Zero':'One'];
+  const etats=['One',randsImp[0],'One',randsImp[1]];
+  const seq=etats.map(e=>e==='One'?[0,-1]:[1,0]);
+  const measInfo=etats.map((e,i)=>`  qs[${i}] = ${e}  (${e==='One'?'haut':'droite'})`).join('\n');
+  startDirectionSequence(seq,4,dualCodeHtml(ex)||'',`MiniAlgo(4) — pairs→X→One, impairs→H→aléatoire :\n${measInfo}`,null);
+}
+function startGrandFinal(ex){
+  const bell=Math.random()<0.5?'Zero':'One';const q3h=Math.random()<0.5?'Zero':'One';
+  const q3final=q3h==='Zero'?'One':'Zero';const q4final=Math.random()<0.5?'Zero':'One';
+  const etats=[bell,bell,'One',q3final,q4final,'One'];
+  const seq=etats.map(e=>e==='One'?[0,-1]:[1,0]);
+  const measInfo=etats.map((e,i)=>`  qs[${i}] = ${e}  (${e==='One'?'haut':'droite'})`).join('\n');
+  startDirectionSequence(seq,6,dualCodeHtml(ex)||'',`analyse :\n  qs[0],qs[1] : Bell → tous les deux ${bell}\n  qs[2] : X+X+X = 3 inversions = One\n  qs[3] : H(${q3h}) puis CNOT(One) → inversé → ${q3final}\n  qs[4] : H → ${q4final}\n  qs[5] : X → One\n\n${measInfo}`,null);
+}
+
+function showContinueBtn(cb){
+  const div=document.createElement('div');div.className='continue-wrap';
+  div.innerHTML=`<button class="continue-btn">continuer →</button>`;div.querySelector('button').onclick=cb;
+  document.getElementById('game-content').appendChild(div);
+}
+function updateScoreDisplay(){
+  document.getElementById('score-label').textContent=`${moduleSessionScore} pts`;
+  const dots=document.getElementById('score-dots');
+  if(dirDots&&dirDots.length){dots.innerHTML=dirDots.filter(Boolean).map(d=>`<div class="score-dot ${d==='hit'?'hit':d==='miss'?'miss':''}"></div>`).join('');}
+}
+function renderFinal(){
+  let total=0;const rows=MODULES.map(m=>{const s=state.scores[m.id]||0;total+=s;return `<div class="score-row"><span>${m.label} — ${m.title}</span><span class="s">${s} pts</span></div>`;}).join('');
+  document.getElementById('total-score').textContent=total;document.getElementById('score-table').innerHTML=rows;
+}
+function sparks(){
+  const colors=['#7a9e87','#e8a598','#8fb4c8','#c8a870','#a89ec8'];
+  for(let i=0;i<6;i++){const p=document.createElement('div');p.className='pt';p.style.cssText=`width:6px;height:6px;left:${Math.random()*100}vw;top:${Math.random()*60+20}vh;background:${colors[i%colors.length]};animation-delay:${Math.random()*0.3}s`;document.body.appendChild(p);setTimeout(()=>p.remove(),1200);}
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('screen-game').style.display!=='flex') return;
+  const map={ArrowUp:'haut',ArrowDown:'bas',ArrowLeft:'gauche',ArrowRight:'droite'};
+  const dir=map[e.key];if(dir){e.preventDefault();const btn=document.querySelector(`.dir-btn[data-dir="${dir}"]:not(:disabled)`);if(btn)btn.click();}
+});
+
+showTitle();
+</script>
+</body>
+</html>

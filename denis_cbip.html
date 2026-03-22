@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · médecine CBIP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#faf8f4; --bg2:#f0ebe2; --bg3:#e8dfd0;
+  --ink:#1a1814; --ink2:#6b6760; --ink3:#b5b2ac;
+  --sage:#7a9e87; --blush:#e8a598; --sky:#8fb4c8;
+  --amber:#c8a870; --line:rgba(26,24,20,0.08);
+}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:12px;padding:0.75rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.tlogo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--ink);}
+.tsep{color:var(--ink3);font-size:12px;}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+
+/* ── HOME ── */
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2.5rem;font-weight:300;}
+.cbip-banner{background:var(--ink);color:var(--bg);border-radius:14px;padding:1.25rem 1.75rem;max-width:500px;width:100%;margin-bottom:1.5rem;}
+.cbip-banner-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;opacity:0.45;margin-bottom:5px;text-transform:uppercase;}
+.cbip-banner-title{font-family:'DM Mono',monospace;font-size:16px;margin-bottom:3px;}
+.cbip-banner-sub{font-size:12px;opacity:0.55;font-weight:300;}
+.chapters-list{max-width:500px;width:100%;display:flex;flex-direction:column;gap:0;}
+.chap-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.55;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:22px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.chap-arrow{font-size:11px;color:var(--ink3);}
+
+/* ── GAME ── */
+#s-game{flex-direction:column;}
+.dots-row{display:flex;gap:3px;padding:0.45rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+
+/* concept */
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.85rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);font-style:normal;}
+.cbody .warn{display:block;background:rgba(232,165,152,0.1);border:1px solid rgba(232,165,152,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#8b4a3e;}
+.cbody .ok{display:block;background:rgba(122,158,135,0.1);border:1px solid rgba(122,158,135,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#3d6b4f;}
+
+/* question */
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;transition:opacity 0.12s;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;transition:all 0.11s;}
+.btnhint:hover{color:var(--ink2);border-color:var(--ink3);}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;letter-spacing:0.04em;}
+.btnback:hover{color:var(--ink);}
+
+/* grid */
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+
+/* win */
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.96);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);letter-spacing:0.04em;}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:420px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;letter-spacing:0.04em;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · médecine</div>
+  <div class="home-title">cbip</div>
+  <div class="home-sub">répertoire commenté des médicaments · progressif · basé sur les preuves</div>
+  <div class="cbip-banner">
+    <div class="cbip-banner-tag">source · cbip.be</div>
+    <div class="cbip-banner-title">répertoire commenté 2026</div>
+    <div class="cbip-banner-sub">20 chapitres · information indépendante · EBM</div>
+  </div>
+  <div class="chapters-list" id="chapters-list"></div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← cbip</button>
+    <span class="tsep">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div class="qtext" id="g-q"></div>
+      <div class="choices" id="g-choices"></div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DONNÉES CBIP — 20 chapitres
+// ══════════════════════════════════════════════════════
+const CHAPTERS = [
+
+  // ── 1. CARDIO-VASCULAIRE ──────────────────────────
+  { id:"cv", num:"1", name:"système cardio-vasculaire",
+    takeaway:[
+      "HTA : objectif < 140/90 mmHg (< 130/80 si diabète/MRC)",
+      "IEC + sartan = déconseillé — double blocage SRAA",
+      "statines : réduisent le LDL, preuve solide en prévention secondaire",
+      "bêtabloquants : bradycardie et hypotension possibles",
+      "surveiller kaliémie sous IEC/sartan/spironolactone"
+    ],
+    questions:[
+      { c:"1.1 · HTA — objectifs",
+        code:`<span class="cm">// hypertension artérielle — objectifs tensionnels</span>
+<span class="kw">général</span>      : &lt; <span class="hl">140/90</span> mmHg
+<span class="kw">diabète / MRC</span> : &lt; <span class="hl">130/80</span> mmHg
+<span class="kw">1ère ligne</span>   : IEC · sartan · thiazide · bêtabloquant · ICC
+<span class="cm">// choix selon profil patient (âge, comorbidités)</span>`,
+        q:"Patient 60 ans, HTA isolée, TA = 155/95. Objectif tensionnel ?",
+        ch:["< 160/100 mmHg","< 140/90 mmHg","< 120/70 mmHg"],
+        ok:1, hint:"objectif général sans comorbidité selon CBIP",
+        fb_ok:"// correct — objectif général HTA : < 140/90 mmHg",
+        fb_no:"// objectif standard HTA sans comorbidité : < 140/90 mmHg",
+        mv:{dx:1,dy:0} },
+      { c:"1.2 · HTA — interactions",
+        code:`<span class="cm">// association IEC + sartan — DÉCONSEILLÉE</span>
+<span class="kw">IEC</span>    = ramipril, énalapril, lisinopril...
+<span class="kw">sartan</span> = valsartan, losartan, candésartan...
+<span class="warn">⚠ double blocage SRAA
+  → insuffisance rénale aiguë
+  → hyperkaliémie</span>
+<span class="cm">// exceptions très rares — avis spécialisé requis</span>`,
+        q:"Pourquoi ne jamais associer un IEC et un sartan ?",
+        ch:["ils ont le même mécanisme et s'annulent","double blocage SRAA → IRA + hyperkaliémie","interaction hépatique grave"],
+        ok:1, hint:"double blocage du système rénine-angiotensine-aldostérone",
+        fb_ok:"// correct — double blocage SRAA → risque rénal et hyperkaliémie",
+        fb_no:"// IEC + sartan = double blocage SRAA → IRA potentielle + hyperkaliémie",
+        mv:{dx:0,dy:-1} },
+      { c:"1.3 · statines",
+        code:`<span class="cm">// statines — inhibiteurs HMG-CoA réductase</span>
+<span class="kw">effet</span>    = ↓ LDL cholestérol
+<span class="kw">preuve</span>   = <span class="hl">solide</span> en prévention secondaire cardiovasculaire
+<span class="kw">EI</span>       = myalgies (fréquents) · rhabdomyolyse (rare)
+<span class="cm">// si myalgies → doser CPK avant de décider</span>`,
+        q:"Patient sous statine avec myalgies. Première étape ?",
+        ch:["arrêter immédiatement","doser les CPK sanguins","doubler la dose pour tester"],
+        ok:1, hint:"les myalgies nécessitent un bilan biologique avant décision",
+        fb_ok:"// correct — doser les CPK pour évaluer le risque de rhabdomyolyse",
+        fb_no:"// myalgies sous statine → doser CPK d'abord, décider ensuite",
+        mv:{dx:1,dy:0} },
+      { c:"1.4 · bêtabloquants",
+        code:`<span class="cm">// bêtabloquants — indications clés</span>
+<span class="kw">indications</span> = HTA · angor · insuffisance cardiaque · arythmies
+<span class="kw">CI relatives</span> = asthme · BAV · bradycardie sévère
+<span class="kw">EI</span>          = bradycardie · hypotension · fatigue · bronchospasme
+<span class="cm">// ne jamais arrêter brusquement → rebond</span>`,
+        q:"Patient asthmatique sous bêtabloquant pour HTA. Quel risque principal ?",
+        ch:["tachycardie paradoxale","bronchospasme — CI relative chez l'asthmatique","augmentation de la TA"],
+        ok:1, hint:"les bêtabloquants bloquent les récepteurs bêta-2 bronchiques",
+        fb_ok:"// correct — bêtabloquants : CI relative dans l'asthme → bronchospasme",
+        fb_no:"// bêtabloquants bloquent les β2 bronchiques → bronchospasme chez l'asthmatique",
+        mv:{dx:0,dy:-1} },
+      { c:"1.5 · antiagrégants",
+        code:`<span class="cm">// aspirine faible dose (75-100 mg)</span>
+<span class="kw">indication</span>  = prévention <span class="hl">secondaire</span> cardiovasculaire
+<span class="warn">⚠ prévention PRIMAIRE : bénéfice &lt; risque hémorragique
+  → non recommandée en général</span>
+<span class="kw">clopidogrel</span> = alternative si allergie aspirine
+<span class="cm">// méta-analyse Lancet 2025 : clopidogrel ≥ aspirine en prév. secondaire</span>`,
+        q:"Homme 55 ans, sans ATCD cardiovasculaire, HTA bien contrôlée. Aspirine préventive ?",
+        ch:["oui — prévention primaire recommandée","non — en prévention primaire, le risque hémorragique > bénéfice","oui — à partir de 50 ans toujours"],
+        ok:1, hint:"prévention primaire vs secondaire — distinction fondamentale",
+        fb_ok:"// correct — prévention primaire : risque hémorragique > bénéfice attendu",
+        fb_no:"// aspirine faible dose = prévention SECONDAIRE. En primaire : non recommandée.",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 2. SANG ET COAGULATION ────────────────────────
+  { id:"sang", num:"2", name:"sang et coagulation",
+    takeaway:[
+      "AVK (warfarine) : INR cible 2-3 (2.5-3.5 si valve mécanique)",
+      "AOD (apixaban, rivaroxaban...) : pas de monitoring INR",
+      "héparines : différencier HNF (IV/SC) et HBPM (SC)",
+      "antidote AOD : andexanet alfa (anti-Xa) / idarucizumab (dabigatran)",
+      "interaction AVK : nombreux médicaments et aliments (vitamine K)"
+    ],
+    questions:[
+      { c:"2.1 · anticoagulants — généralités",
+        code:`<span class="cm">// anticoagulants oraux</span>
+<span class="kw">AVK</span>    = warfarine, acénocoumarol
+       → monitoring <span class="hl">INR</span> obligatoire
+       → INR cible : <span class="hl">2-3</span> (FA, MTEV)
+<span class="kw">AOD</span>    = apixaban, rivaroxaban, dabigatran
+       → <span class="hl">pas de monitoring INR</span> en routine
+<span class="cm">// AOD : doses fixes selon indication et fonction rénale</span>`,
+        q:"Patient sous warfarine. Comment surveiller l'anticoagulation ?",
+        ch:["temps de saignement","INR (INR cible 2-3)","numération plaquettaire"],
+        ok:1, hint:"les AVK nécessitent un monitoring spécifique",
+        fb_ok:"// correct — AVK → monitoring INR obligatoire, cible 2-3",
+        fb_no:"// AVK = warfarine/acénocoumarol → monitoring INR, cible 2-3",
+        mv:{dx:1,dy:0} },
+      { c:"2.2 · AOD vs AVK",
+        code:`<span class="cm">// avantages et limites des AOD</span>
+<span class="ok">✓ pas de monitoring INR
+✓ moins d'interactions alimentaires
+✓ efficacité similaire aux AVK</span>
+<span class="warn">⚠ coût plus élevé
+⚠ adaptation dose si insuffisance rénale
+⚠ antidotes disponibles mais coûteux</span>`,
+        q:"Avantage principal des AOD sur les AVK ?",
+        ch:["plus efficaces que les AVK","pas de monitoring INR en routine","moins d'effets indésirables"],
+        ok:1, hint:"la simplification du suivi est le principal avantage pratique",
+        fb_ok:"// correct — AOD : pas de monitoring INR = grande simplification",
+        fb_no:"// principal avantage AOD : pas de monitoring INR en routine",
+        mv:{dx:0,dy:-1} },
+      { c:"2.3 · antidotes",
+        code:`<span class="cm">// antidotes anticoagulants</span>
+<span class="kw">AVK</span>        → vitamine K (lent) · PPSB (rapide)
+<span class="kw">HNF</span>        → protamine sulfate
+<span class="kw">dabigatran</span> → <span class="hl">idarucizumab</span> (Praxbind®)
+<span class="kw">anti-Xa AOD</span>→ <span class="hl">andexanet alfa</span> (Ondexxya®)
+<span class="cm">// urgence hémorragique = contacter urgences</span>`,
+        q:"Patient sous dabigatran avec hémorragie grave. Quel antidote ?",
+        ch:["vitamine K","idarucizumab (Praxbind®)","andexanet alfa"],
+        ok:1, hint:"l'antidote spécifique du dabigatran est l'idarucizumab",
+        fb_ok:"// correct — dabigatran → idarucizumab (Praxbind®)",
+        fb_no:"// dabigatran = inhibiteur direct de la thrombine → antidote = idarucizumab",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 3. GASTRO-INTESTINAL ─────────────────────────
+  { id:"gi", num:"3", name:"système gastro-intestinal",
+    takeaway:[
+      "IPP : traitement court privilégié — risque de dépendance à long terme",
+      "H. pylori : traitement triple (IPP + 2 antibiotiques) 7-14 jours",
+      "laxatifs osmotiques : macrogol = 1ère ligne constipation chronique",
+      "AINS + IPP : association recommandée chez patients à risque gastrique",
+      "antiémétiques : métoclopramide — risque EPS, éviter > 5 jours"
+    ],
+    questions:[
+      { c:"3.1 · IPP — usage raisonné",
+        code:`<span class="cm">// inhibiteurs de la pompe à protons</span>
+<span class="kw">indications</span> = RGO · ulcère · protection gastroprotection AINS
+<span class="kw">durée</span>       = <span class="hl">la plus courte possible</span>
+<span class="warn">⚠ usage prolongé :
+  → ↓ absorption magnésium, calcium, B12
+  → ↑ risque infections digestives
+  → dépendance (hypersécrétion rebond)</span>`,
+        q:"Un IPP au long cours prescrit pour \"confort digestif\" chez un patient sans indication claire. Attitude ?",
+        ch:["continuer — les IPP sont sans risque","réévaluer l'indication et tenter un sevrage progressif","augmenter la dose si persistance des symptômes"],
+        ok:1, hint:"les IPP doivent être prescrits à la dose minimale pour la durée la plus courte",
+        fb_ok:"// correct — réévaluation obligatoire, sevrage si indication non confirmée",
+        fb_no:"// IPP au long cours sans indication = réévaluer et sevrer si possible",
+        mv:{dx:0,dy:-1} },
+      { c:"3.2 · H. pylori",
+        code:`<span class="cm">// Helicobacter pylori — éradication</span>
+<span class="kw">traitement</span> = <span class="hl">triple thérapie</span>
+  IPP + clarithromycine + amoxicilline
+  → 7-14 jours
+<span class="kw">contrôle</span>   = test respiratoire à l'urée (≥ 4 sem après)
+<span class="cm">// résistances croissantes à la clarithromycine</span>`,
+        q:"Comment confirmer l'éradication d'H. pylori après traitement ?",
+        ch:["prise de sang (sérologie IgG)","test respiratoire à l'urée (≥ 4 semaines après fin traitement)","symptômes cliniques suffisent"],
+        ok:1, hint:"la sérologie reste positive même après éradication",
+        fb_ok:"// correct — test respiratoire ≥ 4 semaines après fin d'antibiotiques",
+        fb_no:"// sérologie = reste positive après éradication → non fiable. Test respiratoire = gold standard.",
+        mv:{dx:1,dy:0} },
+      { c:"3.3 · constipation",
+        code:`<span class="cm">// constipation chronique — 1ère ligne</span>
+<span class="kw">mesures hygiéno-diététiques</span> = hydratation + fibres + activité
+<span class="kw">1ère ligne</span>  = <span class="hl">macrogol</span> (laxatif osmotique)
+<span class="cm">// laxatifs stimulants (séné, bisacodyl) : usage court</span>
+<span class="warn">⚠ laxatifs stimulants au long cours = dépendance possible</span>`,
+        q:"Traitement de 1ère ligne de la constipation chronique de l'adulte ?",
+        ch:["bisacodyl (laxatif stimulant)","macrogol (laxatif osmotique)","huile de paraffine"],
+        ok:1, hint:"le macrogol est le laxatif le mieux évalué et le plus sûr au long cours",
+        fb_ok:"// correct — macrogol = 1ère ligne. Les stimulants = usage court uniquement.",
+        fb_no:"// 1ère ligne constipation chronique = macrogol (osmotique). Stimulants = court terme.",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 4. RESPIRATOIRE ──────────────────────────────
+  { id:"resp", num:"4", name:"système respiratoire",
+    takeaway:[
+      "asthme : bronchodilatateurs (β2-agonistes) + corticoïdes inhalés",
+      "BPCO : bronchodilatateurs longue durée — pas de corticoïdes inhalés en 1ère ligne",
+      "SABA (salbutamol) : traitement de secours — pas de traitement de fond",
+      "LABA + CSI : ne jamais utiliser LABA seul dans l'asthme",
+      "spirométrie : VEMS/CVF < 0.70 après bronchodilatateur = BPCO"
+    ],
+    questions:[
+      { c:"4.1 · asthme — traitement de fond",
+        code:`<span class="cm">// asthme — traitement de fond</span>
+<span class="kw">palier 1</span>  = SABA seul (léger intermittent)
+<span class="kw">palier 2</span>  = <span class="hl">CSI faible dose</span> (1ère ligne fond)
+<span class="kw">palier 3</span>  = CSI + LABA
+<span class="warn">⚠ LABA seul sans CSI dans l'asthme = CI
+  → risque d'exacerbation grave</span>
+<span class="cm">// SABA = salbutamol = traitement de SECOURS uniquement</span>`,
+        q:"Patient asthmatique utilise son salbutamol > 2x/semaine. Que faire ?",
+        ch:["augmenter la dose de salbutamol","instaurer un traitement de fond par CSI","prescrire un LABA seul"],
+        ok:1, hint:"utilisation fréquente du SABA = asthme non contrôlé → traitement de fond",
+        fb_ok:"// correct — SABA > 2x/sem = asthme non contrôlé → CSI en traitement de fond",
+        fb_no:"// SABA = secours. Si > 2x/sem → asthme non contrôlé → débuter CSI",
+        mv:{dx:1,dy:0} },
+      { c:"4.2 · BPCO vs asthme",
+        code:`<span class="cm">// BPCO — différences avec l'asthme</span>
+<span class="kw">BPCO</span>   = obstruction <span class="hl">fixe</span>, progressive, tabac++
+<span class="kw">asthme</span> = obstruction <span class="hl">réversible</span>, souvent allergique
+<span class="kw">BPCO traitement fond</span> = LAMA ou LABA (bronchodilatateurs LD)
+<span class="warn">⚠ CSI en 1ère ligne = non indiqués dans la BPCO pure
+  → réservés si éosinophiles élevées ou asthme associé</span>`,
+        q:"En 1ère ligne dans la BPCO, quel traitement de fond ?",
+        ch:["corticoïdes inhalés (CSI)","bronchodilatateurs longue durée (LAMA ou LABA)","antibiotiques prophylactiques"],
+        ok:1, hint:"dans la BPCO, les bronchodilatateurs sont le pilier — pas les CSI en 1ère ligne",
+        fb_ok:"// correct — BPCO 1ère ligne = bronchodilatateurs LD (LAMA/LABA)",
+        fb_no:"// BPCO : bronchodilatateurs longue durée = 1ère ligne. CSI = si indiqué selon profil.",
+        mv:{dx:0,dy:-1} },
+      { c:"4.3 · toux — étiologies",
+        code:`<span class="cm">// toux chronique — étiologies fréquentes</span>
+<span class="kw">1ère cause</span> = <span class="hl">IEC</span> (10-15% des patients)
+              → toux sèche, irritative
+              → disparaît en 1-4 sem à l'arrêt
+<span class="kw">autres</span>     = asthme · RGO · rhinite postérieure
+<span class="cm">// toujours vérifier les médicaments avant investigations</span>`,
+        q:"Patient sous ramipril (IEC) depuis 3 mois avec toux sèche. Cause la plus probable ?",
+        ch:["bronchite chronique","effet indésirable de l'IEC","asthme débutant"],
+        ok:1, hint:"les IEC causent une toux sèche chez 10-15% des patients",
+        fb_ok:"// correct — toux sèche sous IEC = effet indésirable très fréquent",
+        fb_no:"// toux sèche sous IEC = EI classique chez 10-15%. Remplacer par un sartan.",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 5. SYSTÈME HORMONAL ──────────────────────────
+  { id:"horm", num:"5", name:"système hormonal",
+    takeaway:[
+      "diabète T2 : metformine = 1ère ligne si pas de CI (insuffisance rénale sévère)",
+      "gliflozines (SGLT2i) : bénéfice cardiovasculaire et rénal prouvé",
+      "insuline : ajustement selon glycémie — toujours individualiser",
+      "hypothyroïdie : lévothyroxine à jeun, le matin, 30 min avant repas",
+      "corticoïdes : ne jamais arrêter brutalement si > 2-3 semaines de traitement"
+    ],
+    questions:[
+      { c:"5.1 · diabète T2 — 1ère ligne",
+        code:`<span class="cm">// diabète type 2 — traitement pharmacologique</span>
+<span class="kw">1ère ligne</span> = <span class="hl">metformine</span>
+  CI : DFG &lt; 30 ml/min · acidocétose · contraste iodé
+<span class="kw">2ème ligne</span> = gliflozines · GLP-1 · sulfamides · gliptines
+<span class="ok">✓ gliflozines : bénéfice CV et rénal démontré (RCTs)</span>
+<span class="cm">// individualiser selon profil patient</span>`,
+        q:"Patiente 58 ans, DT2, DFG = 25 ml/min. Peut-on utiliser la metformine ?",
+        ch:["oui — la metformine est toujours sûre","non — CI si DFG < 30 ml/min (risque d'acidose lactique)","oui — à demi-dose"],
+        ok:1, hint:"la metformine est contre-indiquée en cas d'insuffisance rénale sévère",
+        fb_ok:"// correct — metformine CI si DFG < 30 ml/min",
+        fb_no:"// metformine CI si DFG < 30 ml/min → risque d'acidose lactique",
+        mv:{dx:0,dy:-1} },
+      { c:"5.2 · gliflozines",
+        code:`<span class="cm">// gliflozines — inhibiteurs SGLT2</span>
+<span class="kw">ex</span>         = empagliflozine · dapagliflozine · canagliflozine
+<span class="kw">mécanisme</span>  = inhibent réabsorption glucose rénal → glycosurie
+<span class="kw">bénéfices</span>  = <span class="hl">réduction mortalité CV + protection rénale</span>
+<span class="warn">⚠ infections génitales mycosiques fréquentes
+⚠ acidocétose euglycémique possible</span>`,
+        q:"Quel avantage des gliflozines au-delà du contrôle glycémique ?",
+        ch:["puissant effet hypoglycémiant","réduction de la mortalité cardiovasculaire et protection rénale","meilleure tolérance digestive"],
+        ok:1, hint:"les gliflozines ont des bénéfices prouvés par des RCTs sur les événements CV et rénaux",
+        fb_ok:"// correct — gliflozines : bénéfice CV et rénal démontré indépendamment du DT2",
+        fb_no:"// gliflozines = bénéfice CV (EMPA-REG, DECLARE) + rénal prouvés par RCTs",
+        mv:{dx:1,dy:0} },
+      { c:"5.3 · thyroïde",
+        code:`<span class="cm">// hypothyroïdie — traitement</span>
+<span class="kw">traitement</span> = <span class="hl">lévothyroxine</span> (T4)
+<span class="kw">prise</span>      = à jeun, matin, 30 min avant repas
+<span class="warn">⚠ interactions : calcium, fer, IPP → ↓ absorption
+⚠ ne pas ajuster la dose trop vite
+  → attendre 6-8 semaines entre ajustements</span>
+<span class="cm">// objectif TSH : 0.5-2.5 mUI/L (adulte)</span>`,
+        q:"Patient sous lévothyroxine prend du calcium en même temps. Quel problème ?",
+        ch:["risque d'hypercalcémie","le calcium diminue l'absorption de la lévothyroxine","interaction cardiaque"],
+        ok:1, hint:"plusieurs médicaments réduisent l'absorption de la lévothyroxine",
+        fb_ok:"// correct — calcium, fer, IPP = diminuent l'absorption de la lévothyroxine",
+        fb_no:"// calcium = réduit l'absorption lévothyroxine → prendre à 2h d'écart",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 6. GYNÉCO-OBSTÉTRIQUE ────────────────────────
+  { id:"gyno", num:"6", name:"gynéco-obstétrique",
+    takeaway:[
+      "contraceptifs oestroprogestatifs : CI si ATCD thrombo-embolique, migraines avec aura",
+      "grossesse : éviter AINS au 3ème trimestre (fermeture canal artériel)",
+      "acide folique : 0.4 mg/j avant conception et 1er trimestre (prévention NTMD)",
+      "IST : traitement des deux partenaires systématique",
+      "HPV : vaccination recommandée dès 9-12 ans, avant premier contact sexuel"
+    ],
+    questions:[
+      { c:"6.1 · contraception — CI oestroprogestatifs",
+        code:`<span class="cm">// contraceptifs oestroprogestatifs — contre-indications</span>
+<span class="warn">⚠ CI absolues :
+  · ATCD thrombo-embolique veineux
+  · migraine avec aura
+  · HTA sévère non contrôlée
+  · tabagisme &gt; 35 ans
+  · cancer hormonodépendant</span>
+<span class="cm">// progestatifs seuls = alternative si CI oestrogènes</span>`,
+        q:"Femme 36 ans, fumeuse (20 cig/j), souhaite une contraception hormonale. Que proposer ?",
+        ch:["pilule oestroprogestative","pilule microprogestative ou DIU","patch contraceptif (oestroprogestatif)"],
+        ok:1, hint:"tabagisme > 35 ans = CI aux oestroprogestatifs",
+        fb_ok:"// correct — tabagisme > 35 ans = CI oestroprogestatifs → progestatif seul",
+        fb_no:"// tabagisme > 35 ans = CI oestroprogestatifs. Proposer progestatif seul ou DIU.",
+        mv:{dx:1,dy:0} },
+      { c:"6.2 · AINS et grossesse",
+        code:`<span class="cm">// AINS pendant la grossesse</span>
+<span class="kw">T1 et T2</span> = éviter si possible (risque malformations)
+<span class="warn">⚠ T3 (> 24 SA) = CONTRE-INDIQUÉS
+  → fermeture prématurée du canal artériel
+  → insuffisance rénale fœtale
+  → oligohydramnios</span>
+<span class="kw">paracétamol</span> = antalgique de référence pendant grossesse`,
+        q:"Femme enceinte 32 SA avec douleurs lombaires. Peut-on prescrire de l'ibuprofène ?",
+        ch:["oui — AINS sont sûrs pendant la grossesse","non — CI au 3ème trimestre (fermeture canal artériel)","oui — à faible dose uniquement"],
+        ok:1, hint:"les AINS sont contre-indiqués au 3ème trimestre",
+        fb_ok:"// correct — AINS CI au T3 → paracétamol = antalgique de référence",
+        fb_no:"// AINS CI > 24 SA (T3) : fermeture canal artériel fœtal. → Paracétamol.",
+        mv:{dx:0,dy:-1} },
+      { c:"6.3 · acide folique",
+        code:`<span class="cm">// acide folique — prévention NTMD</span>
+<span class="kw">dose standard</span>  = <span class="hl">0.4 mg/j</span>
+<span class="kw">dose élevée</span>    = <span class="hl">5 mg/j</span> si ATCD NTMD, épilepsie, DT, obésité
+<span class="kw">timing</span>         = <span class="hl">au moins 1 mois avant conception</span>
+                  + premier trimestre grossesse
+<span class="cm">// NTMD = anomalie du tube neural (spina bifida, anencéphalie)</span>`,
+        q:"Femme planifiant une grossesse sans facteur de risque particulier. Quand et à quelle dose d'acide folique ?",
+        ch:["0.4 mg/j à partir du test de grossesse positif","0.4 mg/j au moins 1 mois avant la conception","5 mg/j dès le début de la grossesse"],
+        ok:1, hint:"la prévention doit commencer AVANT la conception",
+        fb_ok:"// correct — 0.4 mg/j au moins 1 mois avant conception + T1",
+        fb_no:"// acide folique : débuter 1 mois avant conception pour prévenir les NTMD",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 7. SYSTÈME UROGÉNITAL ────────────────────────
+  { id:"uro", num:"7", name:"système urogénital",
+    takeaway:[
+      "IU femme non compliquée : nitrofurantoïne ou fosfomycine (dose unique) en 1ère ligne",
+      "IU homme = prostatite jusqu'à preuve du contraire — traitement plus long",
+      "hyperplasie bénigne prostate : alphabloquants (tamsulosine) = 1ère ligne",
+      "incontinence urinaire d'effort : rééducation périnéale avant médicament",
+      "BAPCOC : limiter les fluoroquinolones aux indications strictes"
+    ],
+    questions:[
+      { c:"7.1 · cystite non compliquée",
+        code:`<span class="cm">// cystite aiguë non compliquée (femme) — 1ère ligne</span>
+<span class="kw">1ère ligne</span>  = <span class="hl">nitrofurantoïne</span> 5 jours
+              ou <span class="hl">fosfomycine</span> dose unique
+<span class="warn">⚠ fluoroquinolones = déconseillées en 1ère ligne
+  → réserver aux formes compliquées</span>
+<span class="kw">critères</span>  = femme · symptômes classiques · pas de fièvre`,
+        q:"Femme 28 ans, cystite non compliquée (dysurie, pollakiurie, pas de fièvre). 1ère ligne ?",
+        ch:["ciprofloxacine 7 jours","nitrofurantoïne 5 jours ou fosfomycine dose unique","amoxicilline-clavulanate"],
+        ok:1, hint:"les fluoroquinolones sont déconseillées en 1ère ligne pour préserver leur efficacité",
+        fb_ok:"// correct — nitrofurantoïne ou fosfomycine = 1ère ligne cystite simple",
+        fb_no:"// 1ère ligne cystite : nitrofurantoïne ou fosfomycine. Fluoroquinolones = réservées.",
+        mv:{dx:0,dy:-1} },
+      { c:"7.2 · HBP",
+        code:`<span class="cm">// hyperplasie bénigne de la prostate (HBP)</span>
+<span class="kw">1ère ligne</span>   = <span class="hl">alphabloquants</span> (tamsulosine, alfuzosine)
+              → soulagement rapide (jours)
+<span class="kw">2ème ligne</span>   = inhibiteurs 5-alpha-réductase (finastéride)
+              → effet en 3-6 mois, ↓ volume prostate
+<span class="warn">⚠ tamsulosine : hypotension orthostatique
+  → ne pas associer avec inhibiteurs PDE5 (sildénafil)</span>`,
+        q:"Homme 68 ans, HBP symptomatique. Traitement de 1ère ligne ?",
+        ch:["finastéride (inhibiteur 5-alpha-réductase)","tamsulosine (alphabloquant)","antibiotiques"],
+        ok:1, hint:"les alphabloquants agissent rapidement sur les symptômes urinaires",
+        fb_ok:"// correct — alphabloquants (tamsulosine) = 1ère ligne HBP symptomatique",
+        fb_no:"// HBP 1ère ligne = alphabloquants (effet rapide). Finastéride = 2ème ligne.",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 8. DOULEUR ET FIÈVRE ─────────────────────────
+  { id:"doul", num:"8", name:"douleur et fièvre",
+    takeaway:[
+      "palier OMS : paracétamol → AINS/codéine → opioïdes forts",
+      "paracétamol : dose max 4g/j (3g chez patient fragile) — hépatotoxique si surdose",
+      "AINS : risque gastrique, rénal, cardiovasculaire — gastroprotection si risque",
+      "opioïdes : prévenir constipation dès instauration",
+      "codéine : non recommandée < 12 ans, CI si métaboliseur ultra-rapide CYP2D6"
+    ],
+    questions:[
+      { c:"8.1 · paracétamol — sécurité",
+        code:`<span class="cm">// paracétamol — usage sécurisé</span>
+<span class="kw">dose adulte</span> = max <span class="hl">4g/j</span> (1g × 4/j)
+<span class="kw">fragiles</span>    = max <span class="hl">3g/j</span> (alcool chronique, dénutrition, IH)
+<span class="warn">⚠ surdosage = hépatotoxicité grave
+  → antidote : N-acétylcystéine (urgence)
+⚠ attention : présent dans de nombreuses associations
+  (Dafalgan codéiné, DolProfen, médicaments froids...)</span>`,
+        q:"Patient prend Dafalgan 1g × 4/j + DayQuil (contient paracétamol). Quel risque ?",
+        ch:["interaction antibiotique","surdosage en paracétamol (> 4g/j)","hypotension"],
+        ok:1, hint:"le paracétamol est présent dans de nombreuses spécialités — risque de cumul",
+        fb_ok:"// correct — cumul paracétamol = surdosage potentiel → hépatotoxicité",
+        fb_no:"// paracétamol présent dans de nombreuses associations → vérifier le cumul !",
+        mv:{dx:0,dy:-1} },
+      { c:"8.2 · AINS — gastroprotection",
+        code:`<span class="cm">// AINS — gastroprotection</span>
+<span class="kw">risque gastrique</span> = âge &gt; 65 · ATCD ulcère · corticoïdes · anticoag.
+<span class="ok">✓ si ≥ 1 facteur de risque : associer IPP</span>
+<span class="warn">⚠ AINS + anticoagulants = risque hémorragique ↑↑
+⚠ AINS + IEC/sartan = risque IRA (triple whammy)
+⚠ AINS CI si DFG &lt; 30 ml/min</span>`,
+        q:"Homme 72 ans, arthrose, sous warfarine. On prescrit de l'ibuprofène. Que faire en plus ?",
+        ch:["rien — l'ibuprofène est sûr","ajouter un IPP et surveiller l'INR de près","doubler la dose de warfarine"],
+        ok:1, hint:"AINS + anticoagulant + âge > 65 = multiples facteurs de risque hémorragique",
+        fb_ok:"// correct — IPP + surveillance INR. Mais cette association reste risquée.",
+        fb_no:"// AINS + anticoagulant = risque hémorragique majeur → IPP + surveillance INR étroite",
+        mv:{dx:1,dy:0} },
+      { c:"8.3 · opioïdes — effets indésirables",
+        code:`<span class="cm">// opioïdes — effets indésirables prévisibles</span>
+<span class="kw">constipation</span>  = <span class="hl">toujours</span> — prévenir dès instauration
+              → laxatifs osmotiques (macrogol)
+<span class="kw">nausées</span>       = fréquentes au début, souvent transitoires
+<span class="kw">sédation</span>      = attention conduite automobile
+<span class="warn">⚠ dépression respiratoire = urgence
+  → naloxone (Narcan®) = antidote</span>`,
+        q:"Patient sous morphine pour douleurs cancéreuses. Que prescrire systématiquement d'emblée ?",
+        ch:["antihistaminique contre les nausées","laxatif (la constipation est constante sous opioïdes)","antipyrétique"],
+        ok:1, hint:"la constipation sous opioïdes est quasi universelle et ne s'adapte pas",
+        fb_ok:"// correct — laxatif systématique dès instauration des opioïdes",
+        fb_no:"// constipation sous opioïdes = constante, ne s'adapte pas → laxatif systématique",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 9. PATHOLOGIES OSTÉO-ARTICULAIRES ────────────
+  { id:"osteo", num:"9", name:"pathologies ostéo-articulaires",
+    takeaway:[
+      "ostéoporose : biphosphonates = 1ère ligne (alendronate hebdomadaire)",
+      "alendronate : prise à jeun, debout, 30 min avant tout aliment ou médicament",
+      "goutte : colchicine ou AINS en crise aiguë — allopurinol en prévention",
+      "PR : MTX = anchor therapy + biothérapie si réponse insuffisante",
+      "arthrose : paracétamol 1ère ligne — AINS si insuffisant et absence de CI"
+    ],
+    questions:[
+      { c:"9.1 · ostéoporose",
+        code:`<span class="cm">// biphosphonates — 1ère ligne ostéoporose</span>
+<span class="kw">ex</span>         = alendronate 70 mg/sem · risédronate 35 mg/sem
+<span class="warn">⚠ prise correcte obligatoire :
+  → à JEUN le matin
+  → avec grand verre d'eau (200 ml)
+  → DEBOUT ou assis droit
+  → 30 min avant tout aliment/médicament
+  → risque d'œsophagite si mal pris</span>`,
+        q:"Patient sous alendronate se plaint de douleurs rétrosternales. Cause probable ?",
+        ch:["effet indésirable neurologique","œsophagite par mauvaise prise (pas assez d'eau, couché)","réaction allergique"],
+        ok:1, hint:"les biphosphonates peuvent irriter l'œsophage si mal pris",
+        fb_ok:"// correct — œsophagite = EI classique si prise incorrecte d'alendronate",
+        fb_no:"// alendronate mal pris (couché, peu d'eau) → œsophagite. Revoir les modalités.",
+        mv:{dx:1,dy:0} },
+      { c:"9.2 · goutte",
+        code:`<span class="cm">// goutte — crise aiguë vs traitement de fond</span>
+<span class="kw">crise aiguë</span>   = <span class="hl">colchicine</span> (1ère ligne) ou AINS
+<span class="warn">⚠ colchicine : dose faible (0.5 mg × 2/j) aussi efficace
+  → doses élevées → diarrhées graves
+⚠ NE PAS débuter allopurinol pendant la crise</span>
+<span class="kw">prévention</span>   = <span class="hl">allopurinol</span> (uricosurique) en intercritique`,
+        q:"Patient en crise de goutte aiguë. Peut-on débuter l'allopurinol maintenant ?",
+        ch:["oui — c'est le traitement de la goutte","non — l'allopurinol se débute en période intercritique","oui — à forte dose"],
+        ok:1, hint:"l'allopurinol en crise peut prolonger ou aggraver l'épisode aigu",
+        fb_ok:"// correct — allopurinol = phase intercritique uniquement. Crise = colchicine ou AINS.",
+        fb_no:"// allopurinol pendant la crise = risque d'aggravation. Attendre la résolution.",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 10. SYSTÈME NERVEUX ──────────────────────────
+  { id:"sn", num:"10", name:"système nerveux",
+    takeaway:[
+      "antidépresseurs : délai d'action 2-4 semaines — ne pas arrêter trop tôt",
+      "ISRS = 1ère ligne dépression (meilleure tolérance vs tricycliques)",
+      "BZD : max 2-4 semaines — risque de dépendance et de chutes chez le sujet âgé",
+      "antipsychotiques : surveiller syndrome métabolique et allongement QT",
+      "valproate : tératogène — contraception obligatoire chez la femme en âge de procréer"
+    ],
+    questions:[
+      { c:"10.1 · antidépresseurs — délai",
+        code:`<span class="cm">// antidépresseurs — points clés</span>
+<span class="kw">délai</span>       = <span class="hl">2-4 semaines</span> avant effet antidépresseur
+<span class="kw">1ère ligne</span>  = ISRS (fluoxétine, sertraline, escitalopram)
+<span class="kw">durée min</span>   = 6 mois après rémission (1er épisode)
+<span class="warn">⚠ arrêt brutal = syndrome de sevrage
+  → toujours dégresser progressivement</span>`,
+        q:"Patient démarre un ISRS. Il n'a aucun effet après 10 jours. Que faire ?",
+        ch:["changer d'antidépresseur immédiatement","rassurer — le délai d'action est de 2-4 semaines","doubler la dose"],
+        ok:1, hint:"le délai d'action des antidépresseurs est de 2 à 4 semaines",
+        fb_ok:"// correct — délai d'action ISRS = 2-4 semaines. Persévérer.",
+        fb_no:"// ISRS : délai d'action 2-4 semaines. 10 jours = trop tôt pour juger.",
+        mv:{dx:1,dy:0} },
+      { c:"10.2 · benzodiazépines",
+        code:`<span class="cm">// benzodiazépines — usage raisonné</span>
+<span class="kw">durée max</span>   = <span class="hl">2-4 semaines</span> (anxiété) · 2-4 semaines (insomnie)
+<span class="warn">⚠ sujet âgé : risque +++
+  → sédation → chutes → fractures
+  → confusion
+⚠ dépendance physique rapide</span>
+<span class="kw">sevrage</span>     = toujours progressif (10-25% / 2 semaines)`,
+        q:"Sujet âgé 78 ans sous lorazépam depuis 5 ans. Que faire ?",
+        ch:["continuer — il tolère bien","sevrage progressif + alternatives non médicamenteuses","augmenter la dose si anxiété persistante"],
+        ok:1, hint:"BZD au long cours chez le sujet âgé = risque de chutes et de confusion",
+        fb_ok:"// correct — sevrage progressif (jamais brutal) + thérapies non médicamenteuses",
+        fb_no:"// BZD > 2-4 semaines = problème. Sujet âgé = risque chutes/confusion. Sevrer progressivement.",
+        mv:{dx:0,dy:-1} },
+      { c:"10.3 · valproate — tératogénicité",
+        code:`<span class="cm">// valproate — tératogénicité</span>
+<span class="warn">⚠ TÉRATOGÈNE MAJEUR
+  → spina bifida, malformations cardiaques
+  → troubles neurodéveloppementaux (QI ↓)
+  → CI si grossesse SAUF si aucune alternative</span>
+<span class="kw">règle</span> = contraception efficace obligatoire
+        + réévaluation annuelle de l'indication
+<span class="cm">// Dépakine® = valproate — programme de prévention</span>`,
+        q:"Femme 25 ans sous valproate pour épilepsie, souhaite une grossesse. Première démarche ?",
+        ch:["continuer le valproate — le risque est faible","consultation neurologique urgente pour réévaluation du traitement","arrêter le valproate immédiatement"],
+        ok:1, hint:"le valproate est un tératogène majeur — réévaluation indispensable avant grossesse",
+        fb_ok:"// correct — consultation neurologique urgente pour réévaluer et trouver une alternative",
+        fb_no:"// valproate = tératogène majeur. Consultation neuro URGENTE avant grossesse planifiée.",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 11. INFECTIONS ───────────────────────────────
+  { id:"inf", num:"11", name:"infections",
+    takeaway:[
+      "BAPCOC : préserver les antibiotiques — ne traiter que les infections bactériennes prouvées",
+      "amoxicilline = 1ère ligne angine streptococcique, pneumonie communautaire",
+      "fluoroquinolones : réserver aux infections compliquées — résistances croissantes",
+      "durées courtes aussi efficaces (3j cystite, 5j angine) — moins d'EI et de résistances",
+      "vaccination : recommandée avant tout voyage et selon calendrier vaccinal"
+    ],
+    questions:[
+      { c:"11.1 · prescription raisonnée antibiotiques",
+        code:`<span class="cm">// antibiotiques — principes BAPCOC</span>
+<span class="hl">ne traiter que les infections bactériennes</span>
+<span class="kw">règles</span> = bon antibiotique · bonne dose · bonne durée
+<span class="warn">⚠ rhinopharyngite = virale → pas d'antibiotiques
+⚠ bronchite aiguë = virale (90%) → pas d'antibiotiques
+⚠ otite enfant &lt; 2 ans → attendre 48-72h si léger</span>`,
+        q:"Adulte avec rhinopharyngite depuis 3 jours (pas de fièvre, état général conservé). Antibiotique ?",
+        ch:["amoxicilline 5 jours","non — rhinopharyngite = virale, les antibiotiques sont inefficaces","azithromycine 3 jours"],
+        ok:1, hint:"les rhinopharyngites sont quasi toujours virales",
+        fb_ok:"// correct — rhinopharyngite = virale → pas d'antibiotique",
+        fb_no:"// rhinopharyngite = virale. Antibiotiques = inutiles et favorisent les résistances.",
+        mv:{dx:0,dy:-1} },
+      { c:"11.2 · angine streptococcique",
+        code:`<span class="cm">// angine streptococcique — traitement</span>
+<span class="kw">diagnostic</span>  = TDR positif (test rapide streptocoque)
+<span class="kw">traitement</span>  = <span class="hl">amoxicilline</span> 1g × 2/j × 6 jours
+<span class="cm">// ou phénoxyméthylpénicilline</span>
+<span class="warn">⚠ macrolides : résistances élevées (30-40%) en Belgique
+  → réserver si allergie pénicilline</span>`,
+        q:"Angine avec TDR positif, pas d'allergie. Quel antibiotique ?",
+        ch:["azithromycine (macrolide)","amoxicilline","fluoroquinolone"],
+        ok:1, hint:"l'amoxicilline reste le traitement de référence de l'angine streptococcique",
+        fb_ok:"// correct — amoxicilline = 1ère ligne angine streptococcique",
+        fb_no:"// amoxicilline = 1ère ligne. Macrolides = résistances 30-40% → éviter en 1ère ligne.",
+        mv:{dx:1,dy:0} },
+      { c:"11.3 · fluoroquinolones",
+        code:`<span class="cm">// fluoroquinolones — usage restreint</span>
+<span class="warn">⚠ réserver aux indications strictes :
+  · IU compliquée / prostatite
+  · pneumonie sévère (si CI β-lactamines)
+  · pas en 1ère ligne pour cystite simple</span>
+<span class="kw">EI graves</span> = tendinopathies · neuropathies · allongement QT
+<span class="cm">// EMA : restriction d'usage depuis 2019</span>`,
+        q:"Pourquoi éviter les fluoroquinolones pour une cystite simple ?",
+        ch:["elles sont inefficaces sur E. coli","pour préserver leur efficacité et limiter les effets indésirables graves","elles sont trop chères"],
+        ok:1, hint:"l'enjeu est la préservation des antibiotiques et les effets indésirables graves",
+        fb_ok:"// correct — fluoroquinolones = réserver aux formes compliquées (résistances + EI graves)",
+        fb_no:"// fluoroquinolones : EI graves + résistances → réserver aux indications strictes",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 12. IMMUNITÉ ─────────────────────────────────
+  { id:"imm", num:"12", name:"immunité",
+    takeaway:[
+      "vaccins vivants atténués : CI chez immunodéprimés (sauf exceptions)",
+      "corticoïdes > 20 mg/j prednisone > 2 semaines = immunosuppression",
+      "biothérapies : dépistage tuberculose, hépatite B avant instauration",
+      "vaccins inactivés : peuvent être administrés chez l'immunodéprimé",
+      "réactions anaphylactiques : adrénaline IM = traitement de 1ère urgence"
+    ],
+    questions:[
+      { c:"12.1 · vaccins vivants et immunodépression",
+        code:`<span class="cm">// vaccins vivants atténués</span>
+<span class="kw">exemples</span>   = RRO · varicelle · BCG · fièvre jaune · zona (Zostavax®)
+<span class="warn">⚠ CI chez l'immunodéprimé :
+  → risque d'infection par le virus vaccinal
+  → exceptions : VIH bien contrôlé (CD4 > 200)</span>
+<span class="ok">✓ vaccins inactivés = utilisables chez l'immunodéprimé
+  (grippe, pneumocoque, hépatite B...)</span>`,
+        q:"Patient sous chimiothérapie. Peut-on lui donner le vaccin antigrippal inactivé ?",
+        ch:["non — tous les vaccins sont CI sous chimio","oui — les vaccins inactivés peuvent être administrés","seulement 6 mois après la chimio"],
+        ok:1, hint:"vaccins inactivés ≠ vaccins vivants — distinction fondamentale",
+        fb_ok:"// correct — vaccins inactivés utilisables chez l'immunodéprimé (efficacité peut être réduite)",
+        fb_no:"// vaccins inactivés (grippe, pneumo...) = utilisables. Vaccins vivants = CI.",
+        mv:{dx:1,dy:0} },
+      { c:"12.2 · biothérapies — bilan pré-thérapeutique",
+        code:`<span class="cm">// biothérapies — bilan avant instauration</span>
+<span class="kw">obligatoire</span> = dépistage tuberculose (IDR / IGRA)
+              + sérologie hépatite B (AgHBs, AcHBc)
+              + sérologie VIH (selon contexte)
+<span class="warn">⚠ tuberculose latente → traitement prophylactique
+  avant de débuter la biothérapie
+⚠ hépatite B occulte → surveillance ou prophylaxie</span>`,
+        q:"Avant de débuter un anti-TNF pour une polyarthrite rhumatoïde, quel bilan est indispensable ?",
+        ch:["NFS seule","dépistage tuberculose + sérologie hépatite B","ionogramme + fonction rénale"],
+        ok:1, hint:"les anti-TNF peuvent réactiver une tuberculose latente ou une hépatite B",
+        fb_ok:"// correct — TB + HBV à dépister avant tout anti-TNF",
+        fb_no:"// anti-TNF : dépistage TB (IGRA/IDR) + hépatite B obligatoires avant instauration",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 13. MÉDICAMENTS ANTITUMORAUX ─────────────────
+  { id:"onco", num:"13", name:"médicaments antitumoraux",
+    takeaway:[
+      "chimiothérapies : myélosuppression = principale toxicité — NFS régulière",
+      "immunothérapies (anti-PD1/PD-L1) : effets immuns irAE — corticoïdes si sévère",
+      "nausées chimio : ondansétron + dexaméthasone en prévention",
+      "extravasation de cytostatiques = urgence — protocole strict",
+      "interactions nombreuses : toujours vérifier avant co-prescription"
+    ],
+    questions:[
+      { c:"13.1 · toxicité hématologique",
+        code:`<span class="cm">// chimiothérapie — myélosuppression</span>
+<span class="kw">nadir</span>       = 7-14 jours après chimio (leucocytes au plus bas)
+<span class="kw">neutropénie fébrile</span> = urgence médicale
+  T° &gt; 38.5°C + neutrophiles &lt; 500/mm³
+<span class="warn">⚠ antibiotiques IV en urgence (hospitalisé)
+  → ne pas attendre les résultats bactério</span>
+<span class="kw">G-CSF</span>       = stimulation production leucocytes`,
+        q:"Patient sous chimio avec T° 38.8°C, neutrophiles 300/mm³. Première action ?",
+        ch:["antipyrétique et surveillance à domicile","hospitalisation urgente + antibiotiques IV sans délai","bilan biologique et attendre les résultats"],
+        ok:1, hint:"neutropénie fébrile = urgence médicale — les antibiotiques ne doivent pas être retardés",
+        fb_ok:"// correct — neutropénie fébrile = urgence → hospitalisation + antibio IV immédiat",
+        fb_no:"// neutropénie fébrile = urgence vitale. Antibio IV SANS attendre les hémocultures.",
+        mv:{dx:1,dy:0} },
+      { c:"13.2 · immunothérapies",
+        code:`<span class="cm">// immunothérapies — effets indésirables immuns (irAE)</span>
+<span class="kw">mécanisme</span>  = levée de l'inhibition immunitaire
+<span class="kw">irAE</span>       = colite · pneumonite · hépatite · endocrinopathies
+              → peuvent survenir des mois après l'arrêt
+<span class="kw">traitement</span> = <span class="hl">corticoïdes</span> si irAE modéré-sévère
+<span class="cm">// distinction avec infection = essentielle</span>`,
+        q:"Patient sous pembrolizumab (anti-PD1) avec diarrhée profuse. Cause à évoquer ?",
+        ch:["gastro-entérite virale banale","colite immune (irAE) — arrêt immunothérapie + corticoïdes","intoxication alimentaire"],
+        ok:1, hint:"les irAE peuvent survenir à tout moment — toujours y penser sous immunothérapie",
+        fb_ok:"// correct — colite immune (irAE) sous anti-PD1 → arrêt + corticoïdes si sévère",
+        fb_no:"// immunothérapie + diarrhée profuse = colite immune irAE jusqu'à preuve du contraire",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 14. MINÉRAUX ET VITAMINES ────────────────────
+  { id:"vit", num:"14", name:"minéraux et vitamines",
+    takeaway:[
+      "vitamine D : déficit très fréquent en Belgique — supplémentation souvent utile",
+      "fer : absorption réduite par IPP, thé, calcium — prendre à jeun",
+      "vitamine B12 : déficit sous metformine au long cours — surveiller",
+      "magnésium : déficit sous IPP au long cours — supplémentation si symptômes",
+      "ne pas supplémenter sans indication — vitamines liposolubles (ADEK) toxiques en excès"
+    ],
+    questions:[
+      { c:"14.1 · vitamine D",
+        code:`<span class="cm">// vitamine D — déficit et supplémentation</span>
+<span class="kw">seuil</span>       = 25(OH)D &lt; 50 nmol/L = déficit
+<span class="kw">risques</span>     = ostéoporose · chutes · infections
+<span class="kw">Belgique</span>    = déficit très fréquent (ensoleillement limité)
+<span class="ok">✓ supplémentation recommandée : nourrissons, > 70 ans,
+  grossesse, peu d'exposition solaire</span>
+<span class="cm">// surdosage possible → hypercalcémie</span>`,
+        q:"Personne âgée de 75 ans, peu exposée au soleil. Supplémentation en vitamine D ?",
+        ch:["non — les vitamines se trouvent dans l'alimentation","oui — déficit fréquent chez les > 70 ans en Belgique","seulement si fracture ostéoporotique"],
+        ok:1, hint:"les personnes âgées et peu exposées au soleil sont à risque de déficit en Belgique",
+        fb_ok:"// correct — supplémentation recommandée chez les > 70 ans en Belgique",
+        fb_no:"// vitamine D : déficit fréquent > 70 ans en Belgique → supplémentation recommandée",
+        mv:{dx:1,dy:0} },
+      { c:"14.2 · fer — absorption",
+        code:`<span class="cm">// fer oral — optimiser l'absorption</span>
+<span class="ok">✓ prise à jeun (absorption × 2)
+✓ vitamine C améliore l'absorption</span>
+<span class="warn">⚠ réducteurs d'absorption :
+  · IPP et anti-H2
+  · thé, café, lait
+  · calcium, magnésium
+  · tétracyclines, fluoroquinolones</span>`,
+        q:"Patient sous IPP prend du fer. Quel conseil ?",
+        ch:["prendre le fer avec le repas principal","prendre le fer 1-2h avant ou après l'IPP, à jeun si possible","l'IPP n'a aucun impact sur le fer"],
+        ok:1, hint:"les IPP réduisent l'acidité gastrique nécessaire à l'absorption du fer",
+        fb_ok:"// correct — IPP ↓ absorption fer → espacer les prises de 1-2h minimum",
+        fb_no:"// IPP = réducteur d'acidité → ↓ absorption fer. Espacer les prises.",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 15. DERMATOLOGIE ─────────────────────────────
+  { id:"derm", num:"15", name:"dermatologie",
+    takeaway:[
+      "acné : rétinoïdes topiques = 1ère ligne. Isotrétinoïne orale = tératogène majeur",
+      "corticoïdes topiques : potence adaptée à la localisation — éviter visage avec forte potence",
+      "antifongiques : tinea pedis → terbinafine topique. Candidose buccale → nystatine",
+      "psoriasis léger : corticoïdes topiques + analogue vitamine D",
+      "eczéma atopique : émollients dès la naissance — corticoïdes en poussée"
+    ],
+    questions:[
+      { c:"15.1 · corticoïdes topiques",
+        code:`<span class="cm">// corticoïdes topiques — potences</span>
+<span class="kw">faible</span>    = hydrocortisone 1% → visage · plis · nourrisson
+<span class="kw">modérée</span>   = bétaméthasone 0.05%
+<span class="kw">forte</span>     = clobétasol → usage court · pas sur visage
+<span class="warn">⚠ usage prolongé :
+  → atrophie cutanée · vergetures · acné
+  → absorption systémique si grande surface
+  → glaucome si péri-oculaire</span>`,
+        q:"Eczéma du visage chez un adulte. Quelle potence de dermocorticoïde ?",
+        ch:["forte potence (clobétasol) pour efficacité maximale","faible potence (hydrocortisone 1%) adaptée au visage","pas de dermocorticoïde sur le visage"],
+        ok:1, hint:"le visage est une zone sensible — dermocorticoïdes de faible potence uniquement",
+        fb_ok:"// correct — visage = faible potence uniquement (hydrocortisone 1%)",
+        fb_no:"// visage = zone sensible → faible potence (hydrocortisone 1%). Forte potence = CI visage.",
+        mv:{dx:1,dy:0} },
+      { c:"15.2 · isotrétinoïne",
+        code:`<span class="cm">// isotrétinoïne orale (Roaccutane®)</span>
+<span class="warn">⚠ TÉRATOGÈNE MAJEUR
+  → malformations graves du SNC et cardiaques
+  → contraception obligatoire 1 mois avant, pendant
+    et 1 mois après le traitement</span>
+<span class="kw">programme iPLEDGE/PPP</span> = test grossesse mensuel
+<span class="kw">autres EI</span> = sécheresse (lèvres, peau, yeux) · ↑ TG`,
+        q:"Femme sous isotrétinoïne pour acné sévère. Quelle contrainte absolue ?",
+        ch:["éviter le soleil","contraception efficace obligatoire — tératogène majeur","arrêter si apparition d'acné légère"],
+        ok:1, hint:"l'isotrétinoïne est l'un des médicaments les plus tératogènes connus",
+        fb_ok:"// correct — contraception obligatoire (1 mois avant → 1 mois après). Test grossesse mensuel.",
+        fb_no:"// isotrétinoïne = tératogène majeur → contraception OBLIGATOIRE tout au long du traitement",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 16. OPHTALMOLOGIE ────────────────────────────
+  { id:"opht", num:"16", name:"ophtalmologie",
+    takeaway:[
+      "collyres bêtabloquants (timolol) : absorption systémique possible — CI si asthme/BAV",
+      "glaucome : prostaglandines (latanoprost) = 1ère ligne — 1x/soir",
+      "infection oculaire bactérienne : tobramycine ou chloramphénicol collyre",
+      "corticoïdes oculaires : jamais sans diagnostic précis (risque si herpès)",
+      "DMLA : injections intravitréennes anti-VEGF = traitement forme exsudative"
+    ],
+    questions:[
+      { c:"16.1 · collyres bêtabloquants",
+        code:`<span class="cm">// collyres bêtabloquants (glaucome)</span>
+<span class="kw">ex</span>         = timolol · bétaxolol
+<span class="warn">⚠ absorption systémique possible via conduit nasolacrymal
+  → CI si asthme / BPCO sévère
+  → CI si BAV · bradycardie sévère
+  → interaction avec bêtabloquants oraux</span>
+<span class="kw">astuce</span>     = compression du sac lacrymal 1-2 min après instillation
+             → ↓ absorption systémique`,
+        q:"Patient asthmatique avec glaucome. Le timolol (collyre) est-il contre-indiqué ?",
+        ch:["non — les collyres n'ont pas d'effet systémique","oui — absorption systémique possible → bronchospasme","seulement si asthme sévère"],
+        ok:1, hint:"les collyres bêtabloquants ont une absorption systémique non négligeable",
+        fb_ok:"// correct — timolol collyre = CI si asthme (absorption systémique possible)",
+        fb_no:"// collyres bêtabloquants → absorption systémique → CI asthme/BPCO sévère",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 17. ORL ──────────────────────────────────────
+  { id:"orl", num:"17", name:"oto-rhino-laryngologie",
+    takeaway:[
+      "décongestionnants nasaux (xylométazoline) : max 5-7 jours — effet rebond",
+      "corticoïdes nasaux : traitement de fond rhinite allergique — délai 1-2 semaines",
+      "otite externe : ciprofloxacine + corticoïde auriculaire en gouttes",
+      "cerumen : huile d'olive ou eau oxygénée avant lavage — jamais tige coton",
+      "vertige : bétahistine (Betaserc®) dans la maladie de Ménière — non recommandée en général"
+    ],
+    questions:[
+      { c:"17.1 · décongestionnants nasaux",
+        code:`<span class="cm">// décongestionnants nasaux — usage limité</span>
+<span class="kw">ex</span>         = xylométazoline (Otrivine®) · oxymétazoline
+<span class="kw">durée max</span>  = <span class="hl">5-7 jours</span>
+<span class="warn">⚠ au-delà : rhinite médicamenteuse (rebond)
+  → congestion pire qu'avant
+⚠ CI : enfant &lt; 2 ans · hypertension · grossesse</span>
+<span class="kw">rhinite allergique</span> = corticoïdes nasaux (traitement de fond)`,
+        q:"Patient utilise de la xylométazoline depuis 3 semaines pour rhinite chronique. Problème ?",
+        ch:["pas de problème — les sprays nasaux sont inoffensifs","rhinite médicamenteuse par rebond — sevrage nécessaire","allergie à la xylométazoline"],
+        ok:1, hint:"les décongestionnants nasaux ne doivent pas dépasser 5-7 jours",
+        fb_ok:"// correct — > 5-7j = rhinite médicamenteuse. Sevrage progressif nécessaire.",
+        fb_no:"// xylométazoline > 1 semaine = rhinite médicamenteuse (rebond). Arrêt progressif.",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 18. ANESTHÉSIE ───────────────────────────────
+  { id:"anes", num:"18", name:"anesthésie",
+    takeaway:[
+      "benzodiazépines en prémédication : midazolam (courte durée d'action)",
+      "curares : antagonisation par sugammadex (rocuronium/vécuronium) ou néostigmine",
+      "ALR : toxicité systémique lidocaïne → convulsions puis arrêt cardiaque",
+      "antidouleur postopératoire : analgésie multimodale (paracétamol + AINS + opioïde)",
+      "jeûne préopératoire : 6h solides, 2h liquides clairs"
+    ],
+    questions:[
+      { c:"18.1 · analgésie multimodale",
+        code:`<span class="cm">// analgésie postopératoire multimodale</span>
+<span class="kw">principe</span>   = combiner plusieurs classes pour ↓ doses opioïdes
+<span class="kw">associations</span> = <span class="hl">paracétamol + AINS + opioïde faible/fort</span>
+              + ALR si possible (infiltration, bloc)
+<span class="ok">✓ moins d'effets indésirables des opioïdes
+✓ meilleure analgésie</span>
+<span class="cm">// épargne morphinique = objectif</span>`,
+        q:"Pourquoi associer paracétamol + AINS + opioïde en postopératoire plutôt qu'opioïde seul ?",
+        ch:["pour économiser le coût des médicaments","analgésie multimodale = meilleur effet + moins d'effets indésirables des opioïdes","les opioïdes seuls sont inefficaces"],
+        ok:1, hint:"l'association de mécanismes différents permet une meilleure analgésie avec moins d'opioïdes",
+        fb_ok:"// correct — multimodale = épargne morphinique + meilleure analgésie + moins d'EI",
+        fb_no:"// analgésie multimodale = meilleure efficacité + réduction des doses d'opioïdes + moins d'EI",
+        mv:{dx:1,dy:0} },
+    ]
+  },
+
+  // ── 19. AGENTS DE DIAGNOSTIC ─────────────────────
+  { id:"diag", num:"19", name:"agents de diagnostic",
+    takeaway:[
+      "produits de contraste iodés : risque néphrotoxicité — hydratation préventive",
+      "metformine : suspendre 48h avant/après contraste iodé si DFG < 60",
+      "gadolinium (IRM) : fibrose systémique néphrogénique si insuffisance rénale sévère",
+      "réactions anaphylactoïdes au contraste : adrénaline IM = traitement",
+      "prémédiquer si ATCD réaction au contraste : corticoïdes + antihistaminique"
+    ],
+    questions:[
+      { c:"19.1 · contraste iodé et metformine",
+        code:`<span class="cm">// contraste iodé et metformine</span>
+<span class="warn">⚠ si DFG &lt; 60 ml/min :
+  → suspendre metformine 48h avant l'examen
+  → reprendre 48h après si fonction rénale stable
+  → risque d'acidose lactique si IRA post-contraste</span>
+<span class="kw">si DFG &gt; 60</span> = pas de suspension systématique nécessaire
+<span class="cm">// toujours hydratation IV préventive si risque</span>`,
+        q:"Patient sous metformine, DFG = 45 ml/min, scanner avec contraste demain. Que faire ?",
+        ch:["rien — la metformine est toujours sûre","suspendre la metformine 48h avant et après le scanner","doubler la dose d'hydratation uniquement"],
+        ok:1, hint:"DFG < 60 + contraste iodé = suspendre metformine pour prévenir l'acidose lactique",
+        fb_ok:"// correct — DFG < 60 + contraste → suspendre metformine 48h avant et après",
+        fb_no:"// metformine + contraste iodé + DFG < 60 = risque acidose lactique → suspendre 48h av/ap",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+  // ── 20. MÉDICAMENTS DIVERS ───────────────────────
+  { id:"div", num:"20", name:"médicaments divers",
+    takeaway:[
+      "automédication : toujours vérifier les interactions et les CI",
+      "médicaments OTC ≠ médicaments sans risque — paracétamol, ibuprofène, antihistaminiques",
+      "phytothérapie : millepertuis = inducteur enzymatique puissant (interactions majeures)",
+      "compléments alimentaires : pas d'autorisation d'efficacité — risques sous-estimés",
+      "médicaments périmés : ne jamais utiliser — efficacité et sécurité non garanties"
+    ],
+    questions:[
+      { c:"20.1 · millepertuis — interactions",
+        code:`<span class="cm">// millepertuis (Hypericum perforatum)</span>
+<span class="kw">usage</span>      = dépression légère à modérée (phytothérapie)
+<span class="warn">⚠ inducteur enzymatique puissant (CYP3A4, P-gp)
+  → ↓ efficacité de nombreux médicaments :
+  · contraceptifs oraux (grossesse possible !)
+  · antiviraux (VIH, hépatite C)
+  · ciclosporine, tacrolimus
+  · warfarine
+  · digoxine</span>`,
+        q:"Patiente sous contraceptif oral commence le millepertuis. Quel risque ?",
+        ch:["aucun — c'est une plante naturelle","diminution de l'efficacité du contraceptif → risque de grossesse","augmentation de l'effet contraceptif"],
+        ok:1, hint:"le millepertuis est un inducteur enzymatique puissant qui accélère le métabolisme des médicaments",
+        fb_ok:"// correct — millepertuis + contraceptif oral → ↓ efficacité → risque de grossesse",
+        fb_no:"// millepertuis = inducteur CYP3A4 → métabolisme accéléré contraceptif → ↓ efficacité",
+        mv:{dx:1,dy:0} },
+      { c:"20.2 · automédication — vigilance",
+        code:`<span class="cm">// médicaments OTC — pas sans risque</span>
+<span class="kw">ibuprofène OTC</span> = AINS → risques gastrique, rénal, CV
+<span class="kw">antihistaminiques</span> = sédation · rétention urinaire (sujet âgé)
+<span class="kw">décongestionnants</span>= risque rebond · CI HTA
+<span class="cm">// "en vente libre" ≠ "inoffensif"
+// toujours vérifier CI et interactions</span>`,
+        q:"Homme 70 ans, insuffisance rénale modérée, prend de l'ibuprofène en automédication. Risque ?",
+        ch:["aucun — l'ibuprofène est en vente libre","aggravation de l'insuffisance rénale — AINS CI si DFG < 30","seulement si pris à forte dose"],
+        ok:1, hint:"les AINS sont contre-indiqués ou à utiliser avec grande prudence en cas d'insuffisance rénale",
+        fb_ok:"// correct — AINS + insuffisance rénale = risque d'aggravation majeur",
+        fb_no:"// AINS = vasoconstricteurs rénaux → aggravation IR. CI si DFG < 30. Vigilance si < 60.",
+        mv:{dx:0,dy:-1} },
+    ]
+  },
+
+];
+
+// ══════════════════════════════════════════════════════
+//  ÉTAT
+// ══════════════════════════════════════════════════════
+let curChap = null, curQ = 0, score = 0, answered = false;
+let rX = 0, rY = 5;
+const GOAL = {x:5,y:0};
+let traces = new Set();
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() {
+  document.getElementById('win').classList.remove('show');
+  show('s-home');
+}
+
+// ══════════════════════════════════════════════════════
+//  BUILD HOME
+// ══════════════════════════════════════════════════════
+function buildHome() {
+  const list = document.getElementById('chapters-list');
+  list.innerHTML = '';
+  CHAPTERS.forEach(ch => {
+    const row = document.createElement('div');
+    row.className = 'chap-row';
+    row.innerHTML = `
+      <span class="chap-num">${ch.num}.</span>
+      <span class="chap-name">${ch.name}</span>
+      <span class="chap-count">${ch.questions.length} niveaux</span>
+      <span class="chap-arrow">›</span>`;
+    row.onclick = () => startChap(ch.id);
+    list.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  JEU
+// ══════════════════════════════════════════════════════
+function startChap(id) {
+  curChap = CHAPTERS.find(c => c.id === id);
+  curQ = 0; score = 0; answered = false;
+  rX = 0; rY = 5; traces = new Set();
+  document.getElementById('win').classList.remove('show');
+  buildGrid();
+  loadQ();
+  show('s-game');
+}
+
+function loadQ() {
+  answered = false;
+  const q = curChap.questions[curQ];
+  document.getElementById('g-title').textContent = curChap.name;
+  document.getElementById('g-pts').textContent = score + ' pts';
+  document.getElementById('g-ctag').textContent = q.c;
+  document.getElementById('g-concept').innerHTML = q.code;
+  document.getElementById('g-q').textContent = q.q;
+  document.getElementById('g-fb').className = 'fb';
+  document.getElementById('g-fb').textContent = '';
+  document.getElementById('g-next').className = 'btnext';
+
+  // dots
+  const dr = document.getElementById('dots-row');
+  dr.innerHTML = '';
+  curChap.questions.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < curQ ? ' done' : i === curQ ? ' cur' : '');
+    dr.appendChild(d);
+  });
+
+  // choices
+  const cc = document.getElementById('g-choices');
+  cc.innerHTML = '';
+  q.ch.forEach((t,i) => {
+    const b = document.createElement('button');
+    b.className = 'choice'; b.textContent = t;
+    b.onclick = () => answer(i);
+    cc.appendChild(b);
+  });
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = curChap.questions[curQ];
+  const ok = idx === q.ok;
+  document.querySelectorAll('.choice').forEach((b,i) => {
+    if (i === q.ok) b.classList.add('ok');
+    else if (i === idx && !ok) b.classList.add('no');
+    else b.classList.add('dim');
+    b.onclick = null;
+  });
+  const fb = document.getElementById('g-fb');
+  fb.className = 'fb show ' + (ok ? 'ok' : 'no');
+  fb.textContent = ok ? q.fb_ok : q.fb_no;
+  if (ok) { score += 10; document.getElementById('g-pts').textContent = score + ' pts'; sparks(); }
+  moveRobot(q.mv.dx, q.mv.dy);
+  document.getElementById('g-next').className = 'btnext show';
+}
+
+function doHint() {
+  const fb = document.getElementById('g-fb');
+  fb.className = 'fb show hint';
+  fb.textContent = '? ' + curChap.questions[curQ].hint;
+}
+
+function nextQ() {
+  curQ++;
+  if (curQ >= curChap.questions.length) { showWin(); return; }
+  loadQ();
+}
+
+function showWin() {
+  document.getElementById('win-title').textContent = `// ${curChap.name} · complété`;
+  const ul = document.getElementById('win-list');
+  ul.innerHTML = '';
+  curChap.takeaway.forEach(t => {
+    const li = document.createElement('li'); li.textContent = t;
+    ul.appendChild(li);
+  });
+  document.getElementById('win').classList.add('show');
+}
+
+function restartChap() {
+  document.getElementById('win').classList.remove('show');
+  startChap(curChap.id);
+}
+
+// ══════════════════════════════════════════════════════
+//  GRILLE
+// ══════════════════════════════════════════════════════
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
+    const d = document.createElement('div');
+    d.id = `gc${x}${y}`; d.className = 'gcell';
+    if (x === GOAL.x && y === GOAL.y) d.textContent = '🏁';
+    g.appendChild(d);
+  }
+  renderGrid();
+}
+
+function renderGrid() {
+  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
+    const d = document.getElementById(`gc${x}${y}`);
+    if (!d) continue;
+    d.className = 'gcell'; d.textContent = ''; d.innerHTML = '';
+    if (x === GOAL.x && y === GOAL.y) { d.classList.add('goal'); d.textContent = '🏁'; continue; }
+    if (traces.has(`${x},${y}`)) d.classList.add('trace');
+    if (x === rX && y === rY) {
+      d.classList.add('robot');
+      d.innerHTML = `<svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/>
+        <rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/>
+        <rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/>
+        <circle cx="16" cy="7" r="2" fill="#e8a598"/>
+        <rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+        <rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+      </svg>`;
+    }
+  }
+}
+
+function moveRobot(dx, dy) {
+  traces.add(`${rX},${rY}`);
+  rX = Math.max(0, Math.min(5, rX + dx));
+  rY = Math.max(0, Math.min(5, rY + dy));
+  renderGrid();
+  const dir = dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent = `${curQ+1}/${curChap.questions.length} → ${dir}`;
+}
+
+function sparks() {
+  const cell = document.getElementById(`gc${rX}${rY}`);
+  if (!cell) return;
+  const r = cell.getBoundingClientRect();
+  ['#7a9e87','#e8a598','#8fb4c8','#c8a870'].forEach((c,i) => {
+    const p = document.createElement('div'); p.className = 'pt';
+    const s = 3 + Math.random() * 5;
+    p.style.cssText = `width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  });
+}
+
+buildHome();
+</script>
+</body>
+</html>
