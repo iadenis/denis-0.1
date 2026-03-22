@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameGen — Générateur de Jeux IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0a0a0f; --bg2:#12121a; --bg3:#1a1a28; --bg4:#222235;
+  --accent:#7c3aed; --accent2:#06b6d4; --accent3:#f59e0b;
+  --green:#10b981; --red:#ef4444; --pink:#ec4899;
+  --text:#f1f5f9; --muted:#64748b; --muted2:#94a3b8;
+  --border:rgba(124,58,237,0.2); --border2:rgba(255,255,255,0.06);
+}
+body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* ── HEADER ── */
+.header { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.5rem; border-bottom:1px solid var(--border); background:rgba(10,10,15,0.97); position:sticky; top:0; z-index:200; }
+.logo { font-family:'Space Mono',monospace; font-size:15px; font-weight:700; letter-spacing:0.12em; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.header-sub { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:0.08em; }
+.api-status { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); }
+.api-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); }
+.api-dot.ok { background:var(--green); box-shadow:0 0 6px var(--green); }
+
+/* ── LAYOUT ── */
+.app { display:grid; grid-template-columns:340px 1fr 340px; height:calc(100vh - 50px); }
+
+/* ── SIDEBAR GAUCHE ── */
+.sidebar-left { border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.sidebar-section { padding:1rem 1.25rem; border-bottom:1px solid var(--border2); }
+.sidebar-title { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:0.75rem; }
+
+/* ── API KEY ── */
+.api-input-wrap { display:flex; gap:6px; }
+.api-input { flex:1; font-family:'Space Mono',monospace; font-size:11px; padding:7px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg3); color:var(--text); outline:none; }
+.api-input:focus { border-color:var(--accent); }
+.api-btn { padding:7px 12px; border-radius:8px; background:var(--accent); border:none; color:#fff; font-family:'Space Mono',monospace; font-size:11px; cursor:pointer; white-space:nowrap; }
+.api-btn:hover { opacity:0.85; }
+
+/* ── SOURCE TABS ── */
+.source-tabs { display:flex; gap:4px; margin-bottom:0.75rem; }
+.stab { flex:1; padding:5px 4px; border-radius:7px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'Space Mono',monospace; font-size:9px; cursor:pointer; text-align:center; transition:all 0.15s; letter-spacing:0.04em; }
+.stab:hover { border-color:var(--accent); color:var(--accent); }
+.stab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+.source-panel { display:none; }
+.source-panel.active { display:block; }
+
+.textarea-input { width:100%; font-family:'Outfit',sans-serif; font-size:13px; padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:var(--bg3); color:var(--text); resize:none; outline:none; line-height:1.5; }
+.textarea-input:focus { border-color:var(--accent); }
+
+.url-input { width:100%; font-family:'Space Mono',monospace; font-size:11px; padding:8px 11px; border:1px solid var(--border); border-radius:9px; background:var(--bg3); color:var(--text); outline:none; }
+.url-input:focus { border-color:var(--accent); }
+
+.upload-zone { border:1.5px dashed var(--border); border-radius:10px; padding:1.5rem 1rem; text-align:center; cursor:pointer; transition:all 0.2s; }
+.upload-zone:hover { border-color:var(--accent); background:rgba(124,58,237,0.05); }
+.upload-zone.drag { border-color:var(--accent2); background:rgba(6,182,212,0.07); }
+.upload-icon { font-size:24px; margin-bottom:6px; }
+.upload-txt { font-size:12px; color:var(--muted2); line-height:1.5; }
+.upload-txt b { color:var(--accent2); }
+#file-input { display:none; }
+.file-chosen { font-family:'Space Mono',monospace; font-size:10px; color:var(--green); margin-top:6px; }
+
+/* ── GAME TYPE ── */
+.game-types { display:flex; flex-direction:column; gap:5px; }
+.gtype { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); cursor:pointer; transition:all 0.13s; }
+.gtype:hover { border-color:var(--accent); }
+.gtype.selected { border-color:var(--accent); background:rgba(124,58,237,0.1); }
+.gtype-icon { font-size:14px; }
+.gtype-label { font-size:12px; font-weight:500; }
+.gtype-sub { font-size:10px; color:var(--muted); }
+
+/* ── DIFFICULTY ── */
+.diff-slider { width:100%; accent-color:var(--accent); }
+.diff-labels { display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); margin-top:3px; }
+
+/* ── GENERATE BTN ── */
+.gen-btn { width:100%; padding:12px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#fff; font-family:'Space Mono',monospace; font-size:13px; font-weight:700; cursor:pointer; letter-spacing:0.06em; transition:opacity 0.15s,transform 0.15s; margin-top:auto; }
+.gen-btn:hover { opacity:0.88; transform:translateY(-1px); }
+.gen-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+.sidebar-bottom { padding:1rem 1.25rem; margin-top:auto; }
+
+/* ── CENTRE ── */
+.center { display:flex; flex-direction:column; overflow:hidden; }
+.center-header { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.25rem; border-bottom:1px solid var(--border2); background:var(--bg2); }
+.center-title { font-family:'Space Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:0.08em; }
+.dl-btns { display:flex; gap:6px; }
+.dl-btn { display:flex; align-items:center; gap:5px; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); font-family:'Space Mono',monospace; font-size:10px; cursor:pointer; transition:all 0.13s; letter-spacing:0.04em; }
+.dl-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+.dl-btn:disabled { opacity:0.3; cursor:not-allowed; }
+
+/* ── PREVIEW ── */
+.preview-area { flex:1; overflow:hidden; position:relative; }
+.preview-iframe { width:100%; height:100%; border:none; background:var(--bg); }
+.preview-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:1rem; color:var(--muted); }
+.preview-empty-icon { font-size:48px; opacity:0.3; }
+.preview-empty-txt { font-family:'Space Mono',monospace; font-size:12px; text-align:center; line-height:1.7; }
+
+/* ── LOADING ── */
+.loading-overlay { display:none; position:absolute; inset:0; background:rgba(10,10,15,0.92); z-index:50; flex-direction:column; align-items:center; justify-content:center; gap:1rem; }
+.loading-overlay.on { display:flex; }
+.loading-spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-msg { font-family:'Space Mono',monospace; font-size:12px; color:var(--muted2); text-align:center; max-width:280px; line-height:1.6; }
+.loading-step { font-size:10px; color:var(--accent); }
+
+/* ── SIDEBAR DROITE — CHAT ── */
+.sidebar-right { border-left:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.chat-header { padding:0.75rem 1.25rem; border-bottom:1px solid var(--border2); }
+.chat-title { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+.chat-subtitle { font-size:12px; color:var(--muted2); margin-top:3px; }
+
+.chat-messages { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:10px; }
+.chat-messages::-webkit-scrollbar { width:4px; }
+.chat-messages::-webkit-scrollbar-track { background:transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+.msg { max-width:90%; padding:9px 12px; border-radius:10px; font-size:13px; line-height:1.6; }
+.msg.user { align-self:flex-end; background:var(--accent); color:#fff; border-radius:10px 10px 3px 10px; }
+.msg.ai { align-self:flex-start; background:var(--bg3); color:var(--text); border-radius:10px 10px 10px 3px; border:1px solid var(--border2); }
+.msg.ai b { color:var(--accent2); }
+.msg.system { align-self:center; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); color:var(--accent3); font-size:11px; font-family:'Space Mono',monospace; border-radius:8px; padding:6px 10px; text-align:center; }
+
+.chat-suggestions { padding:0.5rem 1rem; display:flex; flex-wrap:wrap; gap:5px; border-top:1px solid var(--border2); }
+.suggestion { font-size:11px; padding:4px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted2); cursor:pointer; transition:all 0.13s; background:transparent; font-family:'Outfit',sans-serif; }
+.suggestion:hover { border-color:var(--accent2); color:var(--accent2); }
+
+.chat-input-wrap { padding:0.75rem 1rem; border-top:1px solid var(--border2); display:flex; gap:8px; }
+.chat-input { flex:1; font-family:'Outfit',sans-serif; font-size:13px; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg3); color:var(--text); outline:none; resize:none; line-height:1.5; max-height:100px; overflow-y:auto; }
+.chat-input:focus { border-color:var(--accent); }
+.chat-send { width:38px; height:38px; border-radius:10px; background:var(--accent); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:opacity 0.13s; flex-shrink:0; align-self:flex-end; }
+.chat-send:hover { opacity:0.85; }
+.chat-send:disabled { opacity:0.3; cursor:not-allowed; }
+
+/* ── CODE PREVIEW tab ── */
+.preview-tabs { display:flex; gap:0; border-bottom:1px solid var(--border2); }
+.ptab { flex:1; padding:8px; border:none; background:transparent; color:var(--muted); font-family:'Space Mono',monospace; font-size:10px; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.13s; letter-spacing:0.06em; }
+.ptab.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+.ptab:hover { color:var(--text); }
+
+.code-preview { display:none; flex:1; overflow:auto; padding:1rem; font-family:'Space Mono',monospace; font-size:11px; line-height:1.7; color:var(--muted2); white-space:pre; }
+.code-preview.active { display:block; }
+
+/* ── NOTIFICATIONS ── */
+.notif { position:fixed; bottom:1.5rem; right:1.5rem; padding:10px 16px; border-radius:10px; font-family:'Space Mono',monospace; font-size:12px; z-index:1000; animation:slideUp 0.3s ease; }
+.notif.ok { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:var(--green); }
+.notif.err { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:var(--red); }
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+/* ── PROGRESS BAR ── */
+.prog { height:2px; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0; transition:width 0.4s ease; position:absolute; top:0; left:0; right:0; }
+
+/* ── SCROLLBAR global ── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">GAME_GEN</div>
+    <div class="header-sub">générateur de jeux éducatifs par IA</div>
+  </div>
+  <div class="api-status">
+    <div class="api-dot" id="api-dot"></div>
+    <span id="api-status-txt">Clé API requise</span>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR GAUCHE ══ -->
+  <div class="sidebar-left">
+
+    <!-- API Key -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">🔑 Clé API Anthropic</div>
+      <div class="api-input-wrap">
+        <input class="api-input" type="password" id="api-key" placeholder="sk-ant-...">
+        <button class="api-btn" onclick="saveApiKey()">OK</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:5px;">
+        Obtenir une clé : <span style="color:var(--accent2);">console.anthropic.com</span>
+      </div>
+    </div>
+
+    <!-- Source du contenu -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">📥 Source du contenu</div>
+      <div class="source-tabs">
+        <button class="stab active" onclick="switchSource('topic')">Sujet</button>
+        <button class="stab" onclick="switchSource('url')">URL</button>
+        <button class="stab" onclick="switchSource('pdf')">PDF</button>
+        <button class="stab" onclick="switchSource('game')">Jeu</button>
+      </div>
+
+      <div class="source-panel active" id="src-topic">
+        <textarea class="textarea-input" id="topic-input" rows="4" placeholder="Ex: la photosynthèse, les fractions, la Révolution française, les algorithmes de tri..."></textarea>
+      </div>
+
+      <div class="source-panel" id="src-url">
+        <input class="url-input" id="url-input" placeholder="https://..." style="margin-bottom:6px;">
+        <div style="font-size:10px;color:var(--muted);">Le contenu de la page sera analysé par l'IA</div>
+      </div>
+
+      <div class="source-panel" id="src-pdf">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+          <div class="upload-icon">📄</div>
+          <div class="upload-txt">Glisse ton PDF ici<br>ou <b>clique pour choisir</b></div>
+          <div class="file-chosen" id="file-chosen"></div>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,.txt,.md" onchange="fileChosen(event)">
+      </div>
+
+      <div class="source-panel" id="src-game">
+        <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;">Colle le code d'un jeu existant pour le modifier :</div>
+        <textarea class="textarea-input" id="game-input" rows="5" placeholder="Colle ici le code HTML ou Python d'un jeu..."></textarea>
+      </div>
+    </div>
+
+    <!-- Type de jeu -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">🎮 Type de jeu</div>
+      <div class="game-types">
+        <div class="gtype selected" onclick="selectGameType(this,'robot')" data-type="robot">
+          <span class="gtype-icon">🤖</span>
+          <div><div class="gtype-label">Robot sur grille</div><div class="gtype-sub">Comme Quantum Robot</div></div>
+        </div>
+        <div class="gtype" onclick="selectGameType(this,'quiz')" data-type="quiz">
+          <span class="gtype-icon">❓</span>
+          <div><div class="gtype-label">QCM / Quiz</div><div class="gtype-sub">Questions à choix multiples</div></div>
+        </div>
+        <div class="gtype" onclick="selectGameType(this,'blanks')" data-type="blanks">
+          <span class="gtype-icon">✏️</span>
+          <div><div class="gtype-label">Remplir les blancs</div><div class="gtype-sub">Compléter les phrases</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Difficulté -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">📊 Niveau</div>
+      <input type="range" class="diff-slider" min="1" max="3" value="1" id="difficulty">
+      <div class="diff-labels"><span>Débutant</span><span>Intermédiaire</span><span>Avancé</span></div>
+    </div>
+
+    <!-- Langue -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">🌍 Langue du jeu</div>
+      <select style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:Outfit,sans-serif;font-size:13px;" id="lang-select">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div>
+
+    <!-- Bouton générer -->
+    <div class="sidebar-bottom">
+      <button class="gen-btn" id="gen-btn" onclick="generateGame()">
+        ✨ Générer le jeu
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ CENTRE — PREVIEW ══ -->
+  <div class="center">
+    <div class="center-header">
+      <div class="preview-tabs" style="border:none;flex:1;">
+        <button class="ptab active" onclick="switchPreview('game')">Aperçu du jeu</button>
+        <button class="ptab" onclick="switchPreview('html')">Code HTML</button>
+        <button class="ptab" onclick="switchPreview('python')">Code Python</button>
+      </div>
+      <div class="dl-btns">
+        <button class="dl-btn" id="dl-html" onclick="downloadHTML()" disabled>⬇ HTML</button>
+        <button class="dl-btn" id="dl-py" onclick="downloadPython()" disabled>⬇ .py</button>
+      </div>
+    </div>
+
+    <div class="preview-area" id="preview-area">
+      <div class="prog" id="prog-bar"></div>
+      <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-msg">
+          <div class="loading-step" id="loading-step">Analyse du contenu...</div>
+          <div style="margin-top:6px;" id="loading-detail">L'IA génère ton jeu personnalisé</div>
+        </div>
+      </div>
+
+      <!-- Aperçu jeu -->
+      <div id="pview-game" style="height:100%;">
+        <div class="preview-empty" id="empty-state">
+          <div class="preview-empty-icon">🎮</div>
+          <div class="preview-empty-txt">
+            Ton jeu apparaîtra ici<br>
+            <span style="color:var(--accent);">Configure et génère !</span><br><br>
+            <span style="font-size:10px;color:var(--muted);">PDF · URL · Sujet · Jeu existant</span>
+          </div>
+        </div>
+        <iframe class="preview-iframe" id="preview-iframe" style="display:none;"></iframe>
+      </div>
+
+      <!-- Code HTML -->
+      <div id="pview-html" style="display:none;height:100%;overflow:auto;">
+        <pre class="code-preview active" id="html-code" style="display:block;"></pre>
+      </div>
+
+      <!-- Code Python -->
+      <div id="pview-python" style="display:none;height:100%;overflow:auto;">
+        <pre class="code-preview active" id="python-code" style="display:block;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SIDEBAR DROITE — CHAT ══ -->
+  <div class="sidebar-right">
+    <div class="chat-header">
+      <div class="chat-title">💬 Affine ton jeu</div>
+      <div class="chat-subtitle">Dis à l'IA comment modifier le jeu</div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg system">Génère d'abord un jeu pour commencer la conversation !</div>
+    </div>
+
+    <div class="chat-suggestions" id="suggestions">
+      <button class="suggestion" onclick="useSuggestion(this)">Rends-le plus difficile</button>
+      <button class="suggestion" onclick="useSuggestion(this)">Ajoute un module de plus</button>
+      <button class="suggestion" onclick="useSuggestion(this)">Simplifie les explications</button>
+      <button class="suggestion" onclick="useSuggestion(this)">Ajoute des indices</button>
+      <button class="suggestion" onclick="useSuggestion(this)">Change les couleurs</button>
+      <button class="suggestion" onclick="useSuggestion(this)">Ajoute un score</button>
+    </div>
+
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" placeholder="Ex: rends les exercices plus difficiles, ajoute un module sur X..." rows="2" onkeydown="chatKeydown(event)"></textarea>
+      <button class="chat-send" id="chat-send" onclick="sendChat()" disabled>↑</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════
+let apiKey = localStorage.getItem('gamegen_api_key') || '';
+let currentSource = 'topic';
+let currentGameType = 'robot';
+let currentHtmlGame = '';
+let currentPythonGame = '';
+let uploadedFileContent = '';
+let uploadedFileName = '';
+let chatHistory = [];
+let isGenerating = false;
+let gameGenerated = false;
+
+// Init
+if (apiKey) {
+  document.getElementById('api-key').value = apiKey;
+  updateApiStatus(true);
+}
+
+// ═══════════════════════════════════════════════════
+//  API KEY
+// ═══════════════════════════════════════════════════
+function saveApiKey() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key.startsWith('sk-ant-') && !key.startsWith('sk-')) {
+    showNotif('Clé invalide — commence par sk-ant-...', 'err'); return;
+  }
+  apiKey = key;
+  localStorage.setItem('gamegen_api_key', key);
+  updateApiStatus(true);
+  showNotif('Clé API sauvegardée !', 'ok');
+}
+
+function updateApiStatus(ok) {
+  const dot = document.getElementById('api-dot');
+  const txt = document.getElementById('api-status-txt');
+  dot.className = 'api-dot' + (ok ? ' ok' : '');
+  txt.textContent = ok ? 'API connectée' : 'Clé API requise';
+}
+
+// ═══════════════════════════════════════════════════
+//  SOURCES
+// ═══════════════════════════════════════════════════
+function switchSource(src) {
+  currentSource = src;
+  document.querySelectorAll('.stab').forEach((t,i) => {
+    t.classList.toggle('active', ['topic','url','pdf','game'][i] === src);
+  });
+  document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('src-' + src).classList.add('active');
+}
+
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag'); }
+function dragLeave(e) { document.getElementById('upload-zone').classList.remove('drag'); }
+
+function dropFile(e) {
+  e.preventDefault();
+  dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+
+function fileChosen(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  uploadedFileName = file.name;
+  document.getElementById('file-chosen').textContent = '✓ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => { uploadedFileContent = e.target.result; };
+  if (file.type === 'application/pdf') {
+    // Pour les PDFs, on extrait le texte brut (limité sans lib)
+    reader.readAsDataURL(file);
+    uploadedFileContent = `[PDF uploadé: ${file.name}] Le contenu sera analysé par l'IA.`;
+  } else {
+    reader.readAsText(file);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  TYPE DE JEU
+// ═══════════════════════════════════════════════════
+function selectGameType(el, type) {
+  document.querySelectorAll('.gtype').forEach(g => g.classList.remove('selected'));
+  el.classList.add('selected');
+  currentGameType = type;
+}
+
+// ═══════════════════════════════════════════════════
+//  SWITCH PREVIEW
+// ═══════════════════════════════════════════════════
+function switchPreview(tab) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('pview-game').style.display = tab === 'game' ? 'block' : 'none';
+  document.getElementById('pview-html').style.display = tab === 'html' ? 'block' : 'none';
+  document.getElementById('pview-python').style.display = tab === 'python' ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════════════════
+//  CONSTRUIRE LE PROMPT
+// ═══════════════════════════════════════════════════
+function buildPrompt() {
+  const diff = ['débutant complet', 'intermédiaire', 'avancé'][parseInt(document.getElementById('difficulty').value) - 1];
+  const lang = document.getElementById('lang-select').value;
+  const langName = {fr:'français',en:'anglais',es:'espagnol',de:'allemand'}[lang];
+
+  let contentSection = '';
+  if (currentSource === 'topic') {
+    const topic = document.getElementById('topic-input').value.trim();
+    contentSection = `SUJET : ${topic}`;
+  } else if (currentSource === 'url') {
+    const url = document.getElementById('url-input').value.trim();
+    contentSection = `URL SOURCE : ${url}\nAnalyse ce contenu et crée le jeu basé sur les informations de cette page.`;
+  } else if (currentSource === 'pdf') {
+    contentSection = `FICHIER : ${uploadedFileName}\nContenu extrait : ${uploadedFileContent.substring(0, 3000)}`;
+  } else if (currentSource === 'game') {
+    const gameCode = document.getElementById('game-input').value.trim();
+    contentSection = `JEU EXISTANT À MODIFIER :\n${gameCode.substring(0, 3000)}`;
+  }
+
+  const gameTypeInstructions = {
+    robot: `
+TYPE DE JEU : Robot sur grille (style Quantum Robot)
+- Une grille 6x6 avec un robot R qui se déplace vers un but G
+- Chaque bonne réponse fait bouger le robot (direction dépend de la réponse)
+- 5 modules avec 4-5 exercices progressifs chacun
+- Explications claires du concept avant chaque exercice
+- Code affiché à gauche, grille à droite
+- Animations du robot, particules de succès, indice disponible`,
+    quiz: `
+TYPE DE JEU : QCM interactif
+- Questions à choix multiples avec 4 options
+- 5 modules thématiques avec 5 questions chacun
+- Feedback immédiat (vert=correct, rouge=incorrect)
+- Explication de la bonne réponse après chaque question
+- Barre de progression, score final, possibilité de rejouer`,
+    blanks: `
+TYPE DE JEU : Remplir les blancs
+- Phrases avec des mots-clés à compléter
+- 5 modules thématiques avec 5 phrases chacun
+- Aide contextuelle (définition au survol)
+- Validation mot par mot avec feedback coloré
+- Résumé des concepts appris à la fin`
+  };
+
+  return `Tu es un expert en création de jeux éducatifs interactifs en HTML/CSS/JS.
+
+${contentSection}
+
+NIVEAU : ${diff}
+LANGUE DU JEU : ${langName}
+
+${gameTypeInstructions[currentGameType]}
+
+INSTRUCTIONS TECHNIQUES :
+- Crée un fichier HTML COMPLET et AUTONOME (tout en un seul fichier)
+- Design sombre et moderne (fond #0a0a0f, accents violet/cyan)
+- Utilise Google Fonts Space Mono + Outfit
+- Responsive, fonctionne sans serveur
+- Le jeu doit être ENTIÈREMENT FONCTIONNEL (pas de placeholder)
+- Inclus au moins 3 modules avec le contenu RÉEL du sujet
+- Les exercices doivent être SPÉCIFIQUES au contenu fourni
+- Ajoute un score, une barre de progression, des animations
+- Le bouton "niveau suivant" n'apparaît qu'après avoir réussi
+
+IMPORTANT : Génère UNIQUEMENT le code HTML complet, sans texte avant ni après.
+Commence directement par <!DOCTYPE html> et termine par </html>.`;
+}
+
+// ═══════════════════════════════════════════════════
+//  APPEL API ANTHROPIC
+// ═══════════════════════════════════════════════════
+async function callClaude(messages, system = '') {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: system || 'Tu es un expert en création de jeux éducatifs HTML interactifs.',
+      messages: messages
+    })
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Erreur API');
+  }
+  const data = await response.json();
+  return data.content[0].text;
+}
+
+// ═══════════════════════════════════════════════════
+//  GÉNÉRER LE JEU
+// ═══════════════════════════════════════════════════
+async function generateGame() {
+  if (!apiKey) { showNotif('Entre ta clé API d\'abord !', 'err'); return; }
+  if (isGenerating) return;
+
+  // Validation source
+  if (currentSource === 'topic' && !document.getElementById('topic-input').value.trim()) {
+    showNotif('Entre un sujet !', 'err'); return;
+  }
+  if (currentSource === 'url' && !document.getElementById('url-input').value.trim()) {
+    showNotif('Entre une URL !', 'err'); return;
+  }
+  if (currentSource === 'pdf' && !uploadedFileName) {
+    showNotif('Upload un fichier !', 'err'); return;
+  }
+  if (currentSource === 'game' && !document.getElementById('game-input').value.trim()) {
+    showNotif('Colle le code du jeu !', 'err'); return;
+  }
+
+  isGenerating = true;
+  document.getElementById('gen-btn').disabled = true;
+  showLoading(true, 'Analyse du contenu...', 'L\'IA génère ton jeu personnalisé');
+  setProgress(10);
+
+  try {
+    setProgress(30);
+    setLoadingStep('Génération des exercices...', 'Création du contenu pédagogique');
+
+    const prompt = buildPrompt();
+    const result = await callClaude([{ role: 'user', content: prompt }]);
+
+    setProgress(80);
+    setLoadingStep('Compilation du jeu...', 'Mise en forme finale');
+
+    // Extraire le HTML
+    let html = result;
+    const htmlMatch = result.match(/<!DOCTYPE html>[\s\S]*<\/html>/i);
+    if (htmlMatch) html = htmlMatch[0];
+
+    currentHtmlGame = html;
+    currentPythonGame = generatePythonFromHTML(html, prompt);
+
+    setProgress(100);
+
+    // Afficher
+    setTimeout(() => {
+      showLoading(false);
+      displayGame(html);
+      document.getElementById('html-code').textContent = html;
+      document.getElementById('python-code').textContent = currentPythonGame;
+      document.getElementById('dl-html').disabled = false;
+      document.getElementById('dl-py').disabled = false;
+      document.getElementById('chat-send').disabled = false;
+      gameGenerated = true;
+
+      // Init chat
+      chatHistory = [{ role: 'user', content: prompt }, { role: 'assistant', content: html }];
+      addChatMsg('ai', '✅ Jeu généré ! Tu peux maintenant me demander des modifications en langage courant.\n\nPar exemple : <b>rends-le plus difficile</b>, <b>ajoute un module sur X</b>, <b>change les couleurs</b>...');
+
+      showNotif('Jeu généré avec succès !', 'ok');
+      isGenerating = false;
+      document.getElementById('gen-btn').disabled = false;
+    }, 500);
+
+  } catch (err) {
+    showLoading(false);
+    showNotif('Erreur : ' + err.message, 'err');
+    addChatMsg('ai', '❌ Erreur lors de la génération : ' + err.message);
+    isGenerating = false;
+    document.getElementById('gen-btn').disabled = false;
+    setProgress(0);
+  }
+}
+
+function displayGame(html) {
+  const iframe = document.getElementById('preview-iframe');
+  const empty = document.getElementById('empty-state');
+  empty.style.display = 'none';
+  iframe.style.display = 'block';
+  const blob = new Blob([html], { type: 'text/html' });
+  iframe.src = URL.createObjectURL(blob);
+}
+
+// ═══════════════════════════════════════════════════
+//  CHAT DE RAFFINEMENT
+// ═══════════════════════════════════════════════════
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg || !gameGenerated || isGenerating) return;
+
+  input.value = '';
+  addChatMsg('user', msg);
+  isGenerating = true;
+  document.getElementById('chat-send').disabled = true;
+  showLoading(true, 'Modification en cours...', msg);
+  setProgress(20);
+
+  try {
+    const modifPrompt = `Voici le jeu HTML actuel :\n\`\`\`html\n${currentHtmlGame.substring(0, 6000)}\n\`\`\`\n\nModification demandée : ${msg}\n\nGénère le jeu HTML COMPLET et MODIFIÉ. Commence par <!DOCTYPE html> et termine par </html>. Ne génère que le code, sans texte avant ni après.`;
+
+    chatHistory.push({ role: 'user', content: modifPrompt });
+    setProgress(50);
+
+    const result = await callClaude(chatHistory);
+    setProgress(90);
+
+    let html = result;
+    const htmlMatch = result.match(/<!DOCTYPE html>[\s\S]*<\/html>/i);
+    if (htmlMatch) html = htmlMatch[0];
+
+    currentHtmlGame = html;
+    currentPythonGame = generatePythonFromHTML(html, modifPrompt);
+    chatHistory.push({ role: 'assistant', content: html });
+
+    setTimeout(() => {
+      showLoading(false);
+      displayGame(html);
+      document.getElementById('html-code').textContent = html;
+      document.getElementById('python-code').textContent = currentPythonGame;
+      setProgress(100);
+      setTimeout(() => setProgress(0), 500);
+
+      addChatMsg('ai', `✅ Modification appliquée : <b>${msg}</b>\n\nTu peux continuer à affiner ou télécharger le jeu !`);
+      isGenerating = false;
+      document.getElementById('chat-send').disabled = false;
+      showNotif('Jeu modifié !', 'ok');
+    }, 400);
+
+  } catch (err) {
+    showLoading(false);
+    addChatMsg('ai', '❌ Erreur : ' + err.message);
+    isGenerating = false;
+    document.getElementById('chat-send').disabled = false;
+    setProgress(0);
+    showNotif('Erreur : ' + err.message, 'err');
+  }
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+function useSuggestion(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendChat();
+}
+
+function addChatMsg(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = text.replace(/\n/g, '<br>');
+  // Remove system msg if exists
+  const sys = container.querySelector('.msg.system');
+  if (sys && role === 'ai') sys.remove();
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════
+//  GÉNÉRATION DU CODE PYTHON
+// ═══════════════════════════════════════════════════
+function generatePythonFromHTML(html, originalPrompt) {
+  // Extrait le sujet/titre du HTML
+  const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1] : 'Jeu éducatif';
+
+  return `# ============================================================
+#   ${title}
+#   Généré par GameGen — ${new Date().toLocaleDateString('fr-FR')}
+#   Lance ce fichier dans Spyder avec F5
+#   Installe d'abord : pip install colorama
+# ============================================================
+#
+#   NOTE : Ce fichier Python est une version adaptée du jeu HTML.
+#   Pour la version complète avec graphismes, utilise le fichier HTML.
+#
+#   Pour régénérer ce jeu ou le modifier, utilise GameGen :
+#   Prompt original : ${originalPrompt.substring(0, 200).replace(/\n/g,' ')}...
+# ============================================================
+
+import os, sys, random
+
+try:
+    from colorama import init, Fore, Back, Style
+    init(autoreset=True)
+except ImportError:
+    print("pip install colorama"); sys.exit()
+
+R=Fore.RED+Style.BRIGHT; G=Fore.GREEN+Style.BRIGHT; Y=Fore.YELLOW+Style.BRIGHT
+M=Fore.MAGENTA+Style.BRIGHT; C=Fore.CYAN+Style.BRIGHT; W=Fore.WHITE+Style.BRIGHT
+DIM=Style.DIM; RST=Style.RESET_ALL
+BGGR=Back.GREEN+Fore.BLACK+Style.BRIGHT; BGRD=Back.RED+Fore.WHITE+Style.BRIGHT
+BGMG=Back.MAGENTA+Fore.WHITE+Style.BRIGHT; BGYL=Back.YELLOW+Fore.BLACK+Style.BRIGHT
+
+def effacer(): os.system('cls' if os.name=='nt' else 'clear')
+def pause(): input(f"\\n  {DIM}Entrée pour continuer...{RST}")
+def succes(m): print(f"\\n  {BGGR} ✓ {m} {RST}\\n")
+def erreur(m): print(f"\\n  {BGRD} ✗ {m} {RST}\\n")
+
+def afficher_grille(robot, but, taille=6, traces=None):
+    if traces is None: traces=set()
+    sep = C+"  +"+"────+"*taille; print(); print(sep)
+    for y in range(taille):
+        lg=C+"  |"
+        for x in range(taille):
+            p=(x,y)
+            if p==robot: lg+=Back.BLUE+Fore.WHITE+" R  "+RST+C+"|"
+            elif p==but: lg+=Back.GREEN+Fore.BLACK+" G  "+RST+C+"|"
+            elif p in traces: lg+=BGYL+" ·  "+RST+C+"|"
+            else: lg+="    |"
+        print(lg); print(sep)
+    print()
+
+# ──────────────────────────────────────────
+#  CONTENU GÉNÉRÉ — à compléter avec GameGen
+# ──────────────────────────────────────────
+# Ce fichier est un template. Pour un jeu complet
+# basé sur votre contenu, ouvrez game_generator.html
+# et téléchargez la version Python générée par l'IA.
+
+def main():
+    effacer()
+    print(f"\\n  {BGMG}  ${title}  {RST}")
+    print(f"  {W}Jeu généré par GameGen{RST}\\n")
+    print(f"  {C}Pour le jeu complet :{RST}")
+    print(f"  {Y}  → Ouvre game_generator.html dans ton navigateur{RST}")
+    print(f"  {Y}  → Configure et génère ton jeu{RST}")
+    print(f"  {Y}  → Télécharge la version Python complète{RST}")
+    print()
+    pause()
+
+if __name__ == "__main__":
+    main()
+`;
+}
+
+// ═══════════════════════════════════════════════════
+//  TÉLÉCHARGEMENTS
+// ═══════════════════════════════════════════════════
+function downloadHTML() {
+  if (!currentHtmlGame) return;
+  const topic = getTopicSlug();
+  const blob = new Blob([currentHtmlGame], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `jeu_${topic}_${Date.now()}.html`;
+  a.click();
+  showNotif('HTML téléchargé !', 'ok');
+}
+
+function downloadPython() {
+  if (!currentPythonGame) return;
+  const topic = getTopicSlug();
+  const blob = new Blob([currentPythonGame], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `jeu_${topic}_${Date.now()}.py`;
+  a.click();
+  showNotif('.py téléchargé !', 'ok');
+}
+
+function getTopicSlug() {
+  const t = document.getElementById('topic-input').value.trim();
+  return t.toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,20) || 'educatif';
+}
+
+// ═══════════════════════════════════════════════════
+//  UI UTILITAIRES
+// ═══════════════════════════════════════════════════
+function showLoading(on, step='', detail='') {
+  document.getElementById('loading').className = 'loading-overlay' + (on ? ' on' : '');
+  if (step) document.getElementById('loading-step').textContent = step;
+  if (detail) document.getElementById('loading-detail').textContent = detail;
+}
+
+function setLoadingStep(step, detail) {
+  document.getElementById('loading-step').textContent = step;
+  document.getElementById('loading-detail').textContent = detail;
+}
+
+function setProgress(pct) {
+  document.getElementById('prog-bar').style.width = pct + '%';
+}
+
+function showNotif(msg, type='ok') {
+  const n = document.createElement('div');
+  n.className = 'notif ' + type;
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 3000);
+}
+</script>
+</body>
+</html>
