@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aide au diagnostic — EBM</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #d8d6cf;
+    --border-strong: #9e9b91;
+    --text: #1a1916;
+    --text-muted: #6b6860;
+    --text-faint: #a09d96;
+    --accent: #1a3a5c;
+    --accent-light: #e5edf5;
+    --accent-mid: #2d5a8a;
+    --warn: #7a3a1a;
+    --warn-light: #f5ebe3;
+    --green: #1a4a2e;
+    --green-light: #e8f0eb;
+    --prob-high: #1a4a2e;
+    --prob-mid: #8a6d1a;
+    --prob-low: #7a3a1a;
+    --prob-rare: #5a1a1a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 3px;
+    --transition: 0.15s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-family: var(--mono); font-size: 16px; font-weight: 500; letter-spacing: 0.02em; }
+  header span { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .nav-links { display: flex; gap: 12px; margin-left: auto; }
+  .nav-links a { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; transition: all 0.15s; }
+  .nav-links a:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+  .sources-badge { display: flex; gap: 6px; }
+  .sources-badge span { font-family: var(--mono); font-size: 10px; padding: 2px 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    min-height: calc(100vh - 73px);
+  }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  /* ── FORM PANEL ── */
+  .form-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+
+  .section { display: flex; flex-direction: column; gap: 8px; }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sym-letter {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--text); }
+
+  label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+  textarea, input[type="text"], select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color var(--transition);
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-mid);
+  }
+  .p-sublabel { font-size: 11px; color: var(--text-faint); font-style: italic; line-height: 1.5; }
+
+  .sym-tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+  .sym-tag {
+    font-family: var(--mono); font-size: 10px;
+    padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer; transition: all 0.12s;
+    user-select: none;
+  }
+  .sym-tag:hover { border-color: var(--accent-mid); color: var(--accent); }
+  .sym-tag.active { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+
+  .int-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .int-badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    color: var(--accent); background: var(--accent-light);
+    padding: 2px 7px; border-radius: var(--radius); flex-shrink: 0;
+  }
+  .btn-add {
+    font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+    background: none; border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 6px 12px; cursor: pointer; width: 100%; text-align: left;
+    transition: all var(--transition);
+  }
+  .btn-add:hover { border-color: var(--accent-mid); color: var(--accent); }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .submit-section { padding-top: 4px; }
+  .btn-analyze {
+    width: 100%; padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-analyze:hover:not(:disabled) { opacity: 0.85; }
+  .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: none;
+  }
+  .btn-analyze.loading .spinner { display: block; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .disclaimer {
+    font-size: 11px; color: var(--text-faint); font-style: italic; line-height: 1.5;
+    padding: 10px; background: var(--warn-light); border: 1px solid #d4b89a; border-radius: var(--radius);
+  }
+
+  /* ── RESULT PANEL ── */
+  .result-panel {
+    background: var(--bg);
+    padding: 28px;
+    overflow-y: auto;
+  }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 12px; color: var(--text-faint); text-align: center; padding: 40px;
+  }
+  .empty-icon { font-family: var(--mono); font-size: 32px; opacity: 0.3; }
+
+  .result-header { margin-bottom: 20px; }
+  .result-header h2 { font-family: var(--mono); font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .btn-clear {
+    font-family: var(--mono); font-size: 10px; padding: 2px 8px;
+    border: 1px solid var(--border); background: none; color: var(--text-muted);
+    border-radius: 999px; cursor: pointer; transition: all var(--transition);
+  }
+  .btn-clear:hover { border-color: var(--border-strong); color: var(--text); }
+  .result-summary { font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; font-style: italic; }
+
+  /* Streaming indicator */
+  .streaming-indicator {
+    display: none; align-items: center; gap: 10px;
+    padding: 12px 16px; background: var(--accent-light);
+    border: 1px solid #b8cfe0; border-radius: var(--radius);
+    margin-bottom: 16px; font-size: 12px; color: var(--accent);
+  }
+  .streaming-indicator.active { display: flex; }
+  .dot-pulse { display: flex; gap: 4px; }
+  .dot-pulse span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-mid); animation: pulse 1.2s ease-in-out infinite; }
+  .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
+  /* Diagnosis cards */
+  .diag-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .diag-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rank-badge {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--accent); color: #fff;
+    padding: 2px 8px; border-radius: var(--radius);
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .diag-main { flex: 1; }
+  .diag-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .diag-subtitle { font-size: 11px; color: var(--text-muted); }
+
+  /* Probability pill */
+  .prob-pill {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    padding: 3px 10px; border-radius: 999px; flex-shrink: 0;
+  }
+  .prob-high { background: #e8f0eb; color: var(--prob-high); border: 1px solid #b0d4bc; }
+  .prob-mid  { background: #f5f0e0; color: var(--prob-mid);  border: 1px solid #d4c080; }
+  .prob-low  { background: var(--warn-light); color: var(--prob-low); border: 1px solid #d4a880; }
+  .prob-rare { background: #f0e8e8; color: var(--prob-rare); border: 1px solid #c49090; }
+
+  .diag-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .diag-section-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-faint);
+    margin-bottom: 4px;
+  }
+  .diag-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+
+  .exam-list { display: flex; flex-direction: column; gap: 4px; }
+  .exam-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; line-height: 1.5;
+  }
+  .exam-priority {
+    font-family: var(--mono); font-size: 9px;
+    padding: 1px 6px; border-radius: 999px; flex-shrink: 0; margin-top: 2px;
+  }
+  .ep-urgent { background: #fde8e8; color: #7a1a1a; border: 1px solid #e0a0a0; }
+  .ep-first  { background: var(--accent-light); color: var(--accent); border: 1px solid #b0c8e0; }
+  .ep-second { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  .alarm-signs {
+    background: var(--warn-light); border: 1px solid #d4a880;
+    border-radius: var(--radius); padding: 10px 12px;
+  }
+  .alarm-signs ul { padding-left: 16px; font-size: 12px; color: var(--warn); line-height: 1.7; }
+
+  .red-flag-block {
+    background: #fde8e8; border: 1px solid #e0a0a0;
+    border-radius: var(--radius); padding: 10px 12px;
+    font-size: 12px; color: #7a1a1a; line-height: 1.6;
+  }
+
+  .diag-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .diag-tag {
+    font-family: var(--mono); font-size: 10px;
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-faint);
+  }
+
+  /* Missing info & next steps */
+  .missing-block, .next-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .missing-block h3, .next-block h3 {
+    font-family: var(--mono); font-size: 12px; color: var(--text);
+    margin-bottom: 8px;
+  }
+  .missing-item, .next-item {
+    font-size: 12px; color: var(--text-muted); line-height: 1.6;
+    padding: 3px 0 3px 14px; position: relative;
+  }
+  .missing-item::before { content: '?'; position: absolute; left: 0; color: var(--text-faint); }
+  .next-item::before { content: '→'; position: absolute; left: 0; color: var(--accent-mid); }
+
+  .error-block {
+    background: var(--warn-light); border: 1px solid #d4a880;
+    border-radius: var(--radius); padding: 14px 16px;
+    font-size: 13px; color: var(--warn);
+  }
+
+  /* Urgence banner */
+  .urgence-banner {
+    background: #fde8e8; border: 2px solid #c04040;
+    border-radius: var(--radius); padding: 12px 16px;
+    margin-bottom: 16px; font-size: 13px; color: #7a1a1a; font-weight: 500;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .urgence-icon { font-size: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Diagnostic — EBM</h1>
+  <span>Aide au diagnostic différentiel · Basé sur la littérature médicale</span>
+  <div class="sources-badge" id="sources-badge">
+    <span>chargement...</span>
+  </div>
+  <div class="nav-links">
+    <a href="pico_medical.html">PICO · traitement</a>
+    <a href="sources.html">sources</a>
+    <a href="index.html">accueil</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LIBRARY BANNER -->
+  <div id="lib-banner" style="display:none; grid-column:1/-1; background:var(--accent-light); border-bottom:1px solid #b8cfe0; padding:8px 24px; font-size:11px; color:var(--info); font-family:var(--mono); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <span style="font-weight:500;">📚 sources actives :</span>
+    <span id="lib-active-names" style="color:var(--accent-mid);"></span>
+    <span id="lib-files-count" style="color:var(--text-faint);"></span>
+    <a href="sources.html" style="margin-left:auto; color:var(--accent-mid); text-decoration:none; border:1px solid var(--accent-mid); padding:2px 9px; border-radius:999px; font-size:10px; white-space:nowrap;">⚙ gérer les sources →</a>
+  </div>
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+
+    <!-- PRÉSENTATION CLINIQUE -->
+    <div class="section">
+      <div class="section-label">
+        <span class="sym-letter">Sx</span>
+        <span class="section-title">Présentation clinique</span>
+      </div>
+
+      <label>Symptômes principaux & anamnèse</label>
+      <textarea id="sx-main" rows="5"
+        placeholder="Décrivez les symptômes, leur début, leur évolution, leur localisation, les facteurs aggravants/soulageants, les symptômes associés...&#10;&#10;Ex: Femme 34 ans, douleur thoracique gauche irradiant vers l'épaule, apparue il y a 2h au repos, dyspnée associée, pas de fièvre, pas de toux..."></textarea>
+
+      <label style="margin-top:6px;">Symptômes fréquents (cliquer pour ajouter)</label>
+      <div class="sym-tag-row" id="sym-presets">
+        <span class="sym-tag" onclick="toggleSym(this,'fièvre')">fièvre</span>
+        <span class="sym-tag" onclick="toggleSym(this,'douleur thoracique')">douleur thoracique</span>
+        <span class="sym-tag" onclick="toggleSym(this,'dyspnée')">dyspnée</span>
+        <span class="sym-tag" onclick="toggleSym(this,'douleur abdominale')">douleur abdominale</span>
+        <span class="sym-tag" onclick="toggleSym(this,'céphalée')">céphalée</span>
+        <span class="sym-tag" onclick="toggleSym(this,'toux')">toux</span>
+        <span class="sym-tag" onclick="toggleSym(this,'fatigue')">fatigue</span>
+        <span class="sym-tag" onclick="toggleSym(this,'vertiges')">vertiges</span>
+        <span class="sym-tag" onclick="toggleSym(this,'nausées')">nausées</span>
+        <span class="sym-tag" onclick="toggleSym(this,'œdèmes')">œdèmes</span>
+        <span class="sym-tag" onclick="toggleSym(this,'palpitations')">palpitations</span>
+        <span class="sym-tag" onclick="toggleSym(this,'syncope')">syncope</span>
+        <span class="sym-tag" onclick="toggleSym(this,'rash cutané')">rash cutané</span>
+        <span class="sym-tag" onclick="toggleSym(this,'diarrhée')">diarrhée</span>
+        <span class="sym-tag" onclick="toggleSym(this,'dysurie')">dysurie</span>
+        <span class="sym-tag" onclick="toggleSym(this,'arthralgie')">arthralgie</span>
+      </div>
+    </div>
+
+    <!-- CONTEXTE PATIENT -->
+    <div class="section">
+      <div class="section-label">
+        <span class="sym-letter">P</span>
+        <span class="section-title">Contexte patient</span>
+      </div>
+
+      <div class="row-2">
+        <div>
+          <label>Âge</label>
+          <input type="text" id="p-age" placeholder="ex. 45 ans">
+        </div>
+        <div>
+          <label>Sexe</label>
+          <select id="p-sexe">
+            <option value="">— non précisé</option>
+            <option>Femme</option>
+            <option>Homme</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="margin-top:6px;">Antécédents & facteurs de risque</label>
+      <textarea id="p-atcd" rows="3"
+        placeholder="HTA, diabète, tabagisme, ATCD familiaux cardiovasculaires, immunodépression, grossesse, médicaments en cours, allergies, voyages récents..."></textarea>
+
+      <div class="row-2">
+        <div>
+          <label>Région</label>
+          <input type="text" id="p-region" placeholder="ex. Rotterdam, Belgique">
+        </div>
+        <div>
+          <label>Contexte épidémique</label>
+          <input type="text" id="p-epidemie" placeholder="ex. grippe saisonnière">
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNES VITAUX & EXAMEN -->
+    <div class="section">
+      <div class="section-label">
+        <span class="sym-letter">Ex</span>
+        <span class="section-title">Signes vitaux & examen clinique</span>
+      </div>
+
+      <textarea id="ex-clinique" rows="3"
+        placeholder="T° : 38.5°C · FC : 110/min · PA : 130/85 · SpO₂ : 96%&#10;Auscultation : crépitants à la base droite&#10;Abdomen : douleur en FID à la palpation..."></textarea>
+    </div>
+
+    <!-- EXAMENS DÉJÀ RÉALISÉS -->
+    <div class="section">
+      <div class="section-label">
+        <span class="sym-letter">Bio</span>
+        <span class="section-title">Examens disponibles (optionnel)</span>
+      </div>
+
+      <textarea id="ex-bio" rows="3"
+        placeholder="NFS : leucocytose 15 G/L · CRP : 85 mg/L · D-dimères : 1200 µg/L&#10;ECG : normal · Rx thorax : opacité base droite..."></textarea>
+      <p class="p-sublabel">Laissez vide si aucun examen n'a encore été réalisé.</p>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer">
+      ⚠ Outil d'aide à la réflexion clinique uniquement. Ne remplace pas le jugement médical, l'examen clinique direct, ni les recommandations de spécialistes. Toujours confronter aux données du patient réel.
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-section">
+      <button class="btn-analyze" id="btn-analyze" onclick="analyze()">
+        <div class="spinner"></div>
+        <span class="btn-text">Analyser le tableau clinique</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div class="result-panel" id="result-panel">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">◎</div>
+      <p>Décrivez la présentation clinique et lancez l'analyse pour obtenir les diagnostics différentiels avec leur probabilité, les examens recommandés et les drapeaux rouges.</p>
+    </div>
+
+    <div id="results-container" style="display:none">
+      <div class="result-header">
+        <h2>Diagnostic différentiel <button class="btn-clear" onclick="clearResults()">Effacer</button></h2>
+        <div class="result-summary" id="result-summary"></div>
+      </div>
+
+      <div class="streaming-indicator" id="streaming-indicator">
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+        <span>Analyse en cours — littérature médicale · guidelines · épidémiologie</span>
+      </div>
+
+      <div id="urgence-container"></div>
+      <div id="diagnoses-list"></div>
+      <div id="missing-container"></div>
+      <div id="next-container"></div>
+      <div id="error-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── BIBLIOTHÈQUE — lecture du localStorage partagé ──────────
+const SOURCE_LABELS = {
+  openalex: 'OpenAlex', pubmed: 'PubMed', europepmc: 'Europe PMC',
+  unpaywall: 'Unpaywall', crossref: 'Crossref',
+  cochrane_abstracts: 'Cochrane', nice: 'NICE', who: 'OMS',
+  cbip: 'CBIP', semantic_scholar: 'Semantic Scholar',
+  ncbi_key: 'NCBI Key', wiley_tdm: 'Wiley TDM'
+};
+
+function getActiveSources() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('denis_active_sources') || 'null');
+    if (!saved) return Object.keys(SOURCE_LABELS);
+    return Object.entries(saved).filter(([,v]) => v).map(([k]) => k);
+  } catch(e) { return Object.keys(SOURCE_LABELS); }
+}
+
+function getAIMode() {
+  return localStorage.getItem('denis_ai_mode') || 'smart';
+}
+
+function getUserFiles() {
+  try { return JSON.parse(localStorage.getItem('denis_user_files') || '[]'); }
+  catch(e) { return []; }
+}
+
+function buildSourcesContext() {
+  const active = getActiveSources();
+  const labels = active.map(id => SOURCE_LABELS[id] || id);
+  const files = getUserFiles();
+  const mode = getAIMode();
+  let ctx = `Sources de littérature médicale activées : ${labels.join(', ')}.`;
+  if (files.length > 0) ctx += `\nBibliothèque personnelle : ${files.map(f=>f.name).join(', ')}.`;
+  if (mode === 'simple') ctx += `\nMode IA : stateless — traiter cette requête indépendamment de tout contexte précédent.`;
+  return ctx;
+}
+
+function initLibraryBanner() {
+  const active = getActiveSources();
+  const labels = active.map(id => SOURCE_LABELS[id] || id);
+  const files = getUserFiles();
+  const banner = document.getElementById('lib-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    document.getElementById('lib-active-names').textContent = labels.slice(0, 5).join(' · ') + (labels.length > 5 ? ` +${labels.length - 5}` : '');
+    const fc = document.getElementById('lib-files-count');
+    fc.textContent = files.length > 0 ? `· ${files.length} fichier(s) perso` : '';
+  }
+  const badge = document.getElementById('sources-badge');
+  if (badge) {
+    badge.innerHTML = labels.slice(0, 4).map(l => `<span>${l}</span>`).join('') +
+      (labels.length > 4 ? `<span>+${labels.length - 4}</span>` : '');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initLibraryBanner);
+window.addEventListener('storage', initLibraryBanner);
+
+// ── SYMPTOM TAGS ──────────────────────────────────
+let activeTags = new Set();
+function toggleSym(el, sym) {
+  if (activeTags.has(sym)) {
+    activeTags.delete(sym);
+    el.classList.remove('active');
+  } else {
+    activeTags.add(sym);
+    el.classList.add('active');
+    // Append to textarea
+    const ta = document.getElementById('sx-main');
+    if (ta.value && !ta.value.endsWith('\n')) ta.value += '\n';
+    ta.value += sym;
+  }
+}
+
+// ── PROB CLASS ────────────────────────────────────
+function probClass(prob) {
+  if (!prob) return 'prob-mid';
+  const p = prob.toLowerCase();
+  if (p.includes('élevé') || p.includes('probable') || p.includes('frequent') || p.includes('commun') || p.includes('>50') || p.includes('haute')) return 'prob-high';
+  if (p.includes('modér') || p.includes('inter') || p.includes('possible') || p.includes('20-50') || p.includes('30-50')) return 'prob-mid';
+  if (p.includes('faib') || p.includes('rare') || p.includes('<10') || p.includes('<5') || p.includes('peu probable')) return 'prob-low';
+  return 'prob-mid';
+}
+
+function examPriorityClass(priority) {
+  if (!priority) return 'ep-first';
+  const p = priority.toLowerCase();
+  if (p.includes('urgent') || p.includes('immédiat') || p.includes('stat')) return 'ep-urgent';
+  if (p.includes('second') || p.includes('si') || p.includes('selon')) return 'ep-second';
+  return 'ep-first';
+}
+
+// ── BUILD PROMPT ──────────────────────────────────
+function buildPrompt(sx, age, sexe, atcd, region, epidemie, exClinique, exBio) {
+  return `Tu es un médecin urgentiste et interniste expert en médecine basée sur les preuves. Analyse ce tableau clinique et génère un diagnostic différentiel structuré, basé sur la littérature médicale.
+
+${buildSourcesContext()}
+
+PRÉSENTATION CLINIQUE
+Symptômes : ${sx}
+Âge : ${age || 'non précisé'} · Sexe : ${sexe || 'non précisé'}
+Antécédents & facteurs de risque : ${atcd || 'non précisés'}
+Région : ${region || 'non précisée'} · Contexte épidémique : ${epidemie || 'aucun signalé'}
+Signes vitaux & examen clinique : ${exClinique || 'non renseignés'}
+Examens disponibles : ${exBio || 'aucun à ce stade'}
+
+INSTRUCTIONS
+Réponds UNIQUEMENT en JSON valide (sans balises markdown) selon ce schéma exact :
+
+{
+  "resume": "Synthèse clinique du tableau en 1-2 phrases",
+  "urgence": null,
+  "diagnostics": [
+    {
+      "rang": 1,
+      "nom": "Nom du diagnostic",
+      "probabilite": "Élevée / Modérée / Faible / À éliminer",
+      "probabilite_chiffree": "~60% dans ce contexte",
+      "arguments_pour": ["Argument clinique 1", "Argument clinique 2"],
+      "arguments_contre": ["Contre-argument 1"],
+      "examens": [
+        {
+          "examen": "Nom de l'examen",
+          "priorite": "Urgent / 1ère intention / 2ème intention",
+          "attendu": "Résultat attendu si ce diagnostic est retenu",
+          "valeur_diagnostique": "Sensibilité ~85%, Spécificité ~70% selon les données"
+        }
+      ],
+      "drapeaux_rouges": ["Signe d'alarme 1 imposant une prise en charge immédiate"],
+      "tags": ["cardiologie", "EBM grade B"]
+    }
+  ],
+  "informations_manquantes": [
+    "Information clinique qui changerait le raisonnement si connue"
+  ],
+  "prochaines_etapes": [
+    "Étape concrète à réaliser en premier"
+  ]
+}
+
+RÈGLES CRITIQUES :
+- Si le tableau évoque une URGENCE VITALE (SCA, EP massive, méningite, sepsis sévère, dissection aortique...), mets dans "urgence" une chaîne de texte courte et alarmante, ex: "⚠ Urgence vitale possible — éliminer SCA et EP en priorité absolue"
+- Propose 3 à 6 diagnostics différentiels, du plus probable au moins probable
+- Inclure TOUJOURS au moins un diagnostic qu'il faut éliminer même si peu probable (À éliminer)
+- Les arguments_pour et arguments_contre doivent citer les données cliniques fournies
+- Les examens doivent avoir une valeur diagnostique (sensibilité/spécificité si connue)
+- Tenir compte de l'âge, sexe, ATCD, région pour les prévalences
+- Réponds UNIQUEMENT avec le JSON, sans texte avant ou après`;
+}
+
+// ── RENDER ────────────────────────────────────────
+function renderResults(data) {
+  // Clear
+  ['diagnoses-list','missing-container','next-container','urgence-container'].forEach(id => {
+    document.getElementById(id).innerHTML = '';
+  });
+
+  document.getElementById('result-summary').textContent = data.resume || '';
+
+  // Urgence banner
+  if (data.urgence) {
+    const banner = document.createElement('div');
+    banner.className = 'urgence-banner';
+    banner.innerHTML = `<span class="urgence-icon">🚨</span><span>${data.urgence}</span>`;
+    document.getElementById('urgence-container').appendChild(banner);
+  }
+
+  // Diagnostics
+  const list = document.getElementById('diagnoses-list');
+  (data.diagnostics || []).forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'diag-card';
+
+    const argsPour = (d.arguments_pour || []).map(a => `<li>${a}</li>`).join('');
+    const argsContre = (d.arguments_contre || []).map(a => `<li>${a}</li>`).join('');
+
+    const examens = (d.examens || []).map(e => `
+      <div class="exam-item">
+        <span class="exam-priority ${examPriorityClass(e.priorite)}">${e.priorite || '1ère intention'}</span>
+        <div>
+          <strong>${e.examen}</strong>
+          ${e.attendu ? `<br><span style="color:var(--text-faint);font-size:11px;">Attendu : ${e.attendu}</span>` : ''}
+          ${e.valeur_diagnostique ? `<br><span style="color:var(--text-faint);font-size:11px;">${e.valeur_diagnostique}</span>` : ''}
+        </div>
+      </div>`).join('');
+
+    const drapeaux = d.drapeaux_rouges && d.drapeaux_rouges.length > 0
+      ? `<div class="red-flag-block">
+           <strong style="font-family:var(--mono);font-size:10px;letter-spacing:0.05em;text-transform:uppercase;">⚠ Drapeaux rouges</strong>
+           <ul style="padding-left:16px;margin-top:6px;">${d.drapeaux_rouges.map(r=>`<li>${r}</li>`).join('')}</ul>
+         </div>` : '';
+
+    const tags = (d.tags || []).map(t => `<span class="diag-tag">${t}</span>`).join('');
+    const probCls = probClass(d.probabilite);
+
+    card.innerHTML = `
+      <div class="diag-header">
+        <div class="rank-badge">#${d.rang}</div>
+        <div class="diag-main">
+          <div class="diag-name">${d.nom}</div>
+          <div class="diag-subtitle">${d.probabilite_chiffree || ''}</div>
+        </div>
+        <span class="prob-pill ${probCls}">${d.probabilite || '?'}</span>
+      </div>
+      <div class="diag-body">
+        ${argsPour ? `<div>
+          <div class="diag-section-title">Arguments pour</div>
+          <ul class="diag-text" style="padding-left:16px;">${argsPour}</ul>
+        </div>` : ''}
+        ${argsContre ? `<div>
+          <div class="diag-section-title">Arguments contre</div>
+          <ul class="diag-text" style="padding-left:16px;color:var(--text-faint);">${argsContre}</ul>
+        </div>` : ''}
+        ${examens ? `<div>
+          <div class="diag-section-title">Examens recommandés</div>
+          <div class="exam-list">${examens}</div>
+        </div>` : ''}
+        ${drapeaux}
+        ${tags ? `<div class="diag-tags">${tags}</div>` : ''}
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Informations manquantes
+  if (data.informations_manquantes && data.informations_manquantes.length > 0) {
+    const block = document.createElement('div');
+    block.className = 'missing-block';
+    block.innerHTML = `<h3>Informations qui affineraient le diagnostic</h3>` +
+      data.informations_manquantes.map(m => `<div class="missing-item">${m}</div>`).join('');
+    document.getElementById('missing-container').appendChild(block);
+  }
+
+  // Prochaines étapes
+  if (data.prochaines_etapes && data.prochaines_etapes.length > 0) {
+    const block = document.createElement('div');
+    block.className = 'next-block';
+    block.innerHTML = `<h3>Prochaines étapes suggérées</h3>` +
+      data.prochaines_etapes.map(s => `<div class="next-item">${s}</div>`).join('');
+    document.getElementById('next-container').appendChild(block);
+  }
+}
+
+// ── MAIN ANALYZE ──────────────────────────────────
+async function analyze() {
+  const sx = document.getElementById('sx-main').value.trim();
+  const age = document.getElementById('p-age').value.trim();
+  const sexe = document.getElementById('p-sexe').value;
+  const atcd = document.getElementById('p-atcd').value.trim();
+  const region = document.getElementById('p-region').value.trim();
+  const epidemie = document.getElementById('p-epidemie').value.trim();
+  const exClinique = document.getElementById('ex-clinique').value.trim();
+  const exBio = document.getElementById('ex-bio').value.trim();
+
+  if (!sx) {
+    alert('Veuillez décrire les symptômes principaux.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('results-container').style.display = 'block';
+  ['diagnoses-list','missing-container','next-container','urgence-container','error-container'].forEach(id => {
+    document.getElementById(id).innerHTML = '';
+  });
+  document.getElementById('result-summary').textContent = '';
+  document.getElementById('streaming-indicator').classList.add('active');
+
+  const prompt = buildPrompt(sx, age, sexe, atcd, region, epidemie, exClinique, exBio);
+
+  try {
+    let response;
+    try {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 4000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+    } catch(corsErr) {
+      streamInd.classList.remove('active');
+      showCopyFallback(prompt, 'Diagnostic différentiel');
+      btn.disabled = false; btn.classList.remove('loading');
+      return;
+    }
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || `Erreur API: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const rawText = data.content?.map(b => b.text || '').join('') || '';
+
+    const cleaned = rawText.replace(/```json|```/g, '').trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch(e) {
+      const match = cleaned.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+      else throw new Error('Réponse non parseable. Réessayez.');
+    }
+
+    document.getElementById('streaming-indicator').classList.remove('active');
+    renderResults(parsed);
+
+  } catch(err) {
+    document.getElementById('streaming-indicator').classList.remove('active');
+    document.getElementById('error-container').innerHTML =
+      `<div class="error-block"><strong>Erreur :</strong> ${err.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+
+// ── COPY-TO-CLAUDE FALLBACK (for GitHub Pages / CORS) ─────
+function showCopyFallback(prompt, toolName) {
+  document.getElementById('cors-fallback')?.remove();
+  const div = document.createElement('div');
+  div.id = 'cors-fallback';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:2rem;text-align:center;';
+  div.innerHTML = `
+    <div style="font-family:'DM Mono',monospace;font-size:22px;color:#1a1814;">🔗</div>
+    <div style="font-family:'DM Mono',monospace;font-size:15px;color:#1a1814;max-width:480px;line-height:1.5;">
+      Pour utiliser ${toolName}, ouvrez Claude<br>et collez le prompt ci-dessous.
+    </div>
+    <div style="font-size:11px;color:#6b6760;max-width:480px;font-family:'DM Mono',monospace;line-height:1.6;">
+      L'API médicale ne peut pas être appelée directement depuis cette page.<br>
+      Copiez le prompt → ouvrez <a href="https://claude.ai" target="_blank" style="color:#8fb4c8;">claude.ai</a> → collez → obtenez votre réponse.
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+      <button onclick="navigator.clipboard.writeText(document.getElementById('prompt-hidden').value).then(()=>{this.textContent='✓ copié !';setTimeout(()=>this.textContent='copier le prompt',2000)})"
+        style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 22px;border-radius:999px;background:#1a1814;color:#faf8f4;border:none;cursor:pointer;">
+        copier le prompt
+      </button>
+      <a href="https://claude.ai" target="_blank"
+        style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 22px;border-radius:999px;background:none;color:#6b6760;border:1px solid rgba(26,24,20,0.15);text-decoration:none;cursor:pointer;">
+        ouvrir Claude →
+      </a>
+      <button onclick="document.getElementById('cors-fallback').remove()"
+        style="font-family:'DM Mono',monospace;font-size:11px;padding:10px 16px;border-radius:999px;background:none;color:#b5b2ac;border:1px solid rgba(26,24,20,0.08);cursor:pointer;">
+        fermer
+      </button>
+    </div>
+    <textarea id="prompt-hidden" style="position:absolute;left:-9999px;opacity:0;" readonly></textarea>
+  `;
+  document.body.appendChild(div);
+  document.getElementById('prompt-hidden').value = prompt;
+}
+
+function clearResults() {
+  document.getElementById('results-container').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'flex';
+}
+</script>
+</body>
+</html>

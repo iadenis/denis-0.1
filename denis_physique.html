@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · physique</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;
+  --ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;
+  --sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;
+  --line:rgba(26,24,20,0.08);
+}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2rem;font-weight:300;text-align:center;max-width:440px;line-height:1.6;}
+.chap-list{max-width:520px;width:100%;display:flex;flex-direction:column;}
+.chap-section{margin-bottom:1.5rem;}
+.chap-section-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.chap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.5;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:20px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-level{font-size:10px;color:var(--ink3);padding:1px 8px;border-radius:999px;border:1px solid var(--line);}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.topbar{display:flex;align-items:center;gap:10px;padding:0.7rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.btnback:hover{color:var(--ink);}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+.dots-row{display:flex;gap:3px;padding:0.4rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .r{color:#c85a5a;}
+.cbody .b{color:#5a7ec8;}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);}
+.cbody .why{display:block;background:rgba(168,158,200,0.1);border:1px solid rgba(168,158,200,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#4a4470;line-height:1.6;}
+.qbadge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:inline-block;margin-bottom:6px;}
+.qbadge.open{border-color:rgba(168,158,200,0.4);color:#4a4470;background:rgba(168,158,200,0.08);}
+.qbadge.qcm{border-color:rgba(122,158,135,0.4);color:#3d6b4f;background:rgba(122,158,135,0.08);}
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.open-wrap{display:flex;gap:7px;align-items:center;}
+.open-input{flex:1;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);outline:none;}
+.open-input:focus{border-color:var(--lav);}
+.open-btn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:8px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.open-btn:hover{opacity:0.75;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;}
+.btnhint:hover{color:var(--ink2);}
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;overflow-y:auto;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:480px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · physique</div>
+  <div class="home-title">physique</div>
+  <div class="home-sub">12 chapitres · du zéro absolu au niveau universitaire<br>atome → liaisons → thermo → équilibres → cinétique → solutions → redox → gaz → nucléaire → stœchiométrie</div>
+  <div class="chap-list" id="chap-list"></div>
+</div>
+
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← chimie</button>
+    <span style="color:var(--ink3);font-size:12px;">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div>
+        <div class="qbadge" id="g-qbadge"></div>
+        <div class="qtext" id="g-q"></div>
+      </div>
+      <div class="choices" id="g-choices"></div>
+      <div class="open-wrap" id="g-open" style="display:none;">
+        <input class="open-input" id="g-input" placeholder="tape ta réponse..." onkeydown="if(event.key==='Enter')checkOpen()">
+        <button class="open-btn" onclick="checkOpen()">→</button>
+      </div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  PHYSIQUE : cinématique → dynamique → énergie → thermo
+//  → électricité → optique → ondes → EM → relativité
+//  → quantique → nucléaire
+//  Du niveau zéro au niveau licence
+// ════════════════════════════════════════════════════════════════
+
+
+const CHAPTERS = [
+
+// ── CHAPITRE 0 : pourquoi la physique ? ──────────────────────
+{
+  id:0, section:"introduction", num:0,
+  name:"pourquoi la physique ?",
+  level:"zéro",
+  takeaway:[
+    "la physique modélise la réalité avec des équations",
+    "un modèle n'est pas la réalité — il en est une approximation utile",
+    "toute grandeur physique a une unité",
+    "mesurer = comparer à un étalon",
+    "l'ordre de grandeur est souvent plus utile que la précision"
+  ],
+  questions:[
+    {c:"notion · qu'est-ce que la physique", type:"qcm",
+     code:`<span class="cm">// la physique — première approche</span>
+La physique cherche à <span class="hl">comprendre et prédire</span>
+les phénomènes naturels grâce à des <span class="hl">modèles mathématiques</span>.
+<span class="ex">chute d'une pomme → gravité
+lumière qui se plie → réfraction
+atome qui rayonne → mécanique quantique</span>
+<span class="why">// un modèle est utile s'il prédit correctement
+// il n'est pas forcément "vrai" — il est efficace</span>`,
+     q:"Un modèle physique est toujours une description parfaite de la réalité. Vrai ou faux ?",
+     ch:["Vrai — la physique découvre les lois exactes","Faux — un modèle est une approximation utile dans un certain domaine","Faux — la physique ne décrit rien exactement"],
+     ok:1, hint:"Newton prédit parfaitement les planètes… sauf Mercure (Einstein était nécessaire)",
+     fb_ok:"// correct — un modèle a toujours un domaine de validité. Newton fonctionne jusqu'à des vitesses proches de c.",
+     fb_no:"// un modèle est une approximation utile. Newton fonctionne bien mais Einstein est plus précis.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · grandeurs et unités", type:"qcm",
+     code:`<span class="cm">// système international (SI) — unités de base</span>
+<span class="hl">mètre</span>    (m)   → longueur
+<span class="hl">kilogramme</span> (kg)  → masse
+<span class="hl">seconde</span>  (s)   → temps
+<span class="hl">ampère</span>   (A)   → courant électrique
+<span class="hl">kelvin</span>   (K)   → température
+<span class="hl">mole</span>     (mol) → quantité de matière
+<span class="why">// toutes les autres unités s'en déduisent
+// ex : N = kg·m/s² · J = kg·m²/s²</span>`,
+     q:"Quelle est l'unité SI de la force ?",
+     ch:["le joule (J)","le newton (N)","le watt (W)","le pascal (Pa)"],
+     ok:1, hint:"F = m × a → kg × m/s² = newton",
+     fb_ok:"// correct — N = kg·m·s⁻². Le joule est l'énergie, le watt la puissance.",
+     fb_no:"// F = m·a → unité = kg·m/s² = newton (N). Le joule est l'énergie (N·m).",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · ordres de grandeur", type:"qcm",
+     code:`<span class="cm">// préfixes SI utiles</span>
+<span class="hl">nano</span>  (n) = 10⁻⁹  → diamètre ADN ~2 nm
+<span class="hl">micro</span> (µ) = 10⁻⁶  → globule rouge ~7 µm
+<span class="hl">milli</span> (m) = 10⁻³  → 1 mm
+<span class="hl">kilo</span>  (k) = 10³   → 1 km
+<span class="hl">méga</span>  (M) = 10⁶   → 1 MW
+<span class="hl">giga</span>  (G) = 10⁹   → mémoire disque`,
+     q:"Un atome mesure environ 1 Å = 10⁻¹⁰ m. C'est combien en nanomètres ?",
+     ch:["0.1 nm","1 nm","10 nm","0.01 nm"],
+     ok:0, hint:"1 nm = 10⁻⁹ m. Donc 10⁻¹⁰ m = 0.1 × 10⁻⁹ m",
+     fb_ok:"// correct — 10⁻¹⁰ m = 0.1 nm. Les liaisons chimiques font ~0.1–0.3 nm.",
+     fb_no:"// 1 nm = 10⁻⁹ m → 10⁻¹⁰ m = 10⁻¹/10⁻⁹ = 0.1 nm.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 1 : mécanique — cinématique ─────────────────────
+{
+  id:1, section:"mécanique", num:1,
+  name:"cinématique — décrire le mouvement",
+  level:"débutant",
+  takeaway:[
+    "vitesse = variation de position / temps : v = Δx/Δt",
+    "accélération = variation de vitesse / temps : a = Δv/Δt",
+    "mouvement rectiligne uniforme : x = x₀ + v·t",
+    "chute libre : y = ½·g·t² (g ≈ 9.81 m/s²)",
+    "la vitesse est un vecteur — direction et sens comptent"
+  ],
+  questions:[
+    {c:"notion · vitesse moyenne", type:"qcm",
+     code:`<span class="cm">// vitesse moyenne</span>
+<span class="hl">v = Δx / Δt</span>
+Δx = déplacement (m)
+Δt = durée (s)
+v  = vitesse moyenne (m/s)
+<span class="ex">voiture parcourt 120 km en 1.5 h
+v = 120 000 m / 5400 s ≈ 22.2 m/s ≈ 80 km/h</span>`,
+     q:"Un cycliste parcourt 36 km en 2 h. Quelle est sa vitesse moyenne en m/s ?",
+     ch:["5 m/s","18 m/s","10 m/s","72 m/s"],
+     ok:0, hint:"36 km = 36 000 m · 2 h = 7200 s → v = 36000/7200",
+     fb_ok:"// correct — 36 000/7200 = 5 m/s (= 18 km/h).",
+     fb_no:"// v = 36 000 m / 7 200 s = 5 m/s. Attention à convertir km en m et h en s.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · MRU — équation horaire", type:"qcm",
+     code:`<span class="cm">// mouvement rectiligne uniforme (MRU)</span>
+accélération <span class="hl">a = 0</span> → vitesse constante
+<span class="hl">x(t) = x₀ + v·t</span>
+x₀ = position initiale (m)
+v  = vitesse (m/s) — constante
+t  = temps (s)
+<span class="ex">x₀=10 m, v=3 m/s → x(4s) = 10 + 3×4 = 22 m</span>`,
+     q:"x₀ = 0, v = 5 m/s. Où se trouve l'objet après 6 secondes ?",
+     ch:["11 m","30 m","25 m","5 m"],
+     ok:1, hint:"x = 0 + 5 × 6 = ?",
+     fb_ok:"// correct — x = 5 × 6 = 30 m.",
+     fb_no:"// x(t) = x₀ + v·t = 0 + 5×6 = 30 m.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · accélération", type:"qcm",
+     code:`<span class="cm">// accélération</span>
+<span class="hl">a = Δv / Δt = (v_f − v_i) / Δt</span>
+unité : m/s²
+<span class="ex">voiture : v_i = 0, v_f = 30 m/s en 10 s
+a = (30−0)/10 = 3 m/s²</span>
+<span class="why">// a positif → accélère dans le sens du mouvement
+// a négatif → décélère (frein)</span>`,
+     q:"Une balle passe de 20 m/s à 5 m/s en 3 s. Quelle est son accélération ?",
+     ch:["5 m/s²","−5 m/s²","8.3 m/s²","−8.3 m/s²"],
+     ok:1, hint:"a = (5 − 20) / 3 = −15/3",
+     fb_ok:"// correct — a = (5−20)/3 = −5 m/s². Négatif : décélération.",
+     fb_no:"// a = (v_f − v_i)/Δt = (5−20)/3 = −15/3 = −5 m/s².",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · chute libre", type:"qcm",
+     code:`<span class="cm">// chute libre (sans frottement)</span>
+<span class="hl">a = g = 9.81 m/s²</span> (vers le bas)
+en partant du repos (v₀=0) :
+<span class="hl">v(t) = g·t</span>
+<span class="hl">h(t) = ½·g·t²</span>
+<span class="ex">t=1s → v=9.81 m/s, h=4.9 m
+t=2s → v=19.6 m/s, h=19.6 m
+t=3s → v=29.4 m/s, h=44.1 m</span>`,
+     q:"Une pierre tombe en chute libre. Après 4 s, quelle est sa vitesse ? (g = 10 m/s²)",
+     ch:["20 m/s","40 m/s","80 m/s","160 m/s"],
+     ok:1, hint:"v = g × t = 10 × 4",
+     fb_ok:"// correct — v = 10 × 4 = 40 m/s.",
+     fb_no:"// v(t) = g·t = 10 × 4 = 40 m/s. La distance serait ½×10×16 = 80 m.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"piège · vecteur vitesse", type:"open",
+     code:`<span class="cm">// vitesse = vecteur !</span>
+Un vecteur a : une <span class="hl">norme</span> (valeur), une <span class="hl">direction</span>, un <span class="hl">sens</span>
+<span class="ex">voiture à 60 km/h vers l'est ≠ voiture à 60 km/h vers l'ouest</span>
+Même norme, directions opposées → vecteurs différents
+<span class="why">// changer de direction SANS changer de vitesse = accélération non nulle !
+// ex : virage à vitesse constante → accélération centripète</span>`,
+     q:"Une voiture tourne en rond à vitesse constante de 10 m/s. Son accélération est-elle nulle ?",
+     keys:["non","n'est pas nulle","pas nulle","centripète","oui non","existe"],
+     hint:"la direction de la vitesse change en permanence dans un virage",
+     fb_ok:"// correct — l'accélération centripète existe même à vitesse constante car la direction change.",
+     fb_no:"// non ! La direction du vecteur vitesse change → a ≠ 0. Accélération centripète = v²/r.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 2 : mécanique — dynamique ──────────────────────
+{
+  id:2, section:"mécanique", num:2,
+  name:"dynamique — les forces",
+  level:"débutant",
+  takeaway:[
+    "1ère loi de Newton : pas de force nette → mouvement rectiligne uniforme",
+    "2ème loi de Newton : F = m·a (vecteurs)",
+    "3ème loi de Newton : action/réaction — forces égales et opposées",
+    "poids P = m·g (force, pas masse)",
+    "la masse est une propriété intrinsèque — le poids dépend de g"
+  ],
+  questions:[
+    {c:"notion · 2e loi de Newton", type:"qcm",
+     code:`<span class="cm">// 2ème loi de Newton</span>
+<span class="hl">ΣF = m × a</span>
+ΣF = somme des forces (N)
+m  = masse (kg)
+a  = accélération (m/s²)
+<span class="why">// si plusieurs forces → on les additionne vectoriellement
+// ex : poids vers le bas + normale vers le haut = 0 → a = 0</span>`,
+     q:"Un objet de 5 kg reçoit une force nette de 20 N. Quelle est son accélération ?",
+     ch:["100 m/s²","4 m/s²","0.25 m/s²","25 m/s²"],
+     ok:1, hint:"a = F/m = 20/5",
+     fb_ok:"// correct — a = F/m = 20/5 = 4 m/s².",
+     fb_no:"// a = F/m = 20/5 = 4 m/s².",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · poids vs masse", type:"qcm",
+     code:`<span class="cm">// poids ≠ masse</span>
+<span class="hl">masse</span>  m (kg) : quantité de matière — <span class="hl">invariable</span>
+<span class="hl">poids</span>  P = m·g (N) : force gravitationnelle
+g ≈ 9.81 m/s² sur Terre · 1.62 m/s² sur la Lune
+<span class="ex">astronaute : m = 80 kg (partout)
+Terre : P = 80×9.81 ≈ 785 N
+Lune  : P = 80×1.62 ≈ 130 N</span>`,
+     q:"Sur la Lune (g=1.6 m/s²), un objet de 10 kg pèse combien ?",
+     ch:["10 N","16 N","98 N","160 N"],
+     ok:1, hint:"P = m × g_lune = 10 × 1.6",
+     fb_ok:"// correct — P = 10 × 1.6 = 16 N. La masse reste 10 kg partout.",
+     fb_no:"// P = m × g = 10 × 1.6 = 16 N. La masse (kg) ne change pas, le poids (N) oui.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · 3e loi de Newton", type:"qcm",
+     code:`<span class="cm">// 3ème loi — action / réaction</span>
+Si A exerce une force sur B,
+alors B exerce une force <span class="hl">égale et opposée</span> sur A.
+<span class="ex">livre posé sur table :
+  livre → table : P = 10 N vers le bas
+  table → livre : N = 10 N vers le haut</span>
+<span class="why">// les deux forces s'appliquent sur des objets DIFFÉRENTS
+// elles ne s'annulent pas pour un même objet</span>`,
+     q:"Un cheval tire un chariot avec une force de 500 N. La force du chariot sur le cheval est :",
+     ch:["0 N — le chariot avance donc il ne tire pas","500 N dans le même sens","500 N dans le sens opposé","250 N — ils partagent la force"],
+     ok:2, hint:"action/réaction : même intensité, sens opposé",
+     fb_ok:"// correct — le chariot tire le cheval vers l'arrière avec 500 N (mais le sol pousse le cheval en avant).",
+     fb_no:"// 3e loi : le chariot tire le cheval vers l'arrière avec exactement 500 N.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · plan incliné", type:"qcm",
+     code:`<span class="cm">// forces sur un plan incliné (angle θ)</span>
+Composante du poids <span class="hl">parallèle</span> : F∥ = m·g·sin(θ)
+Composante du poids <span class="hl">perpendiculaire</span> : F⊥ = m·g·cos(θ)
+<span class="ex">m=10 kg, θ=30°, g=10 m/s²
+F∥ = 10×10×0.5 = 50 N (fait glisser)
+F⊥ = 10×10×0.866 = 86.6 N (contre le plan)</span>`,
+     q:"m = 5 kg, θ = 30°, g = 10 m/s², sans frottement. Quelle est l'accélération sur le plan ?",
+     ch:["5 m/s²","8.66 m/s²","10 m/s²","2.5 m/s²"],
+     ok:0, hint:"a = g·sin(30°) = 10 × 0.5",
+     fb_ok:"// correct — a = g·sin(θ) = 10×0.5 = 5 m/s². La masse n'intervient pas !",
+     fb_no:"// a = g·sin(θ) = 10 × sin(30°) = 10 × 0.5 = 5 m/s². Indépendant de m.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 3 : énergie et travail ────────────────────────
+{
+  id:3, section:"mécanique", num:3,
+  name:"énergie, travail, puissance",
+  level:"intermédiaire",
+  takeaway:[
+    "travail W = F·d·cos(θ) — en joules",
+    "énergie cinétique Ec = ½·m·v²",
+    "énergie potentielle gravitation Ep = m·g·h",
+    "conservation : Ec + Ep = constante (sans frottement)",
+    "puissance P = W/t = F·v — en watts"
+  ],
+  questions:[
+    {c:"notion · travail d'une force", type:"qcm",
+     code:`<span class="cm">// travail W d'une force F sur déplacement d</span>
+<span class="hl">W = F · d · cos(θ)</span>
+F = force (N)   d = déplacement (m)
+θ = angle entre F et d
+<span class="ex">θ=0° (force et déplacement parallèles) : W = F·d  [max]
+θ=90° (force ⊥ déplacement)            : W = 0
+θ=180° (force opposée au déplacement)  : W = −F·d [frein]</span>`,
+     q:"On pousse une caisse avec F = 200 N sur d = 5 m, dans la direction du déplacement. W = ?",
+     ch:["40 J","1000 J","200 J","0 J"],
+     ok:1, hint:"θ=0° → cos(0°)=1 → W = F·d",
+     fb_ok:"// correct — W = 200 × 5 × cos(0°) = 1000 J.",
+     fb_no:"// W = F·d·cos(θ) = 200×5×1 = 1 000 J. L'angle est 0° car force et déplacement sont parallèles.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · énergie cinétique", type:"qcm",
+     code:`<span class="cm">// énergie cinétique Ec</span>
+<span class="hl">Ec = ½ · m · v²</span>
+<span class="why">// si v double → Ec quadruple !
+// c'est pourquoi doubler la vitesse en voiture est TRÈS dangereux</span>
+<span class="ex">m=1000 kg, v=10 m/s → Ec = ½×1000×100 = 50 000 J
+m=1000 kg, v=20 m/s → Ec = ½×1000×400 = 200 000 J (×4 !)</span>`,
+     q:"m = 2 kg, v = 6 m/s. Quelle est l'énergie cinétique ?",
+     ch:["6 J","12 J","36 J","72 J"],
+     ok:2, hint:"Ec = ½ × 2 × 6² = 1 × 36",
+     fb_ok:"// correct — Ec = ½ × 2 × 36 = 36 J.",
+     fb_no:"// Ec = ½·m·v² = ½×2×36 = 36 J. Attention : c'est v² pas v.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · énergie potentielle", type:"qcm",
+     code:`<span class="cm">// énergie potentielle gravitationnelle</span>
+<span class="hl">Ep = m · g · h</span>
+h = hauteur par rapport au niveau de référence
+<span class="why">// l'énergie potentielle dépend du choix du niveau de référence
+// seule la VARIATION ΔEp = m·g·Δh est physiquement mesurable</span>
+<span class="ex">balle m=0.1 kg montée à h=5 m (g=10 m/s²)
+Ep = 0.1×10×5 = 5 J</span>`,
+     q:"Une bille de 0.2 kg tombe de h = 3 m. De combien diminue son Ep ? (g = 10 m/s²)",
+     ch:["0.6 J","3 J","6 J","60 J"],
+     ok:2, hint:"ΔEp = m·g·Δh = 0.2 × 10 × 3",
+     fb_ok:"// correct — ΔEp = 0.2×10×3 = 6 J. Cette énergie se transforme en Ec.",
+     fb_no:"// ΔEp = m·g·h = 0.2×10×3 = 6 J.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · conservation de l'énergie", type:"open",
+     code:`<span class="cm">// conservation de l'énergie mécanique</span>
+Sans frottement : <span class="hl">Ec + Ep = constante</span>
+Au sommet (h, v=0)  : Ep = mgh · Ec = 0
+Au bas    (h=0, v?) : Ep = 0  · Ec = ?
+<span class="hl">mgh = ½mv²</span>  →  <span class="hl">v = √(2gh)</span>
+<span class="why">// la masse disparaît ! Comme pour la chute libre.
+// Galilée l'avait montré sans algèbre.</span>`,
+     q:"Une bille part du haut d'un toboggan à h = 5 m. Quelle est sa vitesse en bas ? (g = 10 m/s²)",
+     keys:["10","dix","10 m/s","dix m/s"],
+     hint:"v = √(2 × 10 × 5) = √100",
+     fb_ok:"// correct — v = √(2gh) = √(2×10×5) = √100 = 10 m/s.",
+     fb_no:"// v = √(2gh) = √(2×10×5) = √100 = 10 m/s. La masse n'intervient pas.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · puissance", type:"qcm",
+     code:`<span class="cm">// puissance P</span>
+<span class="hl">P = W / t = F · v</span>
+P en watts (W) = J/s
+<span class="ex">moteur fournit W=6000 J en 2 min :
+P = 6000/120 = 50 W
+voiture : F=1000 N à v=30 m/s →
+P = 1000×30 = 30 000 W = 30 kW</span>`,
+     q:"Un ascenseur soulève 500 kg de h=12 m en 15 s. Quelle est la puissance minimale ? (g=10)",
+     ch:["400 W","4000 W","40 000 W","1000 W"],
+     ok:1, hint:"W = m·g·h = 500×10×12. P = W/t.",
+     fb_ok:"// correct — W = 60 000 J. P = 60 000/15 = 4 000 W = 4 kW.",
+     fb_no:"// W = 500×10×12 = 60 000 J. P = W/t = 60 000/15 = 4 000 W.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 4 : thermodynamique ────────────────────────────
+{
+  id:4, section:"thermodynamique", num:4,
+  name:"température, chaleur, premier principe",
+  level:"intermédiaire",
+  takeaway:[
+    "température = agitation thermique moyenne des particules",
+    "T(K) = T(°C) + 273.15 — le zéro absolu est à −273.15°C",
+    "Q = m·c·ΔT — capacité thermique massique",
+    "1er principe : ΔU = W + Q (énergie interne = travail + chaleur reçue)",
+    "la chaleur va spontanément du chaud vers le froid"
+  ],
+  questions:[
+    {c:"notion · température et échelles", type:"qcm",
+     code:`<span class="cm">// échelles de température</span>
+<span class="hl">T(K) = T(°C) + 273.15</span>
+0 K = zéro absolu = −273.15°C
+     = agitation thermique nulle (théorique)
+<span class="ex">eau gèle : 0°C = 273 K
+eau bout : 100°C = 373 K
+corps humain : 37°C = 310 K</span>
+<span class="why">// en physique, on utilise TOUJOURS les kelvins dans les calculs</span>`,
+     q:"L'azote liquide bout à −196°C. Quelle est cette température en kelvins ?",
+     ch:["−196 K","77 K","196 K","469 K"],
+     ok:1, hint:"T(K) = T(°C) + 273 = −196 + 273",
+     fb_ok:"// correct — T = −196 + 273 = 77 K. L'azote liquide est très utilisé en cryogénie.",
+     fb_no:"// T(K) = T(°C) + 273.15 = −196 + 273 ≈ 77 K.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · capacité thermique", type:"qcm",
+     code:`<span class="cm">// échange de chaleur Q</span>
+<span class="hl">Q = m · c · ΔT</span>
+Q  = chaleur échangée (J)
+m  = masse (kg)
+c  = capacité thermique massique (J/kg/K)
+ΔT = variation de température (K ou °C)
+<span class="ex">eau : c = 4186 J/(kg·K) — très élevé !
+fer : c = 450 J/(kg·K)
+aluminium : c = 900 J/(kg·K)</span>`,
+     q:"On chauffe 2 kg d'eau (c=4200 J/kg/K) de 20°C à 70°C. Quelle énergie faut-il ?",
+     ch:["84 000 J","420 000 J","168 000 J","8400 J"],
+     ok:1, hint:"Q = 2 × 4200 × (70−20) = 2 × 4200 × 50",
+     fb_ok:"// correct — Q = 2×4200×50 = 420 000 J = 420 kJ.",
+     fb_no:"// Q = m·c·ΔT = 2×4200×50 = 420 000 J. ΔT = 70−20 = 50 K.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · 1er principe thermo", type:"qcm",
+     code:`<span class="cm">// 1er principe de la thermodynamique</span>
+<span class="hl">ΔU = W + Q</span>
+ΔU = variation d'énergie interne (J)
+W  = travail reçu par le système (J)
+Q  = chaleur reçue par le système (J)
+<span class="why">// conservation de l'énergie — l'énergie ne se crée ni ne se détruit
+// elle se transforme (chaleur ↔ travail ↔ énergie interne)</span>`,
+     q:"Un système reçoit Q = 500 J de chaleur et fournit W = 200 J de travail. ΔU = ?",
+     ch:["700 J","300 J","−300 J","500 J"],
+     ok:1, hint:"le système FOURNIT 200 J → il reçoit W = −200 J. ΔU = Q + W",
+     fb_ok:"// correct — ΔU = Q + W = 500 + (−200) = 300 J. Fournir du travail = recevoir W négatif.",
+     fb_no:"// le système fournit 200 J → reçoit W = −200 J. ΔU = 500 − 200 = 300 J.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · transfert thermique", type:"qcm",
+     code:`<span class="cm">// trois modes de transfert thermique</span>
+<span class="hl">conduction</span>  : contact direct (chaleur dans un métal)
+<span class="hl">convection</span>  : mouvement de fluide (chauffage par eau chaude)
+<span class="hl">rayonnement</span> : ondes électromagnétiques (soleil → Terre)
+<span class="why">// dans le vide, seul le rayonnement est possible
+// c'est pourquoi les thermos utilisent un double vide</span>`,
+     q:"La chaleur du Soleil arrive sur Terre par quel mécanisme ?",
+     ch:["conduction — contact avec l'air","convection — courants d'air spatial","rayonnement — ondes EM dans le vide","les trois à la fois"],
+     ok:2, hint:"le vide interplanétaire ne permet pas la conduction ni la convection",
+     fb_ok:"// correct — rayonnement électromagnétique (IR, visible, UV). Le vide ne conduit ni ne convecte.",
+     fb_no:"// dans le vide, seul le rayonnement est possible. Le Soleil émet des ondes EM.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 5 : électricité ────────────────────────────────
+{
+  id:5, section:"électricité", num:5,
+  name:"courant, tension, résistance",
+  level:"intermédiaire",
+  takeaway:[
+    "courant I = charge/temps = ΔQ/Δt — en ampères",
+    "tension U = différence de potentiel — en volts",
+    "loi d'Ohm : U = R·I — résistance en ohms",
+    "puissance électrique P = U·I = R·I² = U²/R — en watts",
+    "en série : R_tot = R₁+R₂ · en parallèle : 1/R_tot = 1/R₁+1/R₂"
+  ],
+  questions:[
+    {c:"notion · loi d'Ohm", type:"qcm",
+     code:`<span class="cm">// loi d'Ohm</span>
+<span class="hl">U = R · I</span>
+U = tension (V = volts)
+R = résistance (Ω = ohms)
+I = intensité (A = ampères)
+<span class="ex">ampoule R=240 Ω sous U=240 V :
+I = U/R = 240/240 = 1 A</span>
+<span class="why">// Ohm décrit les conducteurs "linéaires"
+// une LED ou un transistor n'obéit PAS à Ohm</span>`,
+     q:"R = 100 Ω, I = 0.5 A. Quelle est la tension aux bornes ?",
+     ch:["200 V","50 V","0.005 V","100 V"],
+     ok:1, hint:"U = R × I = 100 × 0.5",
+     fb_ok:"// correct — U = 100 × 0.5 = 50 V.",
+     fb_no:"// U = R·I = 100 × 0.5 = 50 V.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · puissance électrique", type:"qcm",
+     code:`<span class="cm">// puissance électrique</span>
+<span class="hl">P = U · I = R · I² = U² / R</span>
+<span class="ex">ampoule 60 W sous 230 V :
+I = P/U = 60/230 ≈ 0.26 A
+R = U/I = 230/0.26 ≈ 885 Ω</span>
+<span class="why">// 1 kWh = 1000 W × 3600 s = 3.6×10⁶ J
+// c'est l'unité d'énergie des factures électriques</span>`,
+     q:"Un radiateur 2000 W fonctionne 5 h. Quelle énergie consomme-t-il en kWh ?",
+     ch:["2 kWh","5 kWh","10 kWh","400 kWh"],
+     ok:2, hint:"E = P × t = 2 kW × 5 h",
+     fb_ok:"// correct — E = 2 kW × 5 h = 10 kWh.",
+     fb_no:"// E = P·t = 2 kW × 5 h = 10 kWh. Simple : puissance (kW) × temps (h) = énergie (kWh).",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · résistances en série et parallèle", type:"qcm",
+     code:`<span class="cm">// associations de résistances</span>
+<span class="hl">série    :</span> R_tot = R₁ + R₂ + …
+<span class="hl">parallèle:</span> 1/R_tot = 1/R₁ + 1/R₂ + …
+<span class="ex">R₁=4Ω, R₂=4Ω en parallèle :
+1/R_tot = 1/4 + 1/4 = 1/2 → R_tot = 2 Ω</span>
+<span class="why">// en parallèle, R_tot < chaque résistance individuelle
+// c'est pourquoi brancher plus d'appareils ↓ la résistance totale</span>`,
+     q:"R₁ = 6 Ω et R₂ = 3 Ω en parallèle. Quelle est la résistance totale ?",
+     ch:["9 Ω","4.5 Ω","2 Ω","18 Ω"],
+     ok:2, hint:"1/R = 1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2",
+     fb_ok:"// correct — 1/R = 1/6+1/3 = 3/6 → R = 2 Ω.",
+     fb_no:"// 1/R_tot = 1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2 → R_tot = 2 Ω.",
+     mv:{dx:1,dy:0}},
+
+    {c:"application · circuit simple", type:"open",
+     code:`<span class="cm">// lois de Kirchhoff (résumé)</span>
+<span class="hl">nœuds</span> : la somme des courants entrants = sortants
+<span class="hl">mailles</span>: la somme des tensions = 0
+<span class="ex">batterie 12 V, deux résistances en série : R₁=4Ω, R₂=8Ω
+R_tot = 12 Ω
+I = U/R_tot = 12/12 = 1 A
+U₁ = R₁·I = 4 V · U₂ = R₂·I = 8 V
+vérification : 4+8 = 12 V ✓</span>`,
+     q:"Batterie 9 V, R₁ = 1 Ω en série avec R₂ = 2 Ω. Quel courant circule ?",
+     keys:["3","3 a","3a","3 ampères","trois"],
+     hint:"I = U/R_tot = 9/(1+2)",
+     fb_ok:"// correct — I = 9/3 = 3 A. U₁ = 3 V, U₂ = 6 V. Total : 9 V ✓.",
+     fb_no:"// R_tot = 1+2 = 3 Ω. I = U/R = 9/3 = 3 A.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 6 : optique géométrique ───────────────────────
+{
+  id:6, section:"ondes et optique", num:6,
+  name:"optique géométrique — lentilles et miroirs",
+  level:"intermédiaire",
+  takeaway:[
+    "réfraction : n₁·sin(θ₁) = n₂·sin(θ₂) — loi de Snell-Descartes",
+    "lentille convergente : 1/v − 1/u = 1/f (vergence V = 1/f en dioptries)",
+    "grandissement G = v/u = taille image / taille objet",
+    "miroir plan : image virtuelle, même distance, non renversée",
+    "réflexion totale interne quand θ > θ_c (base des fibres optiques)"
+  ],
+  questions:[
+    {c:"notion · réflexion et réfraction", type:"qcm",
+     code:`<span class="cm">// loi de Snell-Descartes</span>
+<span class="hl">n₁·sin(θ₁) = n₂·sin(θ₂)</span>
+n = indice de réfraction (n≥1)
+n_vide = 1 · n_eau ≈ 1.33 · n_verre ≈ 1.5
+<span class="why">// si n₂ > n₁ → le rayon se rapproche de la normale (θ₂ < θ₁)
+// ex : air → verre : le rayon "plonge" vers la normale</span>`,
+     q:"Un rayon passe de l'air (n=1) vers le verre (n=1.5) avec θ₁=60°. sin(θ₂) vaut ?",
+     ch:["0.866 (≈60°)","0.577 (≈35°)","1.3 (impossible)","0.433 (≈26°)"],
+     ok:1, hint:"sin(θ₂) = n₁·sin(θ₁)/n₂ = 1×sin(60°)/1.5 = 0.866/1.5",
+     fb_ok:"// correct — sin(θ₂) = 0.866/1.5 ≈ 0.577 → θ₂ ≈ 35°. Le rayon se rapproche de la normale.",
+     fb_no:"// n₁·sin(θ₁) = n₂·sin(θ₂) → sin(θ₂) = sin(60°)/1.5 = 0.866/1.5 ≈ 0.577.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · lentille convergente", type:"qcm",
+     code:`<span class="cm">// relation conjuguée (lentille mince)</span>
+<span class="hl">1/OA' − 1/OA = 1/f'</span>
+OA = distance objet (négatif si objet à gauche)
+OA'= distance image (positif si image à droite)
+f' = distance focale image (f' > 0 si convergente)
+<span class="hl">Vergence V = 1/f' (dioptries)</span>
+<span class="ex">lunette +2 dioptries → f' = 0.5 m = 50 cm</span>`,
+     q:"Un objet est à 30 cm d'une lentille f' = 20 cm (OA = −30 cm). Où est l'image ?",
+     ch:["à 60 cm de l'autre côté","à 12 cm du même côté","à 20 cm de l'autre côté","à l'infini"],
+     ok:0, hint:"1/OA' = 1/f' + 1/OA = 1/20 + 1/(−30) = 3/60 − 2/60 = 1/60",
+     fb_ok:"// correct — OA' = 60 cm, de l'autre côté (image réelle renversée).",
+     fb_no:"// 1/OA' = 1/f' + 1/OA = 1/20 − 1/30 = 3/60−2/60 = 1/60 → OA'=60 cm.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · fibre optique", type:"qcm",
+     code:`<span class="cm">// réflexion totale interne</span>
+Si θ ≥ θ_c : le rayon est <span class="hl">totalement réfléchi</span> (pas de réfraction)
+<span class="hl">sin(θ_c) = n₂/n₁</span>   (n₁ > n₂)
+<span class="ex">verre (n=1.5) → air (n=1) :
+sin(θ_c) = 1/1.5 = 0.667 → θ_c ≈ 42°</span>
+<span class="why">// principe des fibres optiques : la lumière rebondit sans perte
+// base d'internet, des endoscopes, des capteurs médicaux</span>`,
+     q:"La fibre optique fonctionne grâce à quel phénomène ?",
+     ch:["réfraction totale — la lumière change de milieu","réflexion totale interne — la lumière reste dans le cœur","absorption totale — le verre capte la lumière","dispersion — différentes couleurs à différentes vitesses"],
+     ok:1, hint:"la lumière reste confinée dans le cœur de la fibre",
+     fb_ok:"// correct — réflexion totale interne pour θ > θ_c. La lumière ne sort pas du cœur.",
+     fb_no:"// réflexion totale interne : θ > θ_c → la lumière reste dans la fibre (n_cœur > n_gaine).",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 7 : ondes ──────────────────────────────────────
+{
+  id:7, section:"ondes et optique", num:7,
+  name:"ondes mécaniques et sonores",
+  level:"intermédiaire",
+  takeaway:[
+    "v = λ·f — vitesse = longueur d'onde × fréquence",
+    "son dans l'air : v ≈ 340 m/s à 20°C",
+    "fréquence audible humaine : 20 Hz – 20 000 Hz",
+    "effet Doppler : source qui approche → fréquence perçue plus haute",
+    "intensité sonore en décibels : dB = 10·log(I/I₀)"
+  ],
+  questions:[
+    {c:"notion · relation onde", type:"qcm",
+     code:`<span class="cm">// caractéristiques d'une onde</span>
+<span class="hl">v = λ · f</span>
+v = vitesse de propagation (m/s)
+λ = longueur d'onde (m) — distance entre deux crêtes
+f = fréquence (Hz) — nombre de cycles par seconde
+T = 1/f — période (s)
+<span class="ex">son (f=440 Hz, v=340 m/s) :
+λ = v/f = 340/440 ≈ 0.77 m</span>`,
+     q:"La lumière visible a λ ≈ 500 nm et v = 3×10⁸ m/s. Quelle est sa fréquence ?",
+     ch:["6×10¹⁴ Hz","6×10¹¹ Hz","1.5×10⁸ Hz","500 Hz"],
+     ok:0, hint:"f = v/λ = 3×10⁸ / 500×10⁻⁹",
+     fb_ok:"// correct — f = 3×10⁸ / 5×10⁻⁷ = 6×10¹⁴ Hz. C'est le domaine visible.",
+     fb_no:"// f = v/λ = 3×10⁸ / 500×10⁻⁹ = 3×10⁸ / 5×10⁻⁷ = 6×10¹⁴ Hz.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · effet Doppler", type:"qcm",
+     code:`<span class="cm">// effet Doppler</span>
+Source qui <span class="hl">s'approche</span> : fréquence perçue <span class="hl">↑</span> (plus aiguë)
+Source qui <span class="hl">s'éloigne</span>  : fréquence perçue <span class="hl">↓</span> (plus grave)
+<span class="ex">ambulance siren : aiguë avant, grave après
+radar de vitesse : mesure le décalage Doppler
+étoiles : décalage vers le rouge → univers en expansion</span>`,
+     q:"Une ambulance s'approche de vous à grande vitesse. Son klaxon vous semble :",
+     ch:["plus grave qu'en réalité","identique — la fréquence ne change pas","plus aigu qu'en réalité","silencieux"],
+     ok:2, hint:"source qui approche → longueur d'onde comprimée → fréquence plus haute",
+     fb_ok:"// correct — Doppler : source approche → fréquence perçue plus haute → son plus aigu.",
+     fb_no:"// effet Doppler : source qui approche comprime les fronts d'onde → fréquence ↑ → plus aigu.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · décibels", type:"qcm",
+     code:`<span class="cm">// niveau sonore en décibels (dB)</span>
+<span class="hl">L = 10 · log₁₀(I / I₀)</span>
+I₀ = 10⁻¹² W/m² (seuil d'audition)
+<span class="ex">conversation : ~60 dB (I = 10⁻⁶ W/m²)
+concert rock : ~110 dB  (dommages auditifs)
+décollage avion : ~140 dB</span>
+<span class="why">// +10 dB → intensité ×10
+// +20 dB → intensité ×100
+// +3 dB ≈ intensité ×2</span>`,
+     q:"+10 dB représente une intensité sonore multipliée par combien ?",
+     ch:["×2","×10","×100","×1000"],
+     ok:1, hint:"L augmente de 10 → log(I/I₀) augmente de 1 → I/I₀ augmente de 10¹",
+     fb_ok:"// correct — +10 dB → I×10. +20 dB → I×100. L'échelle dB est logarithmique.",
+     fb_no:"// +10 dB = +1 dans log₁₀(I/I₀) → I multipliée par 10¹ = 10.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 8 : électromagnétisme ─────────────────────────
+{
+  id:8, section:"électromagnétisme", num:8,
+  name:"champs électrique et magnétique",
+  level:"avancé",
+  takeaway:[
+    "champ électrique E = F/q — force par unité de charge",
+    "loi de Coulomb : F = k·q₁·q₂/r²",
+    "champ magnétique B en teslas — créé par des courants",
+    "force de Lorentz : F = q(E + v×B)",
+    "induction de Faraday : une variation de flux crée une tension"
+  ],
+  questions:[
+    {c:"notion · loi de Coulomb", type:"qcm",
+     code:`<span class="cm">// loi de Coulomb</span>
+<span class="hl">F = k · |q₁·q₂| / r²</span>
+k = 9×10⁹ N·m²/C²
+q = charges (coulombs, C)
+r = distance entre les charges (m)
+<span class="why">// même forme que la gravitation (1/r²) → "analogie gravitationnelle"
+// mais électricité : 10³⁹ fois plus forte que la gravité !</span>`,
+     q:"La distance entre deux charges doubles. La force de Coulomb :",
+     ch:["divise par 2","divise par 4","divise par 8","reste identique"],
+     ok:1, hint:"F ∝ 1/r². Si r → 2r, F ∝ 1/(2r)² = 1/4r²",
+     fb_ok:"// correct — F ∝ 1/r². Distance ×2 → F ÷ 4.",
+     fb_no:"// F ∝ 1/r². Si r double (×2) → r² quadruple → F divisée par 4.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · induction de Faraday", type:"qcm",
+     code:`<span class="cm">// loi de Faraday</span>
+Une variation de flux magnétique <span class="hl">Φ = B·A·cos(θ)</span>
+induit une tension (force électromotrice) :
+<span class="hl">e = −dΦ/dt</span>
+<span class="why">// base de tous les générateurs électriques
+// la turbine tourne → le flux varie → tension induite
+// alternateur, transformateur, carte magnétique</span>`,
+     q:"Un aimant immobile dans une bobine. Quel courant est induit ?",
+     ch:["un courant constant","un courant alternatif","aucun courant","un courant qui dépend de B"],
+     ok:2, hint:"Faraday : c'est la VARIATION de flux qui induit — pas le flux lui-même",
+     fb_ok:"// correct — Φ constant → dΦ/dt = 0 → e = 0. Il faut bouger l'aimant.",
+     fb_no:"// Faraday : e = −dΦ/dt. Si B et A sont constants → Φ constant → e = 0. Pas de courant.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · ondes EM", type:"qcm",
+     code:`<span class="cm">// spectre électromagnétique</span>
+← grandes λ ────────────────── petites λ →
+<span class="hl">radio · micro-ondes · IR · visible · UV · X · γ</span>
+toutes à <span class="hl">v = c = 3×10⁸ m/s</span> dans le vide
+énergie photon : <span class="hl">E = h·f</span> (h = 6.63×10⁻³⁴ J·s)
+<span class="why">// plus f est grande → plus E est grande → plus ionisant
+// UV, X et γ peuvent casser des molécules biologiques</span>`,
+     q:"Les rayons X et les ondes radio voyagent à la même vitesse. Quelle différence principale ?",
+     ch:["leur vitesse — les X sont plus rapides","leur fréquence — les X ont une fréquence beaucoup plus élevée","leur nature — les radio sont mécaniques, les X électromagnétiques","leur polarisation"],
+     ok:1, hint:"toutes les ondes EM ont v=c dans le vide — seule la fréquence diffère",
+     fb_ok:"// correct — même vitesse c, fréquence très différente → longueur d'onde et énergie très différentes.",
+     fb_no:"// toutes les ondes EM voyagent à c dans le vide. Ce qui diffère : f, λ, et énergie (E=hf).",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 9 : physique moderne ──────────────────────────
+{
+  id:9, section:"physique moderne", num:9,
+  name:"relativité restreinte — bases",
+  level:"avancé",
+  takeaway:[
+    "la vitesse de la lumière c est constante pour tous les référentiels",
+    "dilatation du temps : Δt' = γ·Δt avec γ = 1/√(1−v²/c²)",
+    "contraction des longueurs : L' = L/γ",
+    "énergie au repos : E = mc²",
+    "rien ne peut dépasser c — la masse augmente avec la vitesse"
+  ],
+  questions:[
+    {c:"notion · postulats d'Einstein", type:"qcm",
+     code:`<span class="cm">// relativité restreinte (Einstein, 1905)</span>
+1. Les lois de la physique sont les mêmes dans tout <span class="hl">référentiel inertiel</span>
+2. La vitesse de la lumière <span class="hl">c = 3×10⁸ m/s est constante</span>
+   → indépendante du mouvement de la source ou de l'observateur
+<span class="why">// conséquence : le temps n'est pas absolu
+// deux événements simultanés pour A peuvent ne pas l'être pour B</span>`,
+     q:"Une fusée se déplace à 0.9c et allume un phare. La lumière s'éloigne de la fusée à :",
+     ch:["1.9c (0.9c + c)","c = 3×10⁸ m/s","0.1c (c − 0.9c)","impossible — rien ne peut dépasser c"],
+     ok:1, hint:"2e postulat : c est constante pour TOUT observateur",
+     fb_ok:"// correct — c est la même pour tous. La lumière s'éloigne à c, même de la fusée à 0.9c.",
+     fb_no:"// 2e postulat : c est invariante. La lumière s'éloigne à c dans tous les référentiels.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · E = mc²", type:"qcm",
+     code:`<span class="cm">// énergie de masse au repos</span>
+<span class="hl">E₀ = m · c²</span>
+c = 3×10⁸ m/s → c² = 9×10¹⁶ m²/s²
+<span class="ex">1 g de matière = 10⁻³ kg :
+E₀ = 10⁻³ × 9×10¹⁶ = 9×10¹³ J
+≈ énergie d'une bombe de 21 kilotonnes !</span>
+<span class="why">// la fission nucléaire convertit ~0.1% de la masse en énergie
+// la fusion en convertit ~0.7% (plus efficace)</span>`,
+     q:"Quelle énergie est libérée par la conversion totale de 1 mg = 10⁻⁶ kg en énergie ?",
+     ch:["9×10¹⁰ J","9×10⁷ J","3×10² J","9×10¹³ J"],
+     ok:0, hint:"E = mc² = 10⁻⁶ × (3×10⁸)² = 10⁻⁶ × 9×10¹⁶",
+     fb_ok:"// correct — E = 10⁻⁶ × 9×10¹⁶ = 9×10¹⁰ J ≈ 21 tonnes de TNT pour 1 mg !",
+     fb_no:"// E = mc² = 10⁻⁶ × 9×10¹⁶ = 9×10¹⁰ J.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · dilatation du temps", type:"qcm",
+     code:`<span class="cm">// dilatation du temps</span>
+<span class="hl">Δt' = γ · Δt</span>
+<span class="hl">γ = 1 / √(1 − v²/c²)</span>
+γ ≥ 1 toujours
+<span class="ex">v = 0.8c → γ = 1/√(1−0.64) = 1/0.6 ≈ 1.67
+1 an pour l'astronaute → 1.67 an sur Terre</span>
+<span class="why">// vérifié expérimentalement : muons cosmiques survivent plus longtemps
+// GPS doit corriger la relativité pour être précis à 1 m !</span>`,
+     q:"v = 0.6c → γ ≈ 1.25. Un voyage dure 10 ans pour l'astronaute. Combien sur Terre ?",
+     ch:["8 ans","10 ans","12.5 ans","16 ans"],
+     ok:2, hint:"Δt_Terre = γ × Δt_astronaute = 1.25 × 10",
+     fb_ok:"// correct — Δt_Terre = 1.25 × 10 = 12.5 ans. L'astronaute vieillit moins vite.",
+     fb_no:"// Δt_Terre = γ·Δt = 1.25 × 10 = 12.5 ans. Le temps de la Terre s'écoule plus vite.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 10 : mécanique quantique ──────────────────────
+{
+  id:10, section:"physique moderne", num:10,
+  name:"mécanique quantique — introduction",
+  level:"avancé",
+  takeaway:[
+    "dualité onde-corpuscule : tout objet a une longueur d'onde de de Broglie λ = h/p",
+    "principe d'incertitude d'Heisenberg : Δx·Δp ≥ ħ/2",
+    "la fonction d'onde ψ donne la probabilité de trouver la particule",
+    "quantification de l'énergie : les niveaux sont discrets (atome de Bohr)",
+    "l'effet tunnel permet des processus impossibles en mécanique classique"
+  ],
+  questions:[
+    {c:"notion · dualité onde-corpuscule", type:"qcm",
+     code:`<span class="cm">// longueur d'onde de de Broglie</span>
+<span class="hl">λ = h / p = h / (m·v)</span>
+h = 6.63×10⁻³⁴ J·s (constante de Planck)
+p = quantité de mouvement (kg·m/s)
+<span class="ex">électron (m=9×10⁻³¹ kg, v=10⁶ m/s) :
+λ = 6.63×10⁻³⁴ / (9×10⁻³¹×10⁶) ≈ 0.73 nm
+→ comparable aux distances interatomiques !</span>`,
+     q:"Pourquoi on n'observe pas d'effets quantiques pour une balle de 100 g à 10 m/s ?",
+     ch:["les balles ne sont pas des ondes","λ = h/mv = 6.6×10⁻³⁴ m — imperceptible","la mécanique quantique ne s'applique qu'aux électrons","les balles vont trop vite"],
+     ok:1, hint:"calculer λ = h/(m·v) = 6.6×10⁻³⁴ / (0.1 × 10)",
+     fb_ok:"// correct — λ ≈ 6.6×10⁻³⁴ m, bien trop petite pour être détectable. Les effets quantiques disparaissent à grande échelle.",
+     fb_no:"// λ = 6.6×10⁻³⁴/(0.1×10) = 6.6×10⁻³⁴ m. Beauuucoup trop petit pour être observable.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · principe d'Heisenberg", type:"qcm",
+     code:`<span class="cm">// principe d'incertitude d'Heisenberg</span>
+<span class="hl">Δx · Δp ≥ ħ/2</span>   (ħ = h/2π ≈ 10⁻³⁴ J·s)
+Plus on connaît précisément <span class="hl">x</span> (position)
+moins on connaît <span class="hl">p</span> (quantité de mouvement) — et vice versa.
+<span class="why">// ce n'est PAS un défaut de nos instruments
+// c'est une propriété fondamentale de la réalité
+// l'électron dans un atome ne peut pas s'arrêter au noyau</span>`,
+     q:"On mesure exactement la position d'un électron (Δx → 0). Sa vitesse est alors :",
+     ch:["parfaitement connue aussi","totalement indéterminée (Δv → ∞)","nulle — l'électron s'arrête","égale à c"],
+     ok:1, hint:"Δx·Δp ≥ ħ/2 : si Δx → 0, alors Δp → ∞",
+     fb_ok:"// correct — Δx → 0 → Δp → ∞. On ne peut pas connaître les deux simultanément.",
+     fb_no:"// Δx·Δp ≥ ħ/2. Si Δx → 0 → Δp → ∞ → Δv → ∞. Position et vitesse ne sont pas simultanément précises.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · effet tunnel", type:"qcm",
+     code:`<span class="cm">// effet tunnel quantique</span>
+Une particule peut traverser une barrière d'énergie
+supérieure à son énergie cinétique.
+<span class="why">// classiquement : impossible (comme franchir un mur)
+// quantiquement : la fonction d'onde "filtre" à travers la barrière</span>
+<span class="ex">applications :
+• radioactivité alpha (α traverse le noyau)
+• STM (microscope à effet tunnel)
+• mémoires flash (stockage de données)
+• réactions nucléaires dans les étoiles</span>`,
+     q:"Quel appareil exploite directement l'effet tunnel pour imager des surfaces atomiques ?",
+     ch:["microscope optique","microscope électronique à balayage (MEB)","microscope à effet tunnel (STM)","spectromètre de masse"],
+     ok:2, hint:"Scanning Tunneling Microscope — la pointe est si proche qu'un courant tunnel circule",
+     fb_ok:"// correct — le STM (Binnig & Rohrer, Nobel 1986) mesure le courant tunnel pour cartographier atome par atome.",
+     fb_no:"// STM = Scanning Tunneling Microscope. Le courant tunnel dépend exponentiellement de la distance → résolution atomique.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 11 : physique nucléaire ───────────────────────
+{
+  id:11, section:"physique moderne", num:11,
+  name:"physique nucléaire et radioactivité",
+  level:"avancé",
+  takeaway:[
+    "noyau = protons (Z) + neutrons (N) — notation ᴬₓX",
+    "radioactivité α : émission He-4 · β : émission électron/positron · γ : photon",
+    "loi de décroissance : N(t) = N₀·e^(−λt) — demi-vie t½ = ln2/λ",
+    "défaut de masse → énergie de liaison (E = Δm·c²)",
+    "fission libère ~200 MeV/atome · fusion libère ~17 MeV/fusion mais plus efficace par kg"
+  ],
+  questions:[
+    {c:"notion · désintégration radioactive", type:"qcm",
+     code:`<span class="cm">// types de radioactivité</span>
+<span class="hl">α (alpha)</span> : ²⁴He émis · Z−2, A−4
+<span class="hl">β⁻</span>       : électron émis · Z+1, A constant
+<span class="hl">β⁺</span>       : positron émis · Z−1, A constant
+<span class="hl">γ (gamma)</span> : photon · Z et A inchangés
+<span class="ex">²³⁸U → α → ²³⁴Th (Z: 92→90, A: 238→234)</span>`,
+     q:"Le radium ²²⁶Ra (Z=88) émet une particule α. Quel est le noyau fils ?",
+     ch:["²²²Rn (Z=86)","²²²Ra (Z=88)","²²⁶Rn (Z=86)","²²⁴Ra (Z=88)"],
+     ok:0, hint:"α = ⁴He : Z−2=86, A−4=222",
+     fb_ok:"// correct — ²²⁶Ra → ²²²Rn + ⁴He. Le radon est issu du radium.",
+     fb_no:"// α = ²⁴He → Z−2 = 86 (radon), A−4 = 222 → ²²²Rn.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · demi-vie", type:"qcm",
+     code:`<span class="cm">// demi-vie t½</span>
+Temps après lequel la moitié des noyaux s'est désintégrée.
+<span class="hl">N(t) = N₀ × (½)^(t/t½)</span>
+<span class="ex">t½(¹⁴C) = 5730 ans  → datation archéologique
+t½(²³⁸U) = 4.5×10⁹ ans → géologie
+t½(¹³¹I)  = 8 jours    → médecine nucléaire</span>`,
+     q:"Après 3 demi-vies, quelle fraction d'un échantillon reste radioactive ?",
+     ch:["1/2","1/4","1/6","1/8"],
+     ok:3, hint:"(1/2)³ = 1/8",
+     fb_ok:"// correct — après 3 t½ : (1/2)³ = 1/8. Après 10 t½ : 1/1024 ≈ 0.1%.",
+     fb_no:"// N/N₀ = (1/2)^3 = 1/8. Chaque demi-vie divise la quantité restante par 2.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"application · énergie nucléaire", type:"qcm",
+     code:`<span class="cm">// énergie de liaison nucléaire</span>
+<span class="hl">E_liaison = Δm · c²</span>
+Δm = défaut de masse (masse noyau < somme des nucléons libres)
+<span class="ex">¹H : m = 1.6726×10⁻²⁷ kg
+⁴He : m = 6.6447×10⁻²⁷ kg
+Δm = 4×1.6726 − 6.6447 ≈ 0.0457×10⁻²⁷ kg
+→ E = Δm·c² ≈ 28.3 MeV</span>`,
+     q:"La fission de l'uranium libère de l'énergie car :",
+     ch:["les neutrons accélèrent les protons","la masse totale des fragments est inférieure à celle du noyau initial","la radioactivité α réchauffe le combustible","le noyau tourne plus vite après fission"],
+     ok:1, hint:"E = Δm·c² — le défaut de masse se convertit en énergie",
+     fb_ok:"// correct — Δm → E = Δm·c². Les produits de fission pèsent un peu moins que l'uranium initial.",
+     fb_no:"// E_liaison : la masse totale des fragments < masse du noyau initial → Δm → E = Δm·c².",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+];
+
+const SECTIONS = {};
+CHAPTERS.forEach(ch => {
+  if(!SECTIONS[ch.section]) SECTIONS[ch.section] = [];
+  SECTIONS[ch.section].push(ch);
+});
+
+// ═══════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════
+let curChap=null, curQ=0, score=0, answered=false;
+let rX=0, rY=5;
+const GOAL={x:5,y:0};
+let traces=new Set();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){
+  document.getElementById('win').classList.remove('show');
+  show('s-home');
+}
+
+function buildHome(){
+  const list=document.getElementById('chap-list');
+  list.innerHTML='';
+  Object.entries(SECTIONS).forEach(([sec, chaps])=>{
+    const sec_div=document.createElement('div');
+    sec_div.className='chap-section';
+    const lbl=document.createElement('div');
+    lbl.className='chap-section-lbl';
+    lbl.textContent=sec;
+    sec_div.appendChild(lbl);
+    chaps.forEach(ch=>{
+      const row=document.createElement('div');
+      row.className='chap-row';
+      row.innerHTML=`
+        <span class="chap-num">${ch.num}.</span>
+        <span class="chap-name">${ch.name}</span>
+        <span class="chap-level">${ch.level}</span>
+        <span class="chap-count">${ch.questions.length} qs</span>`;
+      row.onclick=()=>startChap(ch);
+      sec_div.appendChild(row);
+    });
+    list.appendChild(sec_div);
+  });
+}
+
+function startChap(ch){
+  curChap=ch; curQ=0; score=0; answered=false;
+  rX=0; rY=5; traces=new Set();
+  document.getElementById('win').classList.remove('show');
+  buildGrid(); loadQ(); show('s-game');
+}
+
+function loadQ(){
+  answered=false;
+  const q=curChap.questions[curQ];
+  document.getElementById('g-title').textContent=curChap.name;
+  document.getElementById('g-pts').textContent=score+' pts';
+  document.getElementById('g-ctag').textContent=q.c;
+  document.getElementById('g-concept').innerHTML=q.code;
+  document.getElementById('g-q').textContent=q.q;
+  document.getElementById('g-fb').className='fb';
+  document.getElementById('g-next').className='btnext';
+
+  const badge=document.getElementById('g-qbadge');
+  badge.textContent=q.type==='qcm'?'QCM':'question ouverte';
+  badge.className='qbadge '+(q.type==='qcm'?'qcm':'open');
+
+  const dr=document.getElementById('dots-row');
+  dr.innerHTML='';
+  curChap.questions.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i<curQ?' done':i===curQ?' cur':'');
+    dr.appendChild(d);
+  });
+
+  const cc=document.getElementById('g-choices');
+  const ow=document.getElementById('g-open');
+  const inp=document.getElementById('g-input');
+  cc.innerHTML='';
+
+  if(q.type==='qcm'){
+    ow.style.display='none';
+    q.ch.forEach((t,i)=>{
+      const b=document.createElement('button');
+      b.className='choice'; b.textContent=t;
+      b.onclick=()=>answerQcm(i);
+      cc.appendChild(b);
+    });
+  } else {
+    ow.style.display='flex';
+    inp.value=''; inp.disabled=false;
+    document.querySelector('.open-btn').disabled=false;
+    setTimeout(()=>inp.focus(),100);
+  }
+}
+
+function answerQcm(idx){
+  if(answered) return;
+  answered=true;
+  const q=curChap.questions[curQ];
+  const ok=idx===q.ok;
+  document.querySelectorAll('.choice').forEach((b,i)=>{
+    if(i===q.ok) b.classList.add('ok');
+    else if(i===idx&&!ok) b.classList.add('no');
+    else b.classList.add('dim');
+    b.onclick=null;
+  });
+  showFb(ok,q);
+}
+
+function checkOpen(){
+  if(answered) return;
+  const q=curChap.questions[curQ];
+  const val=document.getElementById('g-input').value.trim().toLowerCase();
+  if(!val) return;
+  const ok=q.keys.some(k=>val.includes(k.toLowerCase())||k.toLowerCase()===val);
+  answered=true;
+  document.getElementById('g-input').disabled=true;
+  document.querySelector('.open-btn').disabled=true;
+  showFb(ok,q);
+}
+
+function showFb(ok,q){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show '+(ok?'ok':'no');
+  fb.textContent=ok?q.fb_ok:q.fb_no;
+  if(ok){score+=10;document.getElementById('g-pts').textContent=score+' pts';sparks();}
+  moveRobot(q.mv.dx,q.mv.dy);
+  document.getElementById('g-next').className='btnext show';
+}
+
+function doHint(){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show hint';
+  fb.textContent='? '+curChap.questions[curQ].hint;
+}
+
+function nextQ(){
+  curQ++;
+  if(curQ>=curChap.questions.length){showWin();return;}
+  loadQ();
+}
+
+function showWin(){
+  document.getElementById('win-title').textContent=`// ${curChap.name} · maîtrisé`;
+  const ul=document.getElementById('win-list');
+  ul.innerHTML='';
+  curChap.takeaway.forEach(t=>{
+    const li=document.createElement('li');li.textContent=t;ul.appendChild(li);
+  });
+  document.getElementById('win').classList.add('show');
+}
+
+function restartChap(){
+  document.getElementById('win').classList.remove('show');
+  startChap(curChap);
+}
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.createElement('div');
+    d.id=`gc${x}${y}`;d.className='gcell';
+    if(x===GOAL.x&&y===GOAL.y) d.textContent='🏁';
+    g.appendChild(d);
+  }
+  renderGrid();
+}
+
+function renderGrid(){
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.getElementById(`gc${x}${y}`);
+    if(!d) continue;
+    d.className='gcell';d.textContent='';d.innerHTML='';
+    if(x===GOAL.x&&y===GOAL.y){d.classList.add('goal');d.textContent='🏁';continue;}
+    if(traces.has(`${x},${y}`)) d.classList.add('trace');
+    if(x===rX&&y===rY){
+      d.classList.add('robot');
+      d.innerHTML=`<svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/>
+        <rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/>
+        <rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/>
+        <circle cx="16" cy="7" r="2" fill="#c8a870"/>
+        <rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+        <rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+      </svg>`;
+    }
+  }
+}
+
+function moveRobot(dx,dy){
+  traces.add(`${rX},${rY}`);
+  rX=Math.max(0,Math.min(5,rX+dx));
+  rY=Math.max(0,Math.min(5,rY+dy));
+  renderGrid();
+  const dir=dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent=`${curQ+1}/${curChap.questions.length} → ${dir}`;
+}
+
+function sparks(){
+  const cell=document.getElementById(`gc${rX}${rY}`);
+  if(!cell) return;
+  const r=cell.getBoundingClientRect();
+  ['#c8a870','#e8a598','#7a9e87','#a89ec8'].forEach((c,i)=>{
+    const p=document.createElement('div');p.className='pt';
+    const s=3+Math.random()*5;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);
+  });
+}
+
+buildHome();
+</script>
+</body>
+</html>

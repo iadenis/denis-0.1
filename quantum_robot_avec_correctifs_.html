@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · quantum robot · Qiskit</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;
+  --ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;
+  --sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;
+  --sky:#8fb4c8;--line:rgba(26,24,20,0.08);
+}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;}
+
+/* ── APP SHELL ── */
+#app{min-height:100vh;display:flex;flex-direction:column;}
+#screen-title,#screen-menu,#screen-game,#screen-final{display:none;flex-direction:column;}
+#screen-title.active,#screen-menu.active,#screen-game.active,#screen-final.active{display:flex;}
+
+/* ── TITLE SCREEN ── */
+#screen-title{align-items:center;justify-content:center;padding:3rem 1.5rem;gap:1.25rem;min-height:100vh;}
+.logo{text-align:center;}
+.logo .q{font-family:'DM Mono',monospace;font-size:36px;font-weight:300;color:var(--ink);letter-spacing:-0.02em;}
+.logo .r{font-family:'DM Mono',monospace;font-size:14px;letter-spacing:0.2em;color:var(--ink3);margin-top:-4px;}
+.subtitle{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);letter-spacing:0.08em;}
+.tagline{font-size:13px;color:var(--ink2);font-weight:300;text-align:center;max-width:380px;}
+.edition-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 12px;border-radius:999px;border:1px solid rgba(122,158,135,0.25);}
+.legend-box{background:white;border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:440px;width:100%;display:flex;flex-direction:column;gap:6px;}
+.legend-box div{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.6;}
+.legend-box span{color:var(--ink);font-weight:500;}
+.qs{color:var(--sage)!important;}
+.qi{color:var(--sky)!important;}
+
+/* ── MENU SCREEN ── */
+#screen-menu{align-items:center;padding:2rem 1.5rem;gap:1rem;min-height:100vh;justify-content:flex-start;padding-top:3rem;}
+.screen-header{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:0.5rem;}
+.module-list{max-width:520px;width:100%;display:flex;flex-direction:column;gap:6px;}
+.module-card{background:white;border:1px solid var(--line);border-radius:10px;padding:0.9rem 1.1rem;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
+.module-card:hover{border-color:var(--ink3);background:var(--bg2);}
+.module-card.done{opacity:0.55;}
+.module-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:28px;}
+.module-info{flex:1;}
+.module-title{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink);}
+.module-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);margin-top:2px;}
+.module-score{font-family:'DM Mono',monospace;font-size:10px;color:var(--sage);}
+
+/* ── GAME SCREEN ── */
+#screen-game{flex:1;flex-direction:column;}
+.progress-wrap{height:2px;background:var(--bg3);}
+.progress-fill{height:2px;background:var(--sage);transition:width 0.4s;}
+.game-header{display:flex;align-items:center;gap:10px;padding:0.7rem 1.25rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
+.back-btn{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.back-btn:hover{color:var(--ink);}
+.game-title{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.exercise-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.score-bar{display:flex;align-items:center;gap:6px;}
+#score-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);}
+.score-dots{display:flex;gap:3px;}
+.score-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);}
+.score-dot.hit{background:var(--sage);border-color:var(--sage);}
+.score-dot.miss{background:var(--blush);border-color:var(--blush);}
+
+/* ── GAME LAYOUT ── */
+.game-layout{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.game-layout{grid-template-columns:1fr;}.right-panel{border-left:none;border-top:1px solid var(--line);}}
+#game-content{display:flex;flex-direction:column;}
+.intro-box{padding:1.5rem;background:var(--bg);}
+.intro-title{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);margin-bottom:8px;}
+.intro-box pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.8;white-space:pre-wrap;}
+
+/* ── CODE BLOCK ── */
+.code-block{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:0 1.5rem 0;}
+.code-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);display:flex;align-items:center;gap:6px;}
+.code-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blush);box-shadow:10px 0 0 var(--amber),20px 0 0 var(--sage);}
+.code-block pre{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.9;color:var(--ink2);white-space:pre-wrap;}
+/* syntax colors */
+.hl{color:var(--ink);font-weight:500;}
+.hlg{color:var(--sage);font-weight:500;}
+.hlm{color:var(--lav);}
+.hly{color:var(--amber);}
+.s{color:var(--ink3);font-style:italic;}
+
+/* ── INFO / DUAL CODE ── */
+.info-box{padding:1rem 1.5rem;font-size:13px;color:var(--ink);line-height:1.6;}
+.dual-panel{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 1.5rem;}
+@media(max-width:640px){.dual-panel{grid-template-columns:1fr;}}
+
+/* ── INPUT / DIRECTION ── */
+.input-area{padding:1rem 1.5rem;display:flex;flex-direction:column;gap:8px;}
+.input-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;}
+.dir-pad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:4px;justify-content:start;}
+.dir-btn{width:48px;height:48px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-size:18px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;}
+.dir-btn:hover{border-color:var(--ink3);background:var(--bg2);}
+.key-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink3);margin-top:2px;}
+
+/* ── MCQ ── */
+.mcq-options{display:flex;flex-direction:column;gap:5px;}
+.mcq-btn{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;}
+.mcq-btn:hover{border-color:var(--ink3);background:var(--bg2);}
+.mcq-btn.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.mcq-btn.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.mcq-btn.dim{opacity:0.35;cursor:default;}
+
+/* ── FEEDBACK ── */
+.feedback{font-family:'DM Mono',monospace;font-size:12px;line-height:1.7;padding:8px 12px;border-radius:8px;display:none;margin:0 1.5rem;}
+.feedback.show{display:block;}
+.feedback.success{border:1px solid rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.feedback.error{border:1px solid rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+
+/* ── CONTINUE BTN ── */
+.continue-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;transition:opacity 0.13s;margin:0 1.5rem;}
+.continue-btn:hover{opacity:0.75;}
+.continue-btn.show{display:inline-block;}
+
+/* ── HINT ── */
+.hint-trigger{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:6px 12px;cursor:pointer;margin:0 1.5rem;}
+.hint-trigger:hover{color:var(--ink2);}
+.hint-overlay{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.92);z-index:50;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.hint-overlay.show{display:flex;}
+.hint-panel{background:white;border:1px solid var(--line);border-radius:12px;padding:1.5rem;max-width:480px;width:100%;}
+.hint-header{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);margin-bottom:10px;display:flex;justify-content:space-between;}
+.hint-close{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:16px;}
+.hint-body{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink2);line-height:1.8;white-space:pre-wrap;}
+
+/* ── RIGHT PANEL (GRID) ── */
+.right-panel{background:var(--bg2);border-left:1px solid var(--line);padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;}
+.grid-panel{display:flex;flex-direction:column;align-items:center;gap:0.9rem;width:100%;}
+.grid-legend{display:flex;gap:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.legend-dot.r{background:var(--sage);}
+.legend-dot.g{background:var(--amber);}
+.legend-dot.t{background:rgba(122,158,135,0.35);}
+.grid-container{background:white;border:1px solid var(--line);border-radius:10px;padding:6px;}
+.pos-info{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;}
+
+/* ── FINAL SCREEN ── */
+#screen-final{align-items:center;justify-content:center;padding:3rem 1.5rem;gap:1.25rem;min-height:100vh;text-align:center;}
+.total-score{font-family:'DM Mono',monospace;font-size:48px;font-weight:300;color:var(--ink);}
+.score-table{background:white;border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:400px;width:100%;text-align:left;}
+.score-row{display:flex;justify-content:space-between;padding:4px 0;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--line);}
+.score-row:last-child{border-bottom:none;}
+.cheatsheet{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.25rem;max-width:420px;width:100%;text-align:left;}
+.cheatsheet-header{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.cs-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-family:'DM Mono',monospace;font-size:11px;}
+.cs-row:last-child{border-bottom:none;}
+.cs-qi{color:var(--sky);}
+.cs-qs{color:var(--sage);}
+
+/* ── BUTTONS ── */
+.btn{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:10px 24px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;transition:opacity 0.13s;}
+.btn:hover{opacity:0.75;}
+.btn-green{background:var(--sage);color:white;}
+.btn-magenta,.btn-purple{background:var(--lav);color:white;}
+
+/* ── PARTICLES ── */
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TITLE -->
+  <div id="screen-title">
+    <div class="logo">
+      <div class="q">QUANTUM</div>
+      <div class="r">ROBOT</div>
+    </div>
+    <div class="subtitle">Apprends Qiskit en jouant · v1.0</div>
+    <p class="tagline">Guide le robot en lisant des circuits quantiques</p>
+
+    <div class="legend-box">
+      <div><span>0 = droite →</span> &nbsp;&nbsp;&nbsp; <span>1 = haut ↑</span></div>
+      <div>porte <span>X</span> = inversion &nbsp;&nbsp; porte <span>H</span> = superposition (50/50)</div>
+      <div>porte <span>CNOT cx(a,b)</span> = inverse b si a=1</div>
+    </div>
+
+    <a href="index.html" style="font-family:DM Mono,monospace;font-size:10px;color:var(--ink3);text-decoration:none;letter-spacing:0.06em;">← denis</a>
+    <button class="btn btn-green" onclick="showMenu()">▶ COMMENCER</button>
+  </div>
+
+  <!-- MENU -->
+  <div id="screen-menu">
+    <div class="screen-header">— SÉLECTION DU MODULE —</div>
+    <div class="module-list" id="module-list"></div>
+    <div style="text-align:center">
+      <button class="btn" onclick="showTitle()">← RETOUR</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game">
+    <div class="progress-wrap"><div class="progress-fill" id="progress-bar"></div></div>
+    <div class="game-header">
+      <button class="back-btn" onclick="showMenu()">← menu</button>
+      <div class="game-title" id="game-title">MODULE 1 — Le Qubit</div>
+      <div class="exercise-badge" id="exercise-badge">Ex 1/5</div>
+      <div class="score-bar">
+        <span id="score-label">0 pts</span>
+        <div class="score-dots" id="score-dots"></div>
+      </div>
+    </div>
+
+    <div id="game-content"></div>
+  </div>
+
+  <!-- FINAL -->
+  <div id="screen-final">
+    <div class="screen-header glow-cyan">✦ MISSION ACCOMPLIE ✦</div>
+    <div style="font-family:'Share Tech Mono',monospace; font-size:0.8rem; color:var(--dim)">SCORE TOTAL</div>
+    <div class="total-score" id="total-score">0</div>
+    <div class="score-table" id="score-table"></div>
+    <p style="color:var(--dim); font-family:'Share Tech Mono',monospace; font-size:0.78rem; margin:20px 0">
+      Tu connais maintenant les bases de Qiskit !<br>
+      Prochaine étape : traduire tout ça en Q# (Microsoft) 🚀
+    </p>
+    <button class="btn btn-magenta" onclick="restartGame()">↺ REJOUER</button>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const state = {
+  scores: {},
+  currentModule: null,
+  currentExIndex: 0,
+  robot: [0, 5],
+  goal: [5, 0],
+  traces: new Set(),
+  exScore: 0,
+  waitingForContinue: false,
+};
+
+// ══════════════════════════════════════════════
+//  MODULES DATA
+// ══════════════════════════════════════════════
+const MODULES = [
+  {
+    id: 1,
+    label: 'MODULE 1',
+    title: 'Le Qubit (0 ou 1)',
+    intro: 'Un QUBIT, c\'est comme un interrupteur : il vaut 0 ou 1.\n  0 = éteint   1 = allumé\n\nDans ce jeu :\n  qubit = 0  →  le robot va à DROITE\n  qubit = 1  →  le robot va en HAUT',
+    exercises: [
+      {
+        title: 'Exercice 1/5 — Lire un qubit',
+        code: 'from qiskit import QuantumCircuit\nqc = QuantumCircuit(1)  # 1 qubit\n# par défaut, le qubit vaut 0\nqc.measure_all()\n# résultat mesuré = 0',
+        info: 'Le qubit vaut 0.\nDans quelle direction le robot doit-il aller ?',
+        type: 'direction',
+        sequence: [[1,0]],
+        maxScore: 1,
+      },
+      {
+        title: 'Exercice 2/5 — Qubit = 1',
+        code: 'from qiskit import QuantumCircuit\nqc = QuantumCircuit(1)\nqc.initialize([0,1], 0)  # qubit = 1\nqc.measure_all()\n# résultat mesuré = 1',
+        info: 'Le qubit vaut 1.\nDans quelle direction le robot doit-il aller ?',
+        type: 'direction',
+        sequence: [[0,-1]],
+        maxScore: 1,
+      },
+      {
+        title: 'Exercice 3/5 — Séquence de 3 mouvements',
+        code: 'qc = QuantumCircuit(3)   # 3 qubits !\n# qubit 0 = 0  →  droite\n# qubit 1 = 1  →  haut\n# qubit 2 = 0  →  droite\nqc.measure_all()\n# résultats : [0, 1, 0]',
+        info: 'Il y a 3 qubits mesurés : 0, 1, 0\nChaque qubit donne une direction.\nEntre les 3 directions dans l\'ordre !',
+        type: 'direction',
+        sequence: [[1,0],[0,-1],[1,0]],
+        maxScore: 3,
+      },
+      {
+        title: 'Exercice 4/5 — initialize([1,0]) ?',
+        code: 'qc = QuantumCircuit(4)\nqc.initialize([0,1],0)  # q0=0\nqc.initialize([0,1],1)  # q1=0\nqc.initialize([1,0],2)  # q2=???\nqc.initialize([0,1],3)  # q3=0\n# résultats mesurés : [0, 0, ?, 0]',
+        info: 'initialize([1,0]) = état |0⟩ = qubit VAUT 0\ninitialize([0,1]) = état |1⟩ = qubit VAUT 1\n\nAttention : q2 utilise [1,0], pas [0,1] !\nQuelle est la valeur de q2 ?',
+        type: 'mcq',
+        question: 'q2 vaut :',
+        options: ['0', '1'],
+        correct: 0,
+        then: {
+          type: 'direction',
+          sequence: [[1,0],[1,0],[1,0],[1,0]],
+          maxScore: 4,
+        },
+      },
+      {
+        title: 'Exercice 5/5 — Mini quiz !',
+        type: 'quiz',
+        questions: [
+          { q: 'Un qubit vaut toujours 0 au départ sans initialisation explicite. Vrai ou faux ?', opts: ['Vrai', 'Faux'], correct: 0, expl: 'Vrai ! Par défaut un qubit = 0.' },
+          { q: 'Si le qubit mesuré vaut 0, dans quelle direction le robot se déplace-t-il ?', opts: ['Droite', 'Haut', 'Bas'], correct: 0, expl: 'qubit=0 → droite !' },
+          { q: 'Si le qubit mesuré vaut 1, dans quelle direction le robot se déplace-t-il ?', opts: ['Droite', 'Haut', 'Bas'], correct: 1, expl: 'qubit=1 → haut !' },
+          { q: 'qc.initialize([1,0], 0) — quelle valeur obtient-on après mesure ?', opts: ['0 — [1,0] encode l\'état |0⟩', '1 — [1,0] encode l\'état |1⟩'], correct: 0, expl: '[1,0] = |0⟩ = 0 !' },
+          { q: 'qc.initialize([0,1], 0) — quelle valeur obtient-on après mesure ?', opts: ['0 — [0,1] encode l\'état |0⟩', '1 — [0,1] encode l\'état |1⟩'], correct: 1, expl: '[0,1] = |1⟩ = 1 !' },
+        ],
+        maxScore: 5,
+      },
+    ],
+    maxScore: 14,
+  },
+  {
+    id: 2,
+    label: 'MODULE 2',
+    title: 'La Porte X — NOT',
+    intro: 'La PORTE X, c\'est un interrupteur qui INVERSE le qubit.\n  0  →  porte X  →  1\n  1  →  porte X  →  0\n\nDans Qiskit : qc.x(0)  (0 = numéro du qubit)\n\nRappel : qubit=0 → droite / qubit=1 → haut',
+    exercises: [
+      {
+        title: 'Exercice 1/5 — Une porte X',
+        code: 'qc = QuantumCircuit(1)\n# qubit démarre à 0\nqc.x(0)      # 0 → 1\nqc.measure_all()\n# résultat mesuré = ?',
+        info: 'La porte X inverse 0 en 1.\nQubit final = 1 → direction ?',
+        type: 'direction',
+        sequence: [[0,-1]],
+        maxScore: 1,
+      },
+      {
+        title: 'Exercice 2/5 — Double porte X',
+        code: 'qc = QuantumCircuit(1)\n# qubit démarre à 0\nqc.x(0)   # 0 → 1\nqc.x(0)   # 1 → ?\nqc.measure_all()',
+        info: 'Deux portes X à la suite !\nX inverse → X inverse encore...\nQue vaut le qubit à la fin ?',
+        type: 'mcq',
+        question: 'Le qubit final vaut :',
+        options: ['0', '1'],
+        correct: 0,
+        expl: 'X puis X s\'annulent ! 0→1→0',
+        then: { type: 'direction', sequence: [[1,0]], maxScore: 1 },
+      },
+      {
+        title: 'Exercice 3/5 — Séquence avec portes X',
+        code: 'qc = QuantumCircuit(4)\n# tous les qubits démarrent à 0\nqc.x(1)   # q1 : 0→1\nqc.x(3)   # q3 : 0→1\nqc.measure_all()\n# q0=0, q1=1, q2=0, q3=1',
+        info: '4 qubits. Seulement q1 et q3 ont une porte X.\nq0=0 → droite\nq1=1 → haut\nq2=0 → droite\nq3=1 → haut',
+        type: 'direction',
+        sequence: [[1,0],[0,-1],[1,0],[0,-1]],
+        maxScore: 4,
+      },
+      {
+        title: 'Exercice 4/5 — Compte les portes X !',
+        code: 'qc = QuantumCircuit(1)\nqc.x(0)   # inversion 1\nqc.x(0)   # inversion 2\nqc.x(0)   # inversion 3\nqc.measure_all()',
+        info: '3 portes X sur le même qubit.\nRappel : pair = revient à 0, impair = reste à 1\n3 inversions → qubit final = ?',
+        type: 'mcq',
+        question: 'Qubit final (0 ou 1) :',
+        options: ['0', '1'],
+        correct: 1,
+        expl: '3 inversions = impair → qubit reste à 1 !',
+        then: { type: 'direction', sequence: [[0,-1]], maxScore: 1 },
+      },
+      {
+        title: 'Exercice 5/5 — Grand parcours !',
+        code: 'qc = QuantumCircuit(6)\nqc.x(0)   # q0: 0→1\nqc.x(2)   # q2: 0→1\nqc.x(4)   # q4: 0→1\n# q1, q3, q5 restent à 0\nqc.measure_all()\n# q0=1, q1=0, q2=1, q3=0, q4=1, q5=0',
+        info: '6 mouvements à enchaîner !\nq0=1→haut  q1=0→droite  q2=1→haut\nq3=0→droite  q4=1→haut  q5=0→droite',
+        type: 'direction',
+        sequence: [[0,-1],[1,0],[0,-1],[1,0],[0,-1],[1,0]],
+        maxScore: 6,
+      },
+    ],
+    maxScore: 14,
+  },
+  {
+    id: 3,
+    label: 'MODULE 3',
+    title: 'La Superposition — Porte H',
+    intro: 'La PORTE H (Hadamard) met le qubit dans un état SPÉCIAL :\nni 0, ni 1... les DEUX en même temps !\n\nOn appelle ça la SUPERPOSITION.\n\nMais quand on MESURE :\n  → 50% de chances d\'obtenir 0\n  → 50% de chances d\'obtenir 1\n\nC\'est comme lancer une pièce ! Dans Qiskit : qc.h(0)',
+    exercises: [
+      {
+        title: 'Exercice 1/5 — Observer la mesure',
+        code: 'qc = QuantumCircuit(1)\nqc.h(0)        # superposition !\nqc.measure_all()\n# résultat = aléatoire...',
+        type: 'random_h',
+        nb: 1,
+        maxScore: 1,
+      },
+      {
+        title: 'Exercice 2/5 — H puis X',
+        code: 'qc = QuantumCircuit(1)\nqc.h(0)   # superposition\n# mesure intermédiaire → 0\nqc.x(0)   # 0 → 1\nqc.measure_all()\n# résultat final = ?',
+        info: 'La mesure intermédiaire a donné 0.\nEnsuite on applique X (inversion).\nQuel est le résultat final ?',
+        type: 'mcq',
+        question: 'Résultat final (0 ou 1) :',
+        options: ['0', '1'],
+        correct: 1,
+        expl: 'H→mesure(0)→X : 0 inversé → 1 !',
+        then: { type: 'direction', sequence: [[0,-1]], maxScore: 1 },
+      },
+      {
+        title: 'Exercice 3/5 — Plusieurs mesures',
+        code: 'qc = QuantumCircuit(3)\nqc.h(0)   # q0 en superposition\nqc.h(1)   # q1 en superposition\nqc.h(2)   # q2 en superposition\nqc.measure_all()',
+        type: 'random_h',
+        nb: 3,
+        maxScore: 3,
+      },
+      {
+        title: 'Exercice 4/5 — Quiz superposition',
+        type: 'quiz',
+        questions: [
+          { q: 'La porte H place le qubit directement à 0. Vrai ou faux ?', opts: ['Vrai', 'Faux'], correct: 1, expl: 'FAUX ! H crée une superposition : ni 0 ni 1 avant la mesure.' },
+          { q: 'Après avoir mesuré un qubit en superposition (qc.h), quel résultat obtient-on ?', opts: ['Toujours 0', 'Toujours 1', '0 ou 1 aléatoirement'], correct: 2, expl: '0 ou 1 aléatoirement, avec 50% chacun !' },
+          { q: 'Peut-on prédire à l\'avance le résultat de qc.h(0) suivi d\'une mesure ?', opts: ['Vrai — on peut calculer', 'Faux — c\'est fondamentalement aléatoire'], correct: 1, expl: 'FAUX ! C\'est fondamentalement aléatoire.' },
+          { q: 'qc.h(0) est appliqué, puis la mesure donne 1. Dans quelle direction le robot va-t-il ?', opts: ['Droite (mesure=0)', 'Haut (mesure=1)'], correct: 1, expl: 'mesure=1 → haut !' },
+          { q: 'qc.h(0) est appliqué, puis la mesure donne 0. Dans quelle direction le robot va-t-il ?', opts: ['Droite (mesure=0)', 'Haut (mesure=1)'], correct: 0, expl: 'mesure=0 → droite !' },
+        ],
+        maxScore: 5,
+      },
+      {
+        title: 'Exercice 5/5 — Grand parcours aléatoire !',
+        code: 'qc = QuantumCircuit(6)\nqc.h(0)   # q0 en superposition\nqc.h(1)   # q1 en superposition\nqc.h(2)   # q2 en superposition\nqc.h(3)   # q3 en superposition\nqc.h(4)   # q4 en superposition\nqc.h(5)   # q5 en superposition\nqc.measure_all()',
+        type: 'random_h',
+        nb: 6,
+        maxScore: 6,
+      },
+    ],
+    maxScore: 17,
+  },
+  {
+    id: 4,
+    label: 'MODULE 4',
+    title: 'L\'Intrication — CNOT',
+    intro: 'La PORTE CNOT connecte DEUX qubits.\n  - qubit de CONTRÔLE  (ex: q0)\n  - qubit CIBLE         (ex: q1)\n\nRègle :\n  Si contrôle = 1  →  cible est INVERSÉ\n  Si contrôle = 0  →  cible reste PAREIL\n\nDans Qiskit : qc.cx(0, 1)\n  0 = qubit de contrôle / 1 = qubit cible\n\nQuand deux qubits sont liés ainsi, on dit qu\'ils sont INTRIQUÉS !',
+    exercises: [
+      {
+        title: 'Exercice 1/5 — CNOT basique',
+        code: 'qc = QuantumCircuit(2)\n# q0=0, q1=0 au départ\nqc.x(0)     # q0 : 0 → 1\nqc.cx(0,1)  # CNOT : contrôle=q0, cible=q1\n# q0=1 → q1 est inversé : 0→1\nqc.measure_all()',
+        info: 'q0 = 1 (après porte X)\nCNOT : contrôle q0=1 → q1 inversé (0→1)\nRésultat : q0=1, q1=1\nq0=1 → haut   q1=1 → haut',
+        type: 'direction',
+        sequence: [[0,-1],[0,-1]],
+        maxScore: 2,
+      },
+      {
+        title: 'Exercice 2/5 — CNOT contrôle = 0',
+        code: 'qc = QuantumCircuit(2)\n# q0=0, q1=0 au départ\n# PAS de porte X sur q0 !\nqc.cx(0,1)  # contrôle=q0=0\n# q0=0 → q1 n\'est PAS inversé\nqc.measure_all()\n# q0=0, q1=0',
+        info: 'q0 = 0 (aucune porte X)\nCNOT : contrôle q0=0 → q1 reste pareil (0)\nRésultat : q0=0, q1=0\nq0=0 → droite   q1=0 → droite',
+        type: 'direction',
+        sequence: [[1,0],[1,0]],
+        maxScore: 2,
+      },
+      {
+        title: 'Exercice 3/5 — Chaîne de CNOT',
+        code: 'qc = QuantumCircuit(3)\nqc.x(0)     # q0 : 0→1\nqc.cx(0,1)  # q0=1 → q1 inversé (0→1)\nqc.cx(1,2)  # q1=1 → q2 inversé (0→1)\nqc.measure_all()\n# q0=1, q1=1, q2=1',
+        info: '3 qubits en chaîne :\nq0=1 → q1 inversé → q1=1\nq1=1 → q2 inversé → q2=1\nTous les qubits valent 1 → tous HAUT !',
+        type: 'direction',
+        sequence: [[0,-1],[0,-1],[0,-1]],
+        maxScore: 3,
+      },
+      {
+        title: 'Exercice 4/5 — Mélange X et CNOT',
+        code: 'qc = QuantumCircuit(4)\nqc.x(0)      # q0: 0→1\nqc.cx(0,1)   # q0=1 → q1 inversé (0→1)\nqc.x(2)      # q2: 0→1\nqc.cx(2,3)   # q2=1 → q3 inversé (0→1)\n# résultat: q0=1,q1=1,q2=1,q3=1',
+        info: 'Calcule l\'état de chaque qubit !\nTous ont été inversés par X ou CNOT → tous HAUT.',
+        type: 'direction',
+        sequence: [[0,-1],[0,-1],[0,-1],[0,-1]],
+        maxScore: 4,
+      },
+      {
+        title: 'Exercice 5/5 — Grand parcours CNOT !',
+        code: 'qc = QuantumCircuit(6)\nqc.x(0)       # q0: 0→1\nqc.cx(0,1)    # q1: 0→1 (car q0=1)\n              # q2: reste 0 (pas touché)\nqc.x(3)       # q3: 0→1\nqc.cx(3,4)    # q4: 0→1 (car q3=1)\n              # q5: reste 0 (pas touché)\n# q0=1,q1=1,q2=0,q3=1,q4=1,q5=0',
+        info: '6 mouvements — calcule chaque qubit !\nq0=1→haut  q1=1→haut  q2=0→droite\nq3=1→haut  q4=1→haut  q5=0→droite',
+        type: 'direction',
+        sequence: [[0,-1],[0,-1],[1,0],[0,-1],[0,-1],[1,0]],
+        maxScore: 6,
+      },
+    ],
+    maxScore: 17,
+  },
+  {
+    id: 5,
+    label: 'MODULE 5',
+    title: 'Circuits Complets',
+    intro: 'Tu connais maintenant :\n\n  ✓ Le qubit (0 ou 1)\n  ✓ La porte X (inversion)\n  ✓ La porte H (superposition)\n  ✓ La porte CNOT (intrication)\n\nDans ce module, les circuits combinent tout !\nLis chaque ligne, calcule étape par étape.',
+    exercises: [
+      {
+        title: 'Exercice 1/4 — X + CNOT + mesure',
+        code: 'qc = QuantumCircuit(2)\nqc.x(0)       # q0: 0→1\nqc.cx(0,1)    # q1 inversé car q0=1 : 0→1\nqc.x(0)       # q0: 1→0 (re-inversé !)\nqc.measure_all()\n# q0=?, q1=?',
+        info: 'Calcule étape par étape :\n  q0: 0 → X → 1 → CNOT(contrôle) → X → 0\n  q1: 0 → CNOT(q0=1 au moment du CNOT) → 1\nRésultat : q0=0 → droite   q1=1 → haut',
+        type: 'direction',
+        sequence: [[1,0],[0,-1]],
+        maxScore: 2,
+      },
+      {
+        title: 'Exercice 2/4 — H + X + CNOT',
+        code: 'qc = QuantumCircuit(2)\nqc.h(0)       # q0 en superposition\n# mesure intermédiaire q0 = ALÉATOIRE\nqc.cx(0,1)    # q1 inversé si q0=1\nqc.measure_all()',
+        type: 'cnot_random',
+        maxScore: 2,
+      },
+      {
+        title: 'Exercice 3/4 — Circuit mystère !',
+        code: 'qc = QuantumCircuit(4)\nqc.x(0)       # ?\nqc.x(0)       # ?\nqc.x(1)       # ?\nqc.cx(1,2)    # ?\nqc.h(3)       # ?\n# mesure q3 = 0\nqc.measure_all()',
+        info: 'Calcule chaque qubit :\n  q0 : X puis X → s\'annulent → q0=0 → droite\n  q1 : X → q1=1 → haut\n  q2 : CNOT(q1=1) → inversé → q2=1 → haut\n  q3 : H puis mesure=0 → droite',
+        type: 'direction',
+        sequence: [[1,0],[0,-1],[0,-1],[1,0]],
+        maxScore: 4,
+      },
+      {
+        title: 'Exercice 4/4 — GRAND FINAL !',
+        code: 'qc = QuantumCircuit(6)\nqc.x(0)       # q0: 0→1\nqc.cx(0,1)    # q1: inversé car q0=1\nqc.h(2)       # q2: superposition\n# mesure q2 = ALÉATOIRE\nqc.x(3)       # q3: 0→1\nqc.x(3)       # q3: 1→0 (annulé)\nqc.h(4)       # q4: superposition\n# mesure q4 = ALÉATOIRE\nqc.cx(0,5)    # q5: inversé car q0=1\nqc.measure_all()',
+        type: 'grand_final',
+        maxScore: 6,
+      },
+    ],
+    maxScore: 14,
+  },
+];
+
+// ══════════════════════════════════════════════
+//  SCREEN SWITCHES
+// ══════════════════════════════════════════════
+function showTitle() {
+  document.getElementById('screen-title').style.display = 'flex';
+  document.getElementById('screen-menu').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-final').style.display = 'none';
+}
+
+function showMenu() {
+  document.getElementById('screen-title').style.display = 'none';
+  document.getElementById('screen-menu').style.display = 'block';
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-final').style.display = 'none';
+  renderMenu();
+}
+
+function showGame() {
+  document.getElementById('screen-title').style.display = 'none';
+  document.getElementById('screen-menu').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'block';
+  document.getElementById('screen-final').style.display = 'none';
+}
+
+function showFinal() {
+  document.getElementById('screen-title').style.display = 'none';
+  document.getElementById('screen-menu').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-final').style.display = 'block';
+  renderFinal();
+}
+
+function restartGame() {
+  state.scores = {};
+  showMenu();
+}
+
+// ══════════════════════════════════════════════
+//  MENU
+// ══════════════════════════════════════════════
+function renderMenu() {
+  const el = document.getElementById('module-list');
+  el.innerHTML = MODULES.map(m => {
+    const s = state.scores[m.id];
+    const done = s !== undefined;
+    return `<div class="module-card ${done ? 'done' : ''}" onclick="startModule(${m.id})">
+      <div class="module-num">${m.id}</div>
+      <div class="module-info">
+        <div class="module-title">${m.label} — ${m.title}</div>
+        <div class="module-sub">${m.exercises.length} exercices</div>
+      </div>
+      <div class="module-score">${done ? s + ' pts' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  GRID
+// ══════════════════════════════════════════════
+function renderGrid(robot, goal, traces) {
+  let html = '<div class="grid-container">';
+  for (let y = 0; y < 6; y++) {
+    for (let x = 0; x < 6; x++) {
+      const isRobot = robot[0]===x && robot[1]===y;
+      const isGoal = goal[0]===x && goal[1]===y;
+      const isTrail = traces && traces.has(`${x},${y}`);
+      let cls = 'cell';
+      let txt = '';
+      if (isRobot) { cls += ' robot'; txt = 'R'; }
+      else if (isGoal) { cls += ' goal'; txt = 'G'; }
+      else if (isTrail) { cls += ' trail'; txt = '·'; }
+      html += `<div class="${cls}">${txt}</div>`;
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+function gridPanel(robot, goal, traces) {
+  return `<div class="grid-panel">
+    ${renderGrid(robot, goal, traces)}
+    <div class="grid-legend">
+      <div class="legend-item"><div class="legend-dot r"></div>Robot</div>
+      <div class="legend-item"><div class="legend-dot g"></div>Goal</div>
+      <div class="legend-item"><div class="legend-dot t"></div>Chemin</div>
+    </div>
+    <div class="pos-info">Robot : <span>(${robot[0]},${robot[1]})</span> &nbsp; Goal : <span>(${goal[0]},${goal[1]})</span></div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  MODULE START
+// ══════════════════════════════════════════════
+let moduleSessionScore = 0;
+
+function startModule(id) {
+  const mod = MODULES.find(m => m.id === id);
+  state.currentModule = mod;
+  state.currentExIndex = -1; // -1 = intro
+  state.robot = [0, 5];
+  state.goal = [5, 0];
+  state.traces = new Set();
+  moduleSessionScore = 0;
+
+  showGame();
+  document.getElementById('game-title').textContent = `${mod.label} — ${mod.title}`;
+  updateProgress(0, mod.exercises.length + 1);
+  renderIntro(mod);
+}
+
+function renderIntro(mod) {
+  const gc = document.getElementById('game-content');
+  document.getElementById('exercise-badge').textContent = 'Intro';
+  document.getElementById('score-dots').innerHTML = '';
+  document.getElementById('score-label').textContent = '0 pts';
+
+  gc.innerHTML = `
+    <div style="max-width:680px; margin:0 auto">
+      <div class="intro-box">
+        <div class="intro-title">⬡ ${mod.label} — ${mod.title}</div>
+        <div style="white-space:pre-line">${mod.intro}</div>
+      </div>
+      <div style="display:flex; justify-content:center; margin-top:20px">
+        <button class="btn btn-green" onclick="nextExercise()">▶ COMMENCER</button>
+      </div>
+    </div>
+  `;
+}
+
+function nextExercise() {
+  state.currentExIndex++;
+  const mod = state.currentModule;
+
+  if (state.currentExIndex >= mod.exercises.length) {
+    // Module done
+    state.scores[mod.id] = moduleSessionScore;
+    const allDone = MODULES.every(m => state.scores[m.id] !== undefined);
+    if (allDone) showFinal();
+    else showMenu();
+    return;
+  }
+
+  updateProgress(state.currentExIndex + 1, mod.exercises.length + 1);
+  renderExercise(mod.exercises[state.currentExIndex]);
+}
+
+function updateProgress(current, total) {
+  const pct = (current / total) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════
+//  EXERCISE RENDERER
+// ══════════════════════════════════════════════
+let dirSequenceIndex = 0;
+let dirSequence = [];
+let dirMaxScore = 0;
+let dirScore = 0;
+let dirDots = [];
+let quizIndex = 0;
+let quizScore = 0;
+let pendingThen = null;
+
+function renderExercise(ex) {
+  const mod = state.currentModule;
+  const exNum = state.currentExIndex + 1;
+  document.getElementById('exercise-badge').textContent = `Ex ${exNum}/${mod.exercises.length}`;
+
+  if (ex.type === 'direction') {
+    state.robot = [0, 5];
+    state.traces = new Set();
+    startDirectionSequence(ex.sequence, ex.maxScore, ex.code, ex.info, null);
+  } else if (ex.type === 'random_h') {
+    state.robot = [0, 5];
+    state.traces = new Set();
+    startRandomH(ex);
+  } else if (ex.type === 'cnot_random') {
+    state.robot = [0, 5];
+    state.traces = new Set();
+    startCnotRandom(ex);
+  } else if (ex.type === 'grand_final') {
+    state.robot = [0, 5];
+    state.traces = new Set();
+    startGrandFinal(ex);
+  } else if (ex.type === 'mcq') {
+    state.robot = [0, 5];
+    state.traces = new Set();
+    renderMCQ(ex);
+  } else if (ex.type === 'quiz') {
+    quizIndex = 0;
+    quizScore = 0;
+    renderQuizQuestion(ex.questions, ex.maxScore);
+  }
+}
+
+// ── DIRECTION SEQUENCE ──────────────────────────────────
+function startDirectionSequence(seq, max, code, info, then) {
+  dirSequenceIndex = 0;
+  dirSequence = seq;
+  dirMaxScore = max;
+  dirScore = 0;
+  dirDots = new Array(max).fill('pending');
+  pendingThen = then;
+  renderDirectionStep(code, info);
+}
+
+function renderDirectionStep(code, info) {
+  const gc = document.getElementById('game-content');
+  const step = dirSequenceIndex;
+  const total = dirSequence.length;
+
+  let infoHtml = info ? `<div class="info-box">${info}</div>` : '';
+  let codeHtml = code ? `<div class="code-block"><div class="code-label">◈ Code Qiskit</div><pre>${code}</pre></div>` : '';
+
+  updateScoreDisplay();
+
+  gc.innerHTML = `
+    <div class="game-layout">
+      ${gridPanel(state.robot, state.goal, state.traces)}
+      <div class="right-panel">
+        ${codeHtml}
+        ${infoHtml}
+        <div class="feedback" id="feedback"></div>
+        <div class="input-area">
+          <div class="input-label">Mouvement <span>${step+1}/${total}</span> — Quelle direction ?</div>
+          <div class="dir-pad">
+            <button class="dir-btn" data-dir="haut" onclick="submitDir('haut')">↑</button>
+            <button class="dir-btn" data-dir="gauche" onclick="submitDir('gauche')">←</button>
+            <button class="dir-btn" data-dir="droite" onclick="submitDir('droite')">→</button>
+            <button class="dir-btn" data-dir="bas" onclick="submitDir('bas')">↓</button>
+          </div>
+          <div class="key-hint">Touches clavier : <kbd>↑</kbd> <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function submitDir(dir) {
+  const map = { droite:[1,0], gauche:[-1,0], haut:[0,-1], bas:[0,1] };
+  const delta = map[dir];
+  const expected = dirSequence[dirSequenceIndex];
+  const correct = delta[0]===expected[0] && delta[1]===expected[1];
+
+  const fb = document.getElementById('feedback');
+  const dirs_name = { '1,0':'droite', '-1,0':'gauche', '0,-1':'haut', '0,1':'bas' };
+  const expName = dirs_name[expected.join(',')];
+
+  if (correct) {
+    fb.className = 'feedback success';
+    fb.textContent = `✓ Correct ! ${expName.toUpperCase()}`;
+    dirScore++;
+    dirDots[dirSequenceIndex] = 'hit';
+  } else {
+    fb.className = 'feedback error';
+    const hintKey = getHintKey();
+    const hasHint = hintKey && EXERCISE_HINTS[hintKey];
+    fb.innerHTML = `✗ C'était ${expName.toUpperCase()}` +
+      (hasHint ? ` <button class="hint-trigger" onclick="showHint()">💡 Pourquoi ?</button>` : '');
+    dirDots[dirSequenceIndex] = 'miss';
+  }
+
+  // Move robot regardless
+  state.traces.add(`${state.robot[0]},${state.robot[1]}`);
+  const nx = Math.max(0, Math.min(5, state.robot[0] + expected[0]));
+  const ny = Math.max(0, Math.min(5, state.robot[1] + expected[1]));
+  state.robot = [nx, ny];
+
+  // Refresh grid
+  document.querySelector('.grid-panel').outerHTML;
+  const gridArea = document.querySelector('.grid-panel');
+  if (gridArea) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = gridPanel(state.robot, state.goal, state.traces);
+    gridArea.replaceWith(tmp.firstElementChild);
+  }
+
+  updateScoreDisplay();
+  disableDirPad();
+
+  dirSequenceIndex++;
+
+  setTimeout(() => {
+    if (dirSequenceIndex >= dirSequence.length) {
+      moduleSessionScore += dirScore;
+      if (pendingThen) {
+        const then = pendingThen;
+        pendingThen = null;
+        state.robot = [0, 5];
+        state.traces = new Set();
+        startDirectionSequence(then.sequence, then.maxScore, null, null, null);
+      } else {
+        showContinueBtn(() => nextExercise());
+      }
+    } else {
+      renderDirectionStep(null, null);
+      // keep previous code/info? Re-render with same
+      const ex = state.currentModule.exercises[state.currentExIndex];
+      renderDirectionStep(ex.code || null, ex.info || null);
+    }
+  }, 800);
+}
+
+function disableDirPad() {
+  document.querySelectorAll('.dir-btn').forEach(b => b.disabled = true);
+}
+
+// ── MCQ ──────────────────────────────────────
+function renderMCQ(ex) {
+  const gc = document.getElementById('game-content');
+  let codeHtml = ex.code ? `<div class="code-block"><div class="code-label">◈ Code Qiskit</div><pre>${ex.code}</pre></div>` : '';
+  let infoHtml = ex.info ? `<div class="info-box">${ex.info}</div>` : '';
+
+  gc.innerHTML = `
+    <div class="game-layout">
+      ${gridPanel(state.robot, state.goal, state.traces)}
+      <div class="right-panel">
+        ${codeHtml}
+        ${infoHtml}
+        <div class="input-area">
+          <div class="input-label">${ex.question}</div>
+          <div class="mcq-options" id="mcq-opts">
+            ${ex.options.map((o,i) => `<button class="mcq-btn" onclick="submitMCQ(${i})">${o}</button>`).join('')}
+          </div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+  `;
+}
+
+function submitMCQ(idx) {
+  const ex = state.currentModule.exercises[state.currentExIndex];
+  const btns = document.querySelectorAll('.mcq-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+
+  if (idx === ex.correct) {
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback success';
+    fb.textContent = `✓ ${ex.expl || 'Correct !'}`;
+    moduleSessionScore += 1;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[ex.correct].classList.add('correct');
+    fb.className = 'feedback error';
+    const hintKey = getHintKey();
+    const hasHint = hintKey && EXERCISE_HINTS[hintKey];
+    fb.innerHTML = `✗ ${ex.expl || 'Réessaie !'}` +
+      (hasHint ? ` <button class="hint-trigger" onclick="showHint()">💡 En savoir plus</button>` : '');
+  }
+
+  setTimeout(() => {
+    if (ex.then) {
+      state.robot = [0, 5];
+      state.traces = new Set();
+      startDirectionSequence(ex.then.sequence, ex.then.maxScore, null, null, null);
+    } else {
+      nextExercise();
+    }
+  }, 1000);
+}
+
+// ── QUIZ ──────────────────────────────────────
+function renderQuizQuestion(questions, maxScore) {
+  const gc = document.getElementById('game-content');
+  const q = questions[quizIndex];
+
+  gc.innerHTML = `
+    <div style="max-width:600px; margin:0 auto">
+      <div class="info-box" style="font-size:0.95rem; font-weight:600">
+        Question ${quizIndex+1}/${questions.length}\n\n${q.q}
+      </div>
+      <div class="mcq-options" id="quiz-opts" style="margin-top:12px">
+        ${q.opts.map((o,i) => `<button class="mcq-btn" onclick="submitQuiz(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback" style="margin-top:12px"></div>
+    </div>
+  `;
+  updateScoreDisplay();
+}
+
+function submitQuiz(idx) {
+  const ex = state.currentModule.exercises[state.currentExIndex];
+  const questions = ex.questions;
+  const q = questions[quizIndex];
+  const btns = document.querySelectorAll('#quiz-opts .mcq-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+
+  if (idx === q.correct) {
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback success';
+    fb.textContent = `✓ ${q.expl}`;
+    quizScore++;
+    moduleSessionScore++;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback error';
+    const hintKey = getHintKey();
+    const hasHint = hintKey && EXERCISE_HINTS[hintKey];
+    fb.innerHTML = `✗ ${q.expl}` +
+      (hasHint ? ` <button class="hint-trigger" onclick="showHint()">💡 En savoir plus</button>` : '');
+  }
+
+  quizIndex++;
+  setTimeout(() => {
+    if (quizIndex < questions.length) {
+      renderQuizQuestion(questions, ex.maxScore);
+    } else {
+      showContinueBtn(() => nextExercise());
+    }
+  }, 1200);
+}
+
+// ── RANDOM H ──────────────────────────────────
+function startRandomH(ex) {
+  const mesures = Array.from({length: ex.nb}, () => Math.random() < 0.5 ? 0 : 1);
+  const sequence = mesures.map(m => m === 0 ? [1,0] : [0,-1]);
+
+  let measInfo = mesures.map((m,i) => `  q${i} mesuré = ${m}  (${m===0?'droite':'haut'})`).join('\n');
+  const info = `Résultats de la mesure quantique (aléatoires !) :\n${measInfo}`;
+
+  dirSequenceIndex = 0;
+  dirSequence = sequence;
+  dirMaxScore = ex.nb;
+  dirScore = 0;
+  dirDots = new Array(ex.nb).fill('pending');
+  pendingThen = null;
+
+  const gc = document.getElementById('game-content');
+  let codeHtml = ex.code ? `<div class="code-block"><div class="code-label">◈ Code Qiskit</div><pre>${ex.code}</pre></div>` : '';
+
+  updateScoreDisplay();
+  gc.innerHTML = `
+    <div class="game-layout">
+      ${gridPanel(state.robot, state.goal, state.traces)}
+      <div class="right-panel">
+        ${codeHtml}
+        <div class="info-box" style="font-family:'Share Tech Mono',monospace; font-size:0.82rem">${info}</div>
+        <div class="feedback" id="feedback"></div>
+        <div class="input-area">
+          <div class="input-label">Mouvement <span>1/${ex.nb}</span> — Quelle direction ?</div>
+          <div class="dir-pad">
+            <button class="dir-btn" data-dir="haut" onclick="submitDir('haut')">↑</button>
+            <button class="dir-btn" data-dir="gauche" onclick="submitDir('gauche')">←</button>
+            <button class="dir-btn" data-dir="droite" onclick="submitDir('droite')">→</button>
+            <button class="dir-btn" data-dir="bas" onclick="submitDir('bas')">↓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Override submitDir to use this context
+  // already handled — dirSequence is set
+}
+
+// ── CNOT RANDOM ──────────────────────────────────
+function startCnotRandom(ex) {
+  const q0 = Math.random() < 0.5 ? 0 : 1;
+  const q1 = q0; // CNOT: q1 = q0 (si q0=1, q1 inversé 0→1)
+  const sequence = [q0===0?[1,0]:[0,-1], q1===0?[1,0]:[0,-1]];
+  const info = `q0 mesuré après H = ${q0}\nCNOT : q0=${q0} → q1 ${q0===1?'inversé (0→1)':'inchangé (reste 0)'}\nq1 final = ${q1}\nq0=${q0} → ${q0===0?'droite':'haut'}   q1=${q1} → ${q1===0?'droite':'haut'}`;
+
+  dirSequenceIndex = 0;
+  dirSequence = sequence;
+  dirMaxScore = 2;
+  dirScore = 0;
+  dirDots = [,'pending','pending'];
+  pendingThen = null;
+
+  const gc = document.getElementById('game-content');
+  let codeHtml = `<div class="code-block"><div class="code-label">◈ Code Qiskit</div><pre>${ex.code}</pre></div>`;
+
+  updateScoreDisplay();
+  gc.innerHTML = `
+    <div class="game-layout">
+      ${gridPanel(state.robot, state.goal, state.traces)}
+      <div class="right-panel">
+        ${codeHtml}
+        <div class="info-box" style="font-family:'Share Tech Mono',monospace; font-size:0.82rem">${info}</div>
+        <div class="feedback" id="feedback"></div>
+        <div class="input-area">
+          <div class="input-label">Mouvement <span>1/2</span> — Quelle direction ?</div>
+          <div class="dir-pad">
+            <button class="dir-btn" data-dir="haut" onclick="submitDir('haut')">↑</button>
+            <button class="dir-btn" data-dir="gauche" onclick="submitDir('gauche')">←</button>
+            <button class="dir-btn" data-dir="droite" onclick="submitDir('droite')">→</button>
+            <button class="dir-btn" data-dir="bas" onclick="submitDir('bas')">↓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── GRAND FINAL ──────────────────────────────────
+function startGrandFinal(ex) {
+  const q2 = Math.random() < 0.5 ? 0 : 1;
+  const q4 = Math.random() < 0.5 ? 0 : 1;
+  const etats = [1, 1, q2, 0, q4, 1];
+  const sequence = etats.map(e => e===1 ? [0,-1] : [1,0]);
+  const info = `Résumé des états finaux :\n  q0=1(X)  q1=1(CNOT)  q2=${q2}(H)  q3=0(XX)  q4=${q4}(H)  q5=1(CNOT)\n\nMesures aléatoires : q2=${q2}  q4=${q4}\n6 mouvements à enchaîner !`;
+
+  dirSequenceIndex = 0;
+  dirSequence = sequence;
+  dirMaxScore = 6;
+  dirScore = 0;
+  dirDots = new Array(6).fill('pending');
+  pendingThen = null;
+
+  const gc = document.getElementById('game-content');
+  let codeHtml = `<div class="code-block"><div class="code-label">◈ Code Qiskit</div><pre>${ex.code}</pre></div>`;
+
+  updateScoreDisplay();
+  gc.innerHTML = `
+    <div class="game-layout">
+      ${gridPanel(state.robot, state.goal, state.traces)}
+      <div class="right-panel">
+        ${codeHtml}
+        <div class="info-box" style="font-family:'Share Tech Mono',monospace; font-size:0.78rem">${info}</div>
+        <div class="feedback" id="feedback"></div>
+        <div class="input-area">
+          <div class="input-label">Mouvement <span>1/6</span> — Quelle direction ?</div>
+          <div class="dir-pad">
+            <button class="dir-btn" data-dir="haut" onclick="submitDir('haut')">↑</button>
+            <button class="dir-btn" data-dir="gauche" onclick="submitDir('gauche')">←</button>
+            <button class="dir-btn" data-dir="droite" onclick="submitDir('droite')">→</button>
+            <button class="dir-btn" data-dir="bas" onclick="submitDir('bas')">↓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── CONTINUE BUTTON ──────────────────────────────────
+function showContinueBtn(cb) {
+  const gc = document.getElementById('game-content');
+  const div = document.createElement('div');
+  div.style.display = 'flex';
+  div.style.justifyContent = 'center';
+  div.style.marginTop = '20px';
+  div.innerHTML = `<button class="continue-btn">CONTINUER ▶</button>`;
+  div.querySelector('button').onclick = cb;
+  gc.appendChild(div);
+}
+
+// ── SCORE DISPLAY ──────────────────────────────────
+function updateScoreDisplay() {
+  document.getElementById('score-label').textContent = `${moduleSessionScore} pts`;
+  const dots = document.getElementById('score-dots');
+  if (dirDots && dirDots.length) {
+    dots.innerHTML = dirDots.filter(Boolean).map(d =>
+      `<div class="score-dot ${d === 'hit' ? 'hit' : d === 'miss' ? 'miss' : ''}"></div>`
+    ).join('');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  FINAL SCREEN
+// ══════════════════════════════════════════════
+function renderFinal() {
+  let total = 0;
+  const rows = MODULES.map(m => {
+    const s = state.scores[m.id] || 0;
+    total += s;
+    return `<div class="score-row"><span>${m.label} — ${m.title}</span><span class="s">${s} pts</span></div>`;
+  }).join('');
+  document.getElementById('total-score').textContent = total;
+  document.getElementById('score-table').innerHTML = rows;
+}
+
+// ══════════════════════════════════════════════
+//  KEYBOARD
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (document.getElementById('screen-game').style.display !== 'block') return;
+  const map = { ArrowUp:'haut', ArrowDown:'bas', ArrowLeft:'gauche', ArrowRight:'droite' };
+  const dir = map[e.key];
+  if (dir) {
+    e.preventDefault();
+    const btn = document.querySelector(`.dir-btn[data-dir="${dir}"]:not(:disabled)`);
+    if (btn) btn.click();
+  }
+});
+
+// ══════════════════════════════════════════════
+//  HINTS — tirées des vraies questions posées
+// ══════════════════════════════════════════════
+const HINTS = {
+  // clé : "moduleId-exIndex" ou thème générique
+  'qubit_base': {
+    title: '💡 Le qubit — base',
+    body: `Un qubit, c'est comme un interrupteur : il vaut <span class="hl">0</span> ou <span class="hl">1</span>.
+
+Par défaut en Qiskit, tout qubit démarre à <span class="hlg">0</span>.
+
+Convention du jeu (toujours la même) :
+  <span class="hly">0  →  DROITE  →  déplacement (1, 0)</span>
+  <span class="hly">1  →  HAUT    →  déplacement (0, -1)</span>
+
+Cette règle ne change jamais. Le circuit fait ce qu'il fait,
+tu mesures, tu obtiens 0 ou 1, tu appliques la règle. C'est tout.`,
+  },
+
+  'initialize': {
+    title: '💡 initialize([A, B]) — comment ça marche ?',
+    body: `<span class="hlm">initialize([A, B])</span> force l'état de départ du qubit.
+
+Le vecteur [A, B] se lit :
+  [<span class="hl">chance d'être 0</span>,  <span class="hl">chance d'être 1</span>]
+
+  <span class="hly">[1, 0]</span>  →  100% chance d'être 0  →  qubit = <span class="hlg">0</span>
+  <span class="hly">[0, 1]</span>  →  100% chance d'être 1  →  qubit = <span class="hlg">1</span>
+
+Astuce : regarde la <span class="hl">position du 1</span> dans le vecteur :
+  [<span class="hlm">1</span>, 0]  →  le 1 est en position 0  →  qubit = 0
+  [0, <span class="hlm">1</span>]  →  le 1 est en position 1  →  qubit = 1
+
+Attention : [1, 0] ressemble au déplacement droite (1,0)
+mais ce sont deux choses COMPLÈTEMENT différentes !
+  [1, 0] vecteur = état du qubit
+  (1,  0) grille  = déplacement droite
+
+Chemin complet :
+  initialize([1, 0])  →  qubit = 0  →  droite  →  (1, 0)`,
+  },
+
+  'porte_x': {
+    title: '💡 La porte X — inverser un qubit',
+    body: `<span class="hlm">qc.x(0)</span> est un inverseur (comme NOT en logique classique).
+
+  qubit = <span class="hl">0</span>  →  X  →  <span class="hlg">1</span>
+  qubit = <span class="hl">1</span>  →  X  →  <span class="hlg">0</span>
+
+X ne connaît pas la valeur de départ — il inverse juste ce qu'il reçoit.
+
+Plusieurs X à la suite :
+  1 X  →  impair  →  qubit = <span class="hlg">1</span>
+  2 X  →  pair    →  qubit = <span class="hlg">0</span>  (s'annulent)
+  3 X  →  impair  →  qubit = <span class="hlg">1</span>
+  4 X  →  pair    →  qubit = <span class="hlg">0</span>
+
+Comme un interrupteur de lumière :
+  1 clic → allumé | 2 clics → éteint | 3 clics → allumé...
+
+X ne change pas l'état de départ ni la convention du jeu.
+Il modifie juste le <span class="hl">trajet</span> entre le départ et le résultat.`,
+  },
+
+  'qubits_independants': {
+    title: '💡 Les qubits sont indépendants (sans CNOT)',
+    body: `Dans un circuit sans CNOT, chaque qubit a sa propre équation.
+
+  q0  →  sa propre équation  →  son propre résultat
+  q1  →  sa propre équation  →  son propre résultat
+  q2  →  sa propre équation  →  son propre résultat
+
+Chacun démarre à <span class="hlg">0</span>, chacun a ses propres portes,
+chacun donne son propre résultat. Ils ne se "connaissent" pas.
+
+Exemple :
+  <span class="hly">qc.x(1)  # seulement q1 est inversé</span>
+  <span class="hly">qc.x(3)  # seulement q3 est inversé</span>
+
+  q0 → pas de X → reste 0 → <span class="hlg">droite</span>
+  q1 → X        → devient 1 → <span class="hlg">haut</span>
+  q2 → pas de X → reste 0 → <span class="hlg">droite</span>
+  q3 → X        → devient 1 → <span class="hlg">haut</span>
+
+Si un qubit n'apparaît pas dans le code, il reste à 0.
+
+C'est CNOT qui brise cette indépendance (module 4) !`,
+  },
+
+  'porte_h': {
+    title: '💡 La porte H — superposition',
+    body: `<span class="hlm">qc.h(0)</span> (Hadamard) met le qubit dans un état spécial :
+ni 0, ni 1... les DEUX en même temps → c'est la <span class="hl">superposition</span>.
+
+Mais quand on MESURE, il doit choisir :
+  → 50% de chances d'obtenir <span class="hlg">0</span>  → droite
+  → 50% de chances d'obtenir <span class="hlg">1</span>  → haut
+
+C'est comme lancer une pièce — fondamentalement aléatoire.
+<span class="hlm">On ne peut pas prédire le résultat !</span>
+
+Le résultat dépend de la mesure simulée affichée dans le panneau.
+Lis la mesure, applique la convention du jeu.
+
+H + X ensuite :
+  H → mesure donne 0 → X inverse → qubit final = 1 → haut`,
+  },
+
+  'cnot': {
+    title: '💡 La porte CNOT — intrication',
+    body: `<span class="hlm">qc.cx(contrôle, cible)</span> connecte deux qubits.
+
+Règle :
+  contrôle = <span class="hlg">1</span>  →  cible est <span class="hl">INVERSÉE</span>
+  contrôle = <span class="hlg">0</span>  →  cible <span class="hl">reste pareille</span>
+
+Exemple :
+  q0 = 1 (après X)
+  qc.cx(0, 1)  →  q1 inversé : 0→1
+
+  q0 = 0 (aucun X)
+  qc.cx(0, 1)  →  q1 reste à 0
+
+Chaîne de CNOT :
+  q0=1 → cx(0,1) → q1 devient 1 → cx(1,2) → q2 devient 1
+
+C'est l'<span class="hlm">intrication</span> : les qubits ne sont plus indépendants.`,
+  },
+};
+
+// Associe chaque exercice à un hint pertinent
+const EXERCISE_HINTS = {
+  '1-0': 'qubit_base',       // M1 Ex1 : qubit=0
+  '1-1': 'qubit_base',       // M1 Ex2 : qubit=1
+  '1-2': 'qubit_base',       // M1 Ex3 : séquence
+  '1-3': 'initialize',       // M1 Ex4 : initialize([1,0])
+  '1-4': 'qubit_base',       // M1 Ex5 : quiz
+  '2-0': 'porte_x',
+  '2-1': 'porte_x',
+  '2-2': 'qubits_independants',
+  '2-3': 'porte_x',
+  '2-4': 'porte_x',
+  '3-0': 'porte_h',
+  '3-1': 'porte_h',
+  '3-2': 'porte_h',
+  '3-3': 'porte_h',
+  '3-4': 'porte_h',
+  '4-0': 'cnot',
+  '4-1': 'cnot',
+  '4-2': 'cnot',
+  '4-3': 'cnot',
+  '4-4': 'cnot',
+  '5-0': 'porte_x',
+  '5-1': 'cnot',
+  '5-2': 'cnot',
+  '5-3': 'cnot',
+};
+
+function getHintKey() {
+  const mod = state.currentModule;
+  if (!mod) return null;
+  return `${mod.id}-${state.currentExIndex}`;
+}
+
+function showHint() {
+  const key = getHintKey();
+  const hintId = EXERCISE_HINTS[key];
+  const hint = hintId ? HINTS[hintId] : null;
+  if (!hint) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'hint-overlay';
+  overlay.id = 'hint-overlay';
+  overlay.innerHTML = `
+    <div class="hint-panel">
+      <div class="hint-header">⬡ ${hint.title}</div>
+      <div class="hint-body">${hint.body}</div>
+      <div class="hint-close">
+        <button class="hint-btn" onclick="closeHint()">J'ai compris ✓</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeHint(); });
+}
+
+function closeHint() {
+  const o = document.getElementById('hint-overlay');
+  if (o) o.remove();
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+showTitle();
+</script>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · neurochirurgie</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe2;--bg3:#e8dfd0;
+  --ink:#1a1814;--ink2:#6b6760;--ink3:#b5b2ac;
+  --sage:#7a9e87;--blush:#e8a598;--amber:#c8a870;--lav:#a89ec8;
+  --line:rgba(26,24,20,0.08);
+}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#s-home{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:0;}
+.home-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.home-title{font-family:'DM Mono',monospace;font-size:42px;font-weight:300;color:var(--ink);margin-bottom:4px;}
+.home-sub{font-size:13px;color:var(--ink2);margin-bottom:2rem;font-weight:300;text-align:center;max-width:440px;line-height:1.6;}
+.chap-list{max-width:520px;width:100%;display:flex;flex-direction:column;}
+.chap-section{margin-bottom:1.5rem;}
+.chap-section-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.chap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:opacity 0.12s;}
+.chap-row:last-child{border-bottom:none;}
+.chap-row:hover{opacity:0.5;}
+.chap-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);min-width:20px;}
+.chap-name{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);flex:1;}
+.chap-level{font-size:10px;color:var(--ink3);padding:1px 8px;border-radius:999px;border:1px solid var(--line);}
+.chap-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);}
+.topbar{display:flex;align-items:center;gap:10px;padding:0.7rem 1.5rem;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:50;}
+.btnback{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:none;background:none;cursor:pointer;padding:0;}
+.btnback:hover{color:var(--ink);}
+.tmod{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink2);}
+.spacer{flex:1;}
+.pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--sage);background:rgba(122,158,135,0.1);padding:3px 10px;border-radius:999px;border:1px solid rgba(122,158,135,0.2);}
+.dots-row{display:flex;gap:3px;padding:0.4rem 1.5rem;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);transition:all 0.3s;}
+.dot.done{background:var(--sage);border-color:var(--sage);}
+.dot.cur{background:var(--ink);border-color:var(--ink);transform:scale(1.3);}
+.gbody{flex:1;display:grid;grid-template-columns:1fr 280px;}
+@media(max-width:640px){.gbody{grid-template-columns:1fr;}.gright{border-left:none;border-top:1px solid var(--line);}}
+.gleft{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;border-right:1px solid var(--line);}
+.gright{padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.9rem;background:var(--bg2);}
+.ctag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;}
+.ccard{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.ccard-top{display:flex;align-items:center;gap:5px;padding:6px 11px;border-bottom:1px solid var(--line);background:var(--bg2);}
+.cdot{width:7px;height:7px;border-radius:50%;}
+.cbody{padding:0.9rem 1.1rem;font-family:'DM Mono',monospace;font-size:12px;line-height:1.95;color:var(--ink2);white-space:pre-wrap;}
+.cbody .hl{color:var(--ink);font-weight:500;}
+.cbody .cm{color:var(--ink3);font-style:italic;}
+.cbody .kw{color:var(--sage);}
+.cbody .r{color:#c85a5a;}
+.cbody .b{color:#5a7ec8;}
+.cbody .ex{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;line-height:1.7;color:var(--ink);}
+.cbody .why{display:block;background:rgba(168,158,200,0.1);border:1px solid rgba(168,158,200,0.3);border-radius:5px;padding:6px 10px;margin:4px 0;font-size:11.5px;color:#4a4470;line-height:1.6;}
+.qbadge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:inline-block;margin-bottom:6px;}
+.qbadge.open{border-color:rgba(168,158,200,0.4);color:#4a4470;background:rgba(168,158,200,0.08);}
+.qbadge.qcm{border-color:rgba(122,158,135,0.4);color:#3d6b4f;background:rgba(122,158,135,0.08);}
+.qtext{font-size:14.5px;font-weight:400;color:var(--ink);line-height:1.6;}
+.choices{display:flex;flex-direction:column;gap:5px;}
+.choice{padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;transition:all 0.11s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--ink3);background:var(--bg2);}
+.choice.ok{background:rgba(122,158,135,0.1);border-color:var(--sage);color:#3d6b4f;}
+.choice.no{background:rgba(232,165,152,0.1);border-color:var(--blush);color:#8b4a3e;}
+.choice.dim{opacity:0.3;cursor:default;}
+.open-wrap{display:flex;gap:7px;align-items:center;}
+.open-input{flex:1;font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);outline:none;}
+.open-input:focus{border-color:var(--lav);}
+.open-btn{font-family:'DM Mono',monospace;font-size:11px;padding:9px 14px;border-radius:8px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.open-btn:hover{opacity:0.75;}
+.fb{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.7;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);display:none;}
+.fb.show{display:block;}
+.fb.ok{border-color:rgba(122,158,135,0.35);color:#3d6b4f;background:rgba(122,158,135,0.07);}
+.fb.no{border-color:rgba(232,165,152,0.35);color:#8b4a3e;background:rgba(232,165,152,0.07);}
+.fb.hint{border-color:rgba(200,168,112,0.35);color:#7a5e1e;background:rgba(200,168,112,0.07);}
+.gactions{display:flex;gap:7px;align-items:center;}
+.btnext{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:7px 16px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;display:none;}
+.btnext:hover{opacity:0.75;}
+.btnext.show{display:block;}
+.btnhint{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);border:1px solid var(--line);background:none;border-radius:999px;padding:7px 12px;cursor:pointer;}
+.btnhint:hover{color:var(--ink2);}
+.glbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;align-self:flex-start;}
+.grid-outer{background:white;border:1px solid var(--line);border-radius:11px;padding:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,36px);grid-template-rows:repeat(6,36px);gap:2px;}
+.gcell{width:36px;height:36px;border-radius:5px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s;}
+.gcell.trace{background:rgba(122,158,135,0.1);}
+.gcell.trace::after{content:'·';color:var(--sage);font-size:15px;}
+.gcell.goal{background:rgba(122,158,135,0.12);}
+.gcell.robot{background:transparent;}
+.mlog{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);align-self:flex-start;min-height:14px;}
+.win{display:none;position:fixed;inset:0;background:rgba(250,248,244,0.97);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem;text-align:center;overflow-y:auto;}
+.win.show{display:flex;}
+.win-robot{font-size:36px;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.win-title{font-family:'DM Mono',monospace;font-size:14px;color:var(--ink);}
+.win-msgs{background:white;border:1px solid var(--line);border-radius:11px;padding:1rem 1.3rem;text-align:left;max-width:480px;width:100%;}
+.win-msgs-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.win-msgs ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.win-msgs li{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink2);line-height:1.6;padding-left:13px;position:relative;}
+.win-msgs li::before{content:'→';position:absolute;left:0;color:var(--sage);}
+.win-btns{display:flex;gap:7px;}
+.btn-restart{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:var(--ink);color:var(--bg);border:none;cursor:pointer;}
+.btn-restart:hover{opacity:0.75;}
+.btn-menu{font-family:'DM Mono',monospace;font-size:11px;padding:8px 18px;border-radius:999px;background:none;color:var(--ink2);border:1px solid var(--line);cursor:pointer;}
+.btn-menu:hover{border-color:var(--ink3);color:var(--ink);}
+.pt{position:fixed;pointer-events:none;border-radius:50%;animation:fup 1s ease-out forwards;z-index:999;}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-55px) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="s-home">
+  <div class="home-logo">denis · neurochirurgie</div>
+  <div class="home-title">neurochirurgie</div>
+  <div class="home-sub" style="color:var(--blush);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;margin-bottom:0.25rem;">anatomie · physiopathologie · pathologie · cas cliniques</div>
+14 chapitres · anatomie · physiopathologie · pathologie · cas cliniques<br>atome → liaisons → thermo → équilibres → cinétique → solutions → redox → gaz → nucléaire → stœchiométrie</div>
+  <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink3);max-width:520px;width:100%;text-align:center;padding:6px 0;border:1px solid var(--line);border-radius:6px;margin-bottom:0.25rem;">
+  ⚕ contenu éducatif uniquement · ne remplace pas la formation médicale
+</div>
+<div class="chap-list" id="chap-list"></div>
+</div>
+
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <button class="btnback" onclick="goHome()">← chimie</button>
+    <span style="color:var(--ink3);font-size:12px;">/</span>
+    <span class="tmod" id="g-title"></span>
+    <div class="spacer"></div>
+    <span class="pts" id="g-pts">0 pts</span>
+  </div>
+  <div class="dots-row" id="dots-row"></div>
+  <div class="gbody">
+    <div class="gleft">
+      <div class="ctag" id="g-ctag"></div>
+      <div class="ccard">
+        <div class="ccard-top">
+          <div class="cdot" style="background:#e8a598"></div>
+          <div class="cdot" style="background:#e8d498"></div>
+          <div class="cdot" style="background:#a8c8a0"></div>
+        </div>
+        <div class="cbody" id="g-concept"></div>
+      </div>
+      <div>
+        <div class="qbadge" id="g-qbadge"></div>
+        <div class="qtext" id="g-q"></div>
+      </div>
+      <div class="choices" id="g-choices"></div>
+      <div class="open-wrap" id="g-open" style="display:none;">
+        <input class="open-input" id="g-input" placeholder="tape ta réponse..." onkeydown="if(event.key==='Enter')checkOpen()">
+        <button class="open-btn" onclick="checkOpen()">→</button>
+      </div>
+      <div class="fb" id="g-fb"></div>
+      <div class="gactions">
+        <button class="btnhint" onclick="doHint()">? indice</button>
+        <button class="btnext" id="g-next" onclick="nextQ()">suivant →</button>
+      </div>
+    </div>
+    <div class="gright">
+      <div class="glbl">progression</div>
+      <div class="grid-outer"><div class="grid" id="grid"></div></div>
+      <div class="mlog" id="g-mlog">en attente...</div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-robot">🤖</div>
+  <div class="win-title" id="win-title"></div>
+  <div class="win-msgs">
+    <div class="win-msgs-lbl">take_home_messages[]</div>
+    <ul id="win-list"></ul>
+  </div>
+  <div class="win-btns">
+    <button class="btn-restart" onclick="restartChap()">↺ recommencer</button>
+    <button class="btn-menu" onclick="goHome()">chapitres</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  NEUROCHIRURGIE : anatomie → physiopathologie → pathologies
+//  → technique → cas cliniques progressifs
+//  Du niveau introduction au niveau praticien
+// ════════════════════════════════════════════════════════════════
+
+
+const CHAPTERS = [
+
+// ── CHAPITRE 0 : orientation ─────────────────────────────────
+{
+  id:0, section:"introduction", num:0,
+  name:"orientation en neurochirurgie",
+  level:"zéro",
+  takeaway:[
+    "la neurochirurgie opère le cerveau, la moelle, les nerfs périphériques et la colonne",
+    "le crâne est une boîte rigide — toute masse supplémentaire augmente la pression",
+    "doctrine de Monro-Kellie : volume crânien = cerveau + LCR + sang (constant)",
+    "symptôme neurologique → localisation anatomique → diagnostic différentiel → décision",
+    "temps = neurones : chaque minute compte dans les urgences neurochirurgicales"
+  ],
+  questions:[
+    {c:"notion · périmètre de la neurochirurgie", type:"qcm",
+     code:`<span class="cm">// qu'opère un neurochirurgien ?</span>
+<span class="hl">encéphale</span>    : tumeurs, hématomes, anévrismes, malformations
+<span class="hl">moelle épinière</span> : tumeurs intra/extradurales, syringomyélie
+<span class="hl">rachis</span>        : hernie discale, sténose, fracture, instabilité
+<span class="hl">nerfs périphériques</span> : canal carpien, névrome, lésion traumatique
+<span class="hl">fonctionnel</span>  : DBS, épilepsie, douleur chronique, hydrocéphalie`,
+     q:"Un patient présente une compression de la queue de cheval. Quel chirurgien ?",
+     ch:["neurochirurgien — c'est de la neurochirurgie rachidienne","orthopédiste seulement","neurologue — pas de chirurgie indiquée","urgentiste"],
+     ok:0, hint:"la queue de cheval est la partie terminale du canal rachidien — neurochirurgie",
+     fb_ok:"// correct — compression queue de cheval = urgence neurochirurgicale rachidienne. Délai < 48h idéalement.",
+     fb_no:"// la queue de cheval (racines L2–S5) est du domaine neurochirurgical. C'est une urgence.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · doctrine de Monro-Kellie", type:"qcm",
+     code:`<span class="cm">// pression intracrânienne (PIC)</span>
+Volume crânien = <span class="hl">cerveau</span> (80%) + <span class="hl">LCR</span> (10%) + <span class="hl">sang</span> (10%)
+Boîte rigide → volume total <span class="hl">constant</span>
+Si une composante ↑ → les autres doivent ↓ pour compenser
+<span class="hl">PIC normale : 5–15 mmHg</span>
+PIC > 20 mmHg → HTIC (hypertension intracrânienne)
+<span class="why">// au-delà de la compensation → PIC ↑ rapidement → engagement</span>`,
+     q:"Un hématome extradural de 30 mL se forme. Quel mécanisme compensatoire initial ?",
+     ch:["vasodilatation cérébrale pour augmenter le volume","expulsion de LCR vers le sac dural spinal et compression veineuse","augmentation de la production de LCR","dilatation des ventricules"],
+     ok:1, hint:"Monro-Kellie : si le sang augmente → LCR et sang veineux doivent diminuer",
+     fb_ok:"// correct — compensation initiale : refoulement du LCR vers le canal spinal et compression des veines de compliance.",
+     fb_no:"// la compensation initiale passe par l'expulsion du LCR et la vidange des veines à paroi souple (sinusoïdes).",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 1 : anatomie chirurgicale du crâne ──────────────
+{
+  id:1, section:"anatomie", num:1,
+  name:"anatomie chirurgicale du crâne et de l'encéphale",
+  level:"débutant",
+  takeaway:[
+    "scalp : 5 couches — peau, tissu sous-cutané, galéa, espace sous-galéal, péricrâne",
+    "les artères méningées courent dans des sillons osseux — risque d'hématome extradural",
+    "l'artère méningée moyenne = principal risque lors d'un traumatisme temporal",
+    "lobes : frontal (moteur, cognitif), pariétal (sensitif), temporal (mémoire, langage), occipital (vision)",
+    "aire de Broca (F3 gauche) = expression · aire de Wernicke (T1 gauche) = compréhension"
+  ],
+  questions:[
+    {c:"notion · couches du scalp", type:"qcm",
+     code:`<span class="cm">// scalp — acronyme SCALP</span>
+<span class="hl">S</span>kin       — peau (épaisse, vascularisée)
+<span class="hl">C</span>onnective — tissu sous-cutané (vaisseaux, nerfs)
+<span class="hl">A</span>poneurosis — galéa aponévrotique
+<span class="hl">L</span>oose       — espace sous-galéal (plan de clivage chirurgical)
+<span class="hl">P</span>ericranium  — périoste externe
+<span class="why">// l'espace sous-galéal est le plan de décollement des cuirs chevelus
+// les hématomes sous-galéaux se répandent largement dans cet espace</span>`,
+     q:"L'espace sous-galéal (loose) est important en neurochirurgie car :",
+     ch:["il contient l'artère temporale superficielle","c'est le plan de clivage utilisé pour les volets crâniens et les décollements de cuir chevelu","c'est là que circule le LCR extracrânien","il est le siège des hématomes extraduraux"],
+     ok:1, hint:"'loose' = lâche = plan de glissement naturel pour le chirurgien",
+     fb_ok:"// correct — l'espace sous-galéal est le plan de clivage naturel des volets crâniens et des décollements traumatiques.",
+     fb_no:"// le plan sous-galéal (loose tissue) est le plan de clivage chirurgical des incisions de scalp.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · artère méningée moyenne", type:"qcm",
+     code:`<span class="cm">// artère méningée moyenne (AMM)</span>
+Branche de <span class="hl">l'artère maxillaire interne</span>
+Entre dans le crâne par le <span class="hl">foramen spinosum</span>
+Court dans un sillon de la <span class="hl">face interne de l'écaille temporale</span>
+Branches : <span class="hl">frontale</span> (antérieure) + <span class="hl">pariétale</span> (postérieure)
+<span class="why">// fracture temporale → rupture AMM → hématome extradural artériel
+// intervalle libre classique, puis détérioration rapide</span>`,
+     q:"Un hématome extradural temporal typique est artériel. Son origine est :",
+     ch:["sinus longitudinal supérieur","artère cérébrale moyenne","artère méningée moyenne","veine jugulaire interne"],
+     ok:2, hint:"la fracture temporale lèse l'AMM qui court dans un sillon osseux de l'écaille",
+     fb_ok:"// correct — fracture temporale → lésion AMM → HED artériel. Urgence chirurgicale absolue.",
+     fb_no:"// AMM = artère méningée moyenne. Fracture temporale → lésion AMM → HED. Intervalle libre puis aggravation.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · localisation fonctionnelle cérébrale", type:"qcm",
+     code:`<span class="cm">// lobes et fonctions principales</span>
+<span class="hl">Frontal</span>   : motricité (aire 4), planification, personnalité, Broca (F3G)
+<span class="hl">Pariétal</span>  : sensibilité (aires 3,1,2), gnose, praxie, représentation spatiale
+<span class="hl">Temporal</span>  : mémoire (hippocampe), audition, langage (Wernicke T1G)
+<span class="hl">Occipital</span> : vision (cortex strié V1, V2…)
+<span class="hl">Insula</span>    : intéroception, langage, goût
+<span class="hl">Cervelet</span>  : coordination, équilibre, adaptation motrice`,
+     q:"Un patient après résection d'une tumeur temporale gauche présente une aphasie de compréhension. L'aire lésée est :",
+     ch:["aire de Broca (F3 gauche)","aire de Wernicke (T1 gauche)","aire motrice primaire (F1 gauche)","gyrus angulaire droit"],
+     ok:1, hint:"compréhension du langage = Wernicke, lobe temporal",
+     fb_ok:"// correct — aphasie de Wernicke (réceptive) : fluent mais incompréhension. Lésion T1 gauche (aire 22).",
+     fb_no:"// aphasie de compréhension = Wernicke. Broca = expression (aphasie non fluente). T1 gauche = Wernicke.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · vascularisation cérébrale", type:"qcm",
+     code:`<span class="cm">// polygone de Willis</span>
+Artères carotides internes (ACI) → <span class="hl">ACM</span> + <span class="hl">ACA</span>
+Artères vertébrales → tronc basilaire → <span class="hl">ACP</span> + artères du tronc
+Communicantes ant. et post. = anastomoses de sécurité
+<span class="ex">ACA : lobe frontal médial, pied du pied
+ACM : capsule interne, lobe frontal/pariétal latéral, Broca/Wernicke
+ACP : lobe occipital, thalamus, tronc</span>`,
+     q:"Un AVC de l'ACM gauche proximal entraîne classiquement :",
+     ch:["hémiplégie droite à prédominance crurale + aphasie","hémiplégie droite à prédominance brachio-faciale + aphasie","hémianopsie latérale homonyme droite isolée","syndrome cérébelleux"],
+     ok:1, hint:"l'ACM irrigue le cortex moteur latéral (bras/face > jambe) et les aires du langage à gauche",
+     fb_ok:"// correct — occlusion ACM gauche : hémiplégie brachio-faciale droite + aphasie (Broca et/ou Wernicke).",
+     fb_no:"// ACM = cortex moteur latéral (face + bras >> jambe) + langage (gauche). ACA = jambe.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 2 : anatomie du rachis ─────────────────────────
+{
+  id:2, section:"anatomie", num:2,
+  name:"anatomie chirurgicale du rachis et de la moelle",
+  level:"débutant",
+  takeaway:[
+    "33 vertèbres : 7C + 12D + 5L + 5S (fusionnés) + 4–5 coccyx",
+    "moelle s'arrête en L1–L2 (cône médullaire) — en dessous : queue de cheval",
+    "racines : sensitives (postérieures) + motrices (antérieures) — loi de Bell-Magendie",
+    "myélomères ≠ niveaux vertébraux : la moelle est plus haute que la vertèbre correspondante",
+    "espace épidural cervical quasi inexistant — hernie discale cervicale peut comprimer rapidement"
+  ],
+  questions:[
+    {c:"notion · conus médullaris et queue de cheval", type:"qcm",
+     code:`<span class="cm">// fin de la moelle</span>
+La moelle se termine en <span class="hl">L1–L2</span> = cône médullaire
+En dessous : <span class="hl">queue de cheval</span> (racines L2 à S5)
+<span class="why">// importance clinique :
+// lésion moelle L1 = syndrome médullaire (moteur + sensitif + sphincters)
+// lésion L3 = syndrome queue de cheval (radiculaire, souvent incomplet)
+// IRM urgente si rétention + déficit membres inférieurs</span>`,
+     q:"Patient : hernie discale L4–L5 massive, rétention urinaire, anesthésie en selle. Quel syndrome ?",
+     ch:["syndrome de Brown-Séquard","syndrome médullaire complet","syndrome de la queue de cheval","syndrome de l'artère spinale antérieure"],
+     ok:2, hint:"hernie L4-L5 = en dessous du cône → racines → queue de cheval",
+     fb_ok:"// correct — hernie massive L4-L5 + rétention + anesthésie en selle = syndrome queue de cheval. Urgence chirurgicale.",
+     fb_no:"// L4-L5 est sous le cône médullaire (L1-L2) → racines = queue de cheval. Urgence décompressive.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · voies longues médullaires", type:"qcm",
+     code:`<span class="cm">// organisation de la moelle</span>
+<span class="hl">Cordons postérieurs</span> : proprioception + tact épicritique (ipsilatéral)
+<span class="hl">Faisceau pyramidal</span>  : motricité volontaire (croisé en haut)
+<span class="hl">Faisceau spinothalamique</span> : douleur + température (croisé dans la moelle)
+<span class="why">// Brown-Séquard : hémi-section
+// → paralysie + perte proprioception IPSILATÉRALE
+// → perte douleur/température CONTROLATÉRALE</span>`,
+     q:"Hémi-section médullaire droite en D6. Quelle association classique ?",
+     ch:["perte douleur droite + paralysie gauche","paralysie droite + perte douleur gauche + perte proprioception droite","paralysie bilatérale + anesthésie en selle","perte douleur bilatérale"],
+     ok:1, hint:"Brown-Séquard : motricité et proprioception ipsilatérales · douleur/temp controlatérale",
+     fb_ok:"// correct — Brown-Séquard D : paralysie + perte proprioception droites ; perte douleur/température gauche.",
+     fb_no:"// Brown-Séquard : voies croisées ≠ mêmes niveaux. Motricité/proprioception ipsilatérales, douleur controlatérale.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 3 : hypertension intracrânienne ─────────────────
+{
+  id:3, section:"physiopathologie", num:3,
+  name:"hypertension intracrânienne (HTIC)",
+  level:"intermédiaire",
+  takeaway:[
+    "HTIC = PIC > 20 mmHg de façon soutenue",
+    "triade de Cushing : HTA + bradycardie + bradypnée = signe terminal d'engagement",
+    "engagement temporal (uncal) : mydriase homolatérale + hémiplégie controlatérale",
+    "engagement central (amygdalien) : troubles de conscience, Cushing, mort",
+    "traitement médical HTIC : tête à 30°, osmothérapie (mannitol/SSH), hyperventilation temporaire"
+  ],
+  questions:[
+    {c:"notion · signes d'HTIC", type:"qcm",
+     code:`<span class="cm">// HTIC — symptômes</span>
+<span class="hl">Céphalées</span>   : matinales, augmentées au décubitus, à la toux
+<span class="hl">Vomissements</span> : en jet, soulagent brièvement
+<span class="hl">Œdème papillaire</span> : fond d'œil — témoin de la PIC chronique
+<span class="hl">Diplopie</span>    : paralysie VI (faux localisant !)
+<span class="hl">Trouble conscience</span> : signe d'alarme grave
+<span class="why">// le VI a le plus long trajet intracrânien → comprimé par HTIC non localisante</span>`,
+     q:"Un patient a des céphalées matinales + vomissements en jet + fond d'œil avec œdème papillaire. Quel diagnostic ?",
+     ch:["migraine classique","méningite bactérienne","HTIC — nécessite imagerie urgente","hypotension intracrânienne"],
+     ok:2, hint:"triade : céphalées matinales + vomissements + œdème papillaire = HTIC",
+     fb_ok:"// correct — la triade céphalo-vomissements-œdème papillaire signe l'HTIC. Scanner cérébral en urgence.",
+     fb_no:"// céphalées matinales + vomissements + œdème papillaire = HTIC. TDM cérébral en urgence avant PL.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · engagement cérébral", type:"qcm",
+     code:`<span class="cm">// engagement temporal (uncal)</span>
+L'uncus du lobe temporal se déplace sous la tente du cervelet.
+Compression du <span class="hl">III (nerf oculomoteur)</span> → mydriase homolatérale
+Compression du <span class="hl">tronc cérébral</span> → hémiplégie controlatérale
+→ puis ipsilatérale (Kernohan : compression du pédoncule opposé)
+<span class="why">// mydriase fixe unilatérale = URGENCE neurochirurgicale absolue
+// le signe de Kernohan peut induire en erreur sur le côté de la lésion</span>`,
+     q:"Patient GCS 8, pupille gauche dilatée aréactive, scanner : hématome extradural temporal DROIT. Expliquer la pupille gauche ?",
+     ch:["la lésion est en réalité à gauche","le III droit est comprimé, pas le gauche","signe de Kernohan : l'hématome droit déplace l'encéphale vers la droite, comprimant le III gauche par contact avec la tente","c'est une lésion directe du globe oculaire"],
+     ok:2, hint:"engagement temporal droit → surtout mydriase droite ; mais le déplacement peut comprimer le III controlat.",
+     fb_ok:"// correct — la mydriase homolatérale est classique (III ipsilésionnel comprimé). La controlatérale = engagement massif (Kernohan).",
+     fb_no:"// mydriase homolatérale à la lésion est classique. Mydriase controlatérale = signe de Kernohan (hernie massive).",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · traitement médical de l'HTIC", type:"qcm",
+     code:`<span class="cm">// mesures anti-HTIC (par ordre)</span>
+1. Tête à <span class="hl">30°</span>, axe tête-cou aligné, sédation
+2. <span class="hl">Osmothérapie</span> : mannitol 20% 0.5–1 g/kg IV ou SSH 3%
+3. <span class="hl">Hyperventilation</span> temporaire : PaCO₂ → 30–35 mmHg → vasoconstriction
+4. Barbiturates (thiopental) si réfractaire + monitorage PIC
+5. <span class="hl">Craniectomie décompressive</span> si tout échec
+<span class="why">// hyperventilation : effet rapide mais transitoire, risque d'ischémie</span>`,
+     q:"PIC à 35 mmHg malgré sédation et tête à 30°. Quelle est la prochaine étape médicale ?",
+     ch:["hyperventilation seule jusqu'à PaCO₂ 20 mmHg","mannitol 20% IV + réévaluation rapide","ponction lombaire pour décomprimer","corticoïdes systématiquement"],
+     ok:1, hint:"osmothérapie = 2e étape. Hyperventilation agressive = risque d'ischémie",
+     fb_ok:"// correct — mannitol 20% (0.5–1 g/kg IV en 15 min) est l'osmothérapie de référence, rapide et efficace.",
+     fb_no:"// 2e étape = osmothérapie (mannitol ou SSH). L'hyperventilation trop agressive risque l'ischémie.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 4 : traumatologie crânienne ────────────────────
+{
+  id:4, section:"pathologie", num:4,
+  name:"traumatologie crânio-cérébrale",
+  level:"intermédiaire",
+  takeaway:[
+    "hématome extradural (HED) : artériel, intervalle libre, lentille biconvexe au scanner",
+    "hématome sous-dural aigu (HSDA) : veineux, en croissant, souvent grave",
+    "contusion cérébrale : lésion directe du parenchyme — coup et contrecoup",
+    "ACSOS : agressions cérébrales secondaires d'origine systémique (hypoxie, hypotension, fièvre, hypo/hyperglycémie)",
+    "score de Glasgow : E4V5M6 = 15 · < 8 = coma = intubation"
+  ],
+  questions:[
+    {c:"notion · Glasgow Coma Scale", type:"qcm",
+     code:`<span class="cm">// Glasgow Coma Scale (GCS)</span>
+<span class="hl">Yeux (E)</span>  : 4=spontané · 3=appel · 2=douleur · 1=aucun
+<span class="hl">Verbal (V)</span> : 5=orienté · 4=confus · 3=mots · 2=sons · 1=aucun
+<span class="hl">Moteur (M)</span> : 6=obéit · 5=localis. · 4=retrait · 3=flexion · 2=extension · 1=aucun
+<span class="hl">Score : 3–15</span>
+≤8 = coma → intubation · 13–15 = TCE léger`,
+     q:"Patient : ouvre les yeux à la douleur, émet des sons incompréhensibles, extension stéréotypée. GCS ?",
+     ch:["GCS 5","GCS 6","GCS 7","GCS 8"],
+     ok:0, hint:"E2 (douleur) + V2 (sons) + M2 (extension) = ?",
+     fb_ok:"// correct — E2+V2+M2 = 6. Score très bas : intubation, imagerie urgente.",
+     fb_no:"// E=2 (yeux à la douleur) + V=2 (sons) + M=2 (extension) = 6.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · HED vs HSDA", type:"qcm",
+     code:`<span class="cm">// différencier les hématomes traumatiques</span>
+<span class="hl">HED</span> (extradural) :
+  • artériel (AMM++) · temporopariétal
+  • lentille <span class="hl">biconvexe</span> au scanner · bord net
+  • intervalle libre classique · évolution rapide
+<span class="hl">HSDA</span> (sous-dural aigu) :
+  • veineux (veines pontines) · mortalité élevée
+  • <span class="hl">croissant</span> hyperdense · suit la convexité
+  • souvent associé à contusion cérébrale sous-jacente`,
+     q:"Scanner post-traumatique : hyperdensité lenticulaire biconvexe temporale droite avec effet de masse. Diagnostic ?",
+     ch:["hématome sous-dural aigu","hématome extradural","contusion hémorragique","hémorragie sous-arachnoïdienne"],
+     ok:1, hint:"lenticulaire biconvexe = HED",
+     fb_ok:"// correct — lenticulaire biconvexe + temporal = HED classique (AMM). Chirurgie urgente si > 30 mL ou effet de masse.",
+     fb_no:"// biconvexe = HED. Croissant = HSDA. C'est la forme caractéristique à connaître.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · ACSOS", type:"qcm",
+     code:`<span class="cm">// agressions cérébrales secondaires d'origine systémique</span>
+Le cerveau lésé est vulnérable à :
+<span class="hl">Hypoxie</span>       : SaO₂ < 90% · PaO₂ < 60 mmHg
+<span class="hl">Hypotension</span>   : PAS < 90 mmHg (objectif ≥ 120 mmHg en TCE grave)
+<span class="hl">Hyperthermie</span>  : chaque degré ↑ = aggravation
+<span class="hl">Hypoglycémie</span>  : glycémie < 4 mmol/L
+<span class="hl">Hyperglycémie</span> : > 10 mmol/L aussi délétère
+<span class="hl">Hyponatrémie</span> : aggrave l'œdème cérébral`,
+     q:"TCE grave, GCS 7. PA 80/50 mmHg, SpO₂ 88%. Quelle est la PRIORITÉ absolue ?",
+     ch:["scanner cérébral immédiat","correction de l'hypoxie et de l'hypotension AVANT le scanner","ponction lombaire","osmothérapie d'emblée"],
+     ok:1, hint:"ACSOS : hypoxie + hypotension = double agression secondaire → corriger en premier",
+     fb_ok:"// correct — ABCDE avant imagerie. Hypotension + hypoxie = deux des pires ACSOS. Intubation + remplissage d'abord.",
+     fb_no:"// ABCDE prime sur le scanner. Corriger hypoxie (intubation) et hypotension avant toute imagerie.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 5 : tumeurs cérébrales ─────────────────────────
+{
+  id:5, section:"pathologie", num:5,
+  name:"tumeurs cérébrales — classification et prise en charge",
+  level:"intermédiaire",
+  takeaway:[
+    "classification OMS 2021 : intègre moléculaire (IDH, 1p19q, MGMT, TERT…)",
+    "glioblastome (GBM) IDH-wt grade 4 : tumeur primitive la plus fréquente et la plus grave",
+    "méningiome : extra-axial, souvent bénin (grade 1), rehaussement intense homogène",
+    "métastases : plus fréquentes que les tumeurs primitives chez l'adulte > 40 ans",
+    "biopsy stéréotaxique si tumeur profonde non résécable ou diagnostic incertain"
+  ],
+  questions:[
+    {c:"notion · classification OMS 2021 des gliomes", type:"qcm",
+     code:`<span class="cm">// gliomes — marqueurs clés (OMS 2021)</span>
+<span class="hl">IDH muté</span> + 1p19q codélétion → oligodendrogliome (grade 2/3)
+<span class="hl">IDH muté</span> sans 1p19q → astrocytome IDH-muté (grade 2/3/4)
+<span class="hl">IDH sauvage</span> (wild-type) + critères moléc. → GBM grade 4
+<span class="why">// IDH sauvage ≠ GBM si pas de critères moléculaires (amp EGFR, gain chr7/perte chr10)
+// la classification moléculaire > histologie seule depuis 2016/2021</span>`,
+     q:"Biopsy d'une tumeur frontale : astrocytes anaplasiques, IDH sauvage, amplification EGFR. Classification OMS 2021 ?",
+     ch:["astrocytome IDH-muté grade 3","oligodendrogliome grade 3","glioblastome IDH-sauvage grade 4","méningiome grade 2"],
+     ok:2, hint:"IDH sauvage + critères moléculaires (amp EGFR) = GBM grade 4 même sans nécrose histologique",
+     fb_ok:"// correct — GBM IDH-sauvage grade 4. L'amplification EGFR est un des critères moléculaires GBM OMS 2021.",
+     fb_no:"// IDH sauvage + critère moléculaire (EGFR amp / gain chr7 / perte chr10) = GBM grade 4 (OMS 2021).",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · méningiome", type:"qcm",
+     code:`<span class="cm">// méningiome — caractéristiques</span>
+Origine : cellules <span class="hl">arachnoïdiennes</span>
+Localisation : <span class="hl">extra-axiale</span> (externe au parenchyme)
+Scanner : <span class="hl">rehaussement homogène intense</span>, base durale
+IRM : signe de la <span class="hl">queue de comète</span> durale
+Grade OMS : 1 (bénin 80%) · 2 (atypique) · 3 (anaplasique)
+<span class="why">// attente active pour petits méningiomes asymptomatiques chez sujet âgé
+// risque chirurgical : sinus veineux, nerfs crâniens, vaisseaux</span>`,
+     q:"IRM : lésion extra-axiale frontale droite, rehaussement intense homogène, queue durale. Diagnostic le plus probable ?",
+     ch:["glioblastome","métastase","méningiome","lymphome cérébral primitif"],
+     ok:2, hint:"extra-axial + queue durale + rehaussement homogène = méningiome",
+     fb_ok:"// correct — méningiome. Extra-axial + queue de comète durale = sémiologie IRM classique.",
+     fb_no:"// extra-axial + rehaussement homogène + queue durale = méningiome. GBM et métastases = intra-axiales.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · métastases cérébrales", type:"qcm",
+     code:`<span class="cm">// métastases cérébrales</span>
+<span class="hl">Plus fréquentes</span> que les tumeurs primitives (adulte > 40 ans)
+Primitifs les plus fréquents :
+  <span class="hl">poumon</span> (40%) · <span class="hl">sein</span> (15%) · <span class="hl">mélanome</span> (10%)
+  rein · colon
+Siège préférentiel : <span class="hl">jonction substance blanche/grise</span>
+Scanner : rehaussement en <span class="hl">anneau</span>, souvent multiples, œdème périlésionnel`,
+     q:"Patient 58 ans, fumeur, 3 lésions cérébrales rehaussées en anneau avec œdème. Quelle est la démarche prioritaire ?",
+     ch:["biopsie cérébrale d'emblée","recherche du primitif (scanner TAP, PET, bronchoscopie si poumon suspect)","radiochirurgie immédiate","corticoïdes seuls et surveillance"],
+     ok:1, hint:"3 métastases → probablement cancer primitif connu ou à trouver avant décision",
+     fb_ok:"// correct — métastases multiples → recherche du primitif (TDM TAP ± PET ± biopsie site accessible) avant décision thérapeutique.",
+     fb_no:"// priorité : trouver le primitif. Le traitement cérébral dépend du primitif et du statut systémique.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 6 : chirurgie vasculaire cérébrale ─────────────
+{
+  id:6, section:"pathologie", num:6,
+  name:"anévrismes, MAV et AVC hémorragiques",
+  level:"avancé",
+  takeaway:[
+    "anévrisme intracrânien : rupture = HSA — céphalée en coup de tonnerre",
+    "Hunt & Hess (clinique) et Fisher (scanner) gradent la HSA",
+    "clippage vs coiling : résultats similaires — décision multidisciplinaire",
+    "vasospasme : J4–J14 après HSA — doppler transcrânien + nimodipine prophylactique",
+    "MAV : épilepsie, hémorragie, déficit focal — score de Spetzler-Martin guide la chirurgie"
+  ],
+  questions:[
+    {c:"notion · hémorragie sous-arachnoïdienne", type:"qcm",
+     code:`<span class="cm">// HSA anévrismale — présentation</span>
+<span class="hl">Céphalée en coup de tonnerre</span> : sévère, brutale, maximale d'emblée
+± perte de conscience transitoire, méningisme, nausées
+Scanner : hyperdensité dans les espaces <span class="hl">sous-arachnoïdiens</span>
+(sillons, scissures, citernes de la base)
+<span class="why">// si scanner négatif < 6h + clinique typique → PL (xanthochromie)
+// après 6h : scanner très sensible (98%) à la phase aiguë</span>`,
+     q:"Patient, 45 ans, céphalée soudaine \"comme jamais\", vomissements, raideur de nuque. Scanner : hyperdensité des citernes de la base. Diagnostic ?",
+     ch:["méningite bactérienne","migraine avec aura","hémorragie sous-arachnoïdienne — angioscanner ou artériographie urgente","hématome extradural"],
+     ok:2, hint:"coup de tonnerre + méningisme + citernes hyperdenses = HSA",
+     fb_ok:"// correct — HSA typique. Angioscanner ou artériographie urgente pour identifier l'anévrisme responsable.",
+     fb_no:"// céphalée en coup de tonnerre + méningisme + scanner (citernes hyperdenses) = HSA. Angioscanner urgent.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · gradations de la HSA", type:"qcm",
+     code:`<span class="cm">// échelles pronostiques HSA</span>
+<span class="hl">Hunt & Hess</span> (clinique) :
+  I: asymptomatique ou céphalée légère
+  II: céphalée modérée/sévère, pas de déficit focal
+  III: obnubilation, déficit focal léger
+  IV: stupeur, déficit modéré/sévère
+  V: coma, postures, pronostic sombre
+<span class="hl">Fisher</span> (scanner) : 1→4 selon volume sang
+  grade 3 (couche épaisse > 1mm) = risque vasospasme max`,
+     q:"HSA grade IV de Hunt & Hess. Quelle attitude initiale ?",
+     ch:["clippage chirurgical immédiat sans délai","coiling artériel immédiat car état trop grave pour chirurgie","stabilisation en réanimation, discuter timing en équipe multidisciplinaire","traitement médical seul — chirurgie contre-indiquée grade IV"],
+     ok:2, hint:"grade IV = état grave mais pas désespéré — timing optimisé selon état neurologique et équipe",
+     fb_ok:"// correct — grade IV : discuter en staff le timing (différer si instable, traiter si récupération partielle). Réanimation d'abord.",
+     fb_no:"// pas de règle absolue grade IV. La décision dépend de l'évolution sous réanimation et de l'expertise du centre.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"notion · vasospasme cérébral", type:"qcm",
+     code:`<span class="cm">// vasospasme post-HSA</span>
+Délai : <span class="hl">J4–J14</span> (pic J7–J10)
+Mécanisme : irritation artérielle par hémoglobine → vasoconstriction
+Clinique : déficit neurologique focalisé retardé
+Monitoring : <span class="hl">Doppler transcrânien</span> (vélocités ACM > 120 cm/s)
+Prévention : <span class="hl">nimodipine</span> 60 mg/4h PO × 21 jours
+Traitement : triple H (HTA + Hypervolémie + Hémodilution) → angioplastie`,
+     q:"J7 post-HSA : patient développe une hémiplégie gauche progressive. Doppler ACM droite : 160 cm/s. Diagnostic ?",
+     ch:["resaignement de l'anévrisme","vasospasme cérébral symptomatique de l'ACM droite","HSD différé","HTIC par hydrocéphalie"],
+     ok:1, hint:"J7 + déficit focal + vélocités élevées au doppler = vasospasme",
+     fb_ok:"// correct — vasospasme ACM droite symptomatique. Vélocités > 120 cm/s confirmées + clinique. TDM + angio ± triple H.",
+     fb_no:"// J7 + déficit focalisé + doppler ACM > 120 cm/s = vasospasme symptomatique. Urgence thérapeutique.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 7 : pathologie rachidienne ─────────────────────
+{
+  id:7, section:"pathologie", num:7,
+  name:"pathologie rachidienne dégénérative et traumatique",
+  level:"intermédiaire",
+  takeaway:[
+    "hernie discale : noyau pulpeux migre à travers l'annulus fibrosus",
+    "hernie L4-L5 comprime la racine L5 · hernie L5-S1 comprime S1",
+    "cervicalgie + radiculopathie C6 : paresthésies pouce + index, déficit biceps",
+    "myélopathie cervicarthrosique : compression médullaire chronique — marche spastique",
+    "fracture burst vertébrale : compression axiale — risque de lésion médullaire"
+  ],
+  questions:[
+    {c:"notion · topographie des hernies discales lombaires", type:"qcm",
+     code:`<span class="cm">// racine comprimée selon le niveau</span>
+Hernie L3–L4 → racine <span class="hl">L4</span> : face ant. cuisse, genou, extension genou ↓
+Hernie L4–L5 → racine <span class="hl">L5</span> : face ext. cuisse/jambe, 1er orteil, dorsiflexion ↓
+Hernie L5–S1 → racine <span class="hl">S1</span> : face post. jambe, 5e orteil, réflexe achilléen ↓
+<span class="why">// la racine est comprimée au niveau du foramen SOUS-JACENT à la hernie
+// hernie médiane massive → queue de cheval (toutes les racines)</span>`,
+     q:"Patient : douleur irradiante de la fesse à la face postérieure de la jambe jusqu'au 5e orteil, réflexe achilléen aboli droite. Niveau hernié ?",
+     ch:["L3–L4","L4–L5","L5–S1","L2–L3"],
+     ok:2, hint:"face post. jambe + 5e orteil + réflexe achilléen = S1 → hernie L5-S1",
+     fb_ok:"// correct — territoire S1 + réflexe achilléen aboli = hernie L5-S1 droite comprimant la racine S1.",
+     fb_no:"// S1 = face post. jambe, 5e orteil, réflexe achilléen. Hernie L5-S1 comprime S1.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · myélopathie cervicarthrosique", type:"qcm",
+     code:`<span class="cm">// myélopathie cervicarthrosique (MCA)</span>
+Compression médullaire cervicale <span class="hl">chronique</span> par arthrose
+Clinique :
+  • troubles de la marche (spastique, asynergie)
+  • main maladroite (écriture, boutons)
+  • syndrome pyramidal : Babinski, clonus
+  • hypoesthésie diffuse, troubles sphinctériens tardifs
+<span class="why">// souvent peu douloureux → diagnostic tardif
+// IRM : signe hypersignal T2 médullaire = lésion installée</span>`,
+     q:"Patient 67 ans : marche spastique progressive, mains maladroites, Babinski bilatéral, pas de douleur. IRM : hypersignal médullaire C3-C5. Diagnostic ?",
+     ch:["sclérose en plaques","SLA — syndrome de la moelle","myélopathie cervicarthrosique — décompression chirurgicale discutée","compression médullaire tumorale"],
+     ok:2, hint:"âge + dégénératif + niveau cervical + hypersignal chronique = MCA",
+     fb_ok:"// correct — MCA : tableau progressif chez sujet âgé, hypersignal médullaire T2 chronique. Chirurgie si évolutif.",
+     fb_no:"// MCA = compression médullaire cervicale chronique par arthrose. Triade : marche + mains + pyramidal.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 8 : hydrocéphalie ───────────────────────────────
+{
+  id:8, section:"pathologie", num:8,
+  name:"hydrocéphalie et dérivations",
+  level:"intermédiaire",
+  takeaway:[
+    "hydrocéphalie = accumulation excessive de LCR dans les ventricules",
+    "obstructive (non communicante) : obstacle sur les voies de circulation du LCR",
+    "communicante : défaut de résorption (post-HSA, post-méningite)",
+    "triade de Hakim-Adams : trouble de la marche + troubles cognitifs + incontinence urinaire",
+    "traitement : dérivation ventriculo-péritonéale (DVP) ou ventriculo-atriale, ou ETV"
+  ],
+  questions:[
+    {c:"notion · types d'hydrocéphalie", type:"qcm",
+     code:`<span class="cm">// circulation du LCR</span>
+Plexus choroïdes → ventricules lat. → foramen de Monro
+→ V3 → aqueduc de Sylvius → V4 → foramen de Magendie/Luschka
+→ espaces sous-arachnoïdiens → granulations de Pacchioni → sinus
+<span class="hl">Obstructive</span> : obstacle intraventriculaire (tumeur, sténose aqueduc)
+<span class="hl">Communicante</span> : défaut de résorption (post-HSA, méningite, NPH)`,
+     q:"Un patient a une dilatation des ventricules latéraux et du V3, mais le V4 est normal. L'obstacle est probablement :",
+     ch:["au niveau des granulations de Pacchioni","à l'aqueduc de Sylvius (entre V3 et V4)","au niveau du foramen de Magendie","au niveau des plexus choroïdes"],
+     ok:1, hint:"V3 dilaté mais V4 normal → obstacle entre V3 et V4 = aqueduc de Sylvius",
+     fb_ok:"// correct — sténose de l'aqueduc de Sylvius : V3 dilaté, V4 normal. Hydrocéphalie obstructive.",
+     fb_no:"// dilatation en amont de l'obstacle : V3 dilaté + V4 normal → obstacle à l'aqueduc.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · hydrocéphalie à pression normale (HPN)", type:"qcm",
+     code:`<span class="cm">// triade de Hakim-Adams (NPH)</span>
+<span class="hl">1. Troubles de la marche</span> : magnétique, à petits pas, élargissement polygone
+<span class="hl">2. Troubles cognitifs</span>   : démence sous-corticale, lenteur
+<span class="hl">3. Incontinence urinaire</span> : urgenturie, puis incontinence vraie
+<span class="why">// IRM : dilatation ventriculaire, pas de sulci atrophiques
+// test : ponction lombaire soustractive (30–50 mL LCR) → amélioration ?
+// si oui → bon pronostic de la dérivation (DVP)</span>`,
+     q:"Patient 72 ans : triade Hakim-Adams complète. IRM : dilatation ventriculaire sans atrophie corticale. Quelle investigation confirme l'indication chirurgicale ?",
+     ch:["biopsie cérébrale","PET scan","ponction lombaire soustractive avec évaluation neurologique avant/après","EEG"],
+     ok:2, hint:"la PL soustractive est le test de réversibilité avant DVP",
+     fb_ok:"// correct — PL soustractive (30–50 mL) : amélioration de la marche et des cognitions → DVP indiquée.",
+     fb_no:"// PL soustractive = test prédictif de la réponse à la DVP. Amélioration → indication opératoire.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 9 : neurochirurgie fonctionnelle ────────────────
+{
+  id:9, section:"fonctionnel", num:9,
+  name:"neurochirurgie fonctionnelle — DBS, épilepsie, douleur",
+  level:"avancé",
+  takeaway:[
+    "DBS (deep brain stimulation) : STN ou GPi pour Parkinson — électrode + générateur",
+    "chirurgie de l'épilepsie : résection si zone épileptogène bien définie et non éloquente",
+    "SEEG (stéréoelectroencéphalographie) : cartographie 3D de l'épilepsie",
+    "douleur chronique : SCS (stimulation moelle épinière), DREZ, cordotomie",
+    "radiochirurgie (Gamma Knife, CyberKnife) : névralgie V, métastases, MAV"
+  ],
+  questions:[
+    {c:"notion · DBS dans la maladie de Parkinson", type:"qcm",
+     code:`<span class="cm">// stimulation cérébrale profonde (DBS)</span>
+Cibles principales :
+<span class="hl">STN</span> (noyau sous-thalamique) → tremblement + rigidité + akinésie
+<span class="hl">GPi</span> (globus pallidus interne) → dyskinésies + tremblement
+<span class="hl">VIM</span> (thalamus) → tremblement essentiel isolé
+<span class="why">// la DBS ne guérit pas Parkinson — elle contrôle les symptômes
+// indication : formes fluctuantes répondant à la L-DOPA, sans démence
+// le patient doit répondre à L-DOPA pour répondre à la DBS (règle générale)</span>`,
+     q:"Patient Parkinsonien avec fluctuations motrices importantes, bonne réponse à la L-DOPA, sans démence, 64 ans. La DBS-STN est indiquée si :",
+     ch:["il n'a jamais répondu à la L-DOPA","il est dément mais jeune","il répond à la L-DOPA et est en bonne santé générale sans démence","il a déjà une démence légère"],
+     ok:2, hint:"réponse à la L-DOPA = prédicteur de réponse à la DBS-STN",
+     fb_ok:"// correct — réponse à la L-DOPA + absence de démence + bonne santé générale = critères DBS-STN.",
+     fb_no:"// critères DBS : réponse à la L-DOPA + pas de démence + fluctuations motrices invalidantes.",
+     mv:{dx:1,dy:0}},
+
+    {c:"notion · chirurgie de l'épilepsie", type:"qcm",
+     code:`<span class="cm">// bilan pré-chirurgical épilepsie</span>
+Étape 1 : IRM (lésion structurelle ?)
+Étape 2 : vidéo-EEG (concordance clinique/électrique)
+Étape 3 : si concordance → bilan neuropsychologique + TEP/SPECT
+Étape 4 : si zone éloquente ou non concordant → <span class="hl">SEEG</span>
+Résection : <span class="hl">lobectomie temporale</span> (hippocampe) = meilleurs résultats
+<span class="why">// Engel I (seizure-free) dans ~70% après lobectomie temporale pour sclérose hippocampique</span>`,
+     q:"Épilepsie temporale droite pharmacorésistante, IRM : atrophie hippocampique droite, EEG temporale droite concordant, TEP : hypomètabolisme temporal droit. Prochaine étape ?",
+     ch:["SEEG d'emblée — EEG de surface insuffisant","bilan neuropsychologique puis discussion en comité multidisciplinaire pour lobectomie temporale droite","DBS comme traitement alternatif","VNS sans bilan complémentaire"],
+     ok:1, hint:"concordance IRM + EEG + TEP = zone bien définie → bilan neuropsychologique + comité chirurgie",
+     fb_ok:"// correct — concordance IRM/EEG/TEP → résection discutée en comité. Neuropsycho obligatoire (risque mémoire).",
+     fb_no:"// bonne concordance → SEEG pas nécessaire. Bilan neuropsychologique + comité chirurgie de l'épilepsie.",
+     mv:{dx:0,dy:-1}},
+  ]
+},
+
+// ── CHAPITRE 10 : cas cliniques ──────────────────────────────
+{
+  id:10, section:"cas cliniques", num:10,
+  name:"cas clinique 1 — trauma crânien",
+  level:"avancé",
+  takeaway:[
+    "tout traumatisme crânien + trouble de conscience → scanner sans délai",
+    "HED : intervalle libre + aggravation = urgence chirurgicale (tréphination < 2h)",
+    "GCS ≤ 8 = intubation pour protection des voies aériennes",
+    "corriger les ACSOS avant et pendant le transport",
+    "objectifs post-op : PIC < 20 mmHg, PPC > 60 mmHg, SaO₂ > 95%"
+  ],
+  questions:[
+    {c:"cas · présentation", type:"qcm",
+     code:`<span class="cm">// cas clinique 1 — présentation</span>
+Victor, 22 ans, chute de vélo (sans casque).
+<span class="hl">Impact temporal droit.</span>
+Aux urgences (H+1) :
+  • GCS 14 (E4V4M6) · légère confusion
+  • plaie du scalp temporal droit
+  • pas de déficit moteur · pupilles isocores
+Scanner cérébral réalisé.`,
+     q:"Le scanner montre une lentille biconvexe temporale droite de 20 mL, sans engagement. Quelle est votre décision immédiate ?",
+     ch:["surveillance clinique rapprochée en réanimation — intervention si aggravation","craniotomie temporale droite urgente et évacuation de l'HED","ponction sous scanner pour décomprimer","transfert en neurochirurgie + scanner de contrôle à H+6 avec surveillance GCS/pupilles"],
+     ok:3, hint:"HED < 30 mL, pas d'engagement, GCS > 13 → surveillance possible selon protocoles mais surveillance neurochirurgicale impérative",
+     fb_ok:"// correct — HED 20 mL, GCS 14, pas d'engagement : surveillance neurochirurgicale possible. Seuil chirurgical : épaisseur > 15 mm OU volume > 30 mL OU déviation > 5 mm OU détérioration.",
+     fb_no:"// HED 20 mL + GCS 14 : surveillance neurochirurgicale étroite acceptable. Opérer si volume > 30 mL, engagement, ou détérioration.",
+     mv:{dx:1,dy:0}},
+
+    {c:"cas · aggravation — H+3", type:"qcm",
+     code:`<span class="cm">// évolution à H+3</span>
+Victor est en observation. À H+3 :
+  • GCS passe de 14 à <span class="hl">9</span> (E2V3M4)
+  • pupille droite <span class="hl">dilatée, aréactive</span>
+  • membre gauche en flexion
+Nouveau scanner : HED maintenant <span class="hl">45 mL</span>,
+  engagement temporal débutant, déviation 8 mm.`,
+     q:"Quelle est la décision maintenant ?",
+     ch:["osmothérapie seule et attendre 30 min","bloc opératoire immédiat — craniotomie temporale décompressive","PL pour réduire la PIC","nouveau scanner de contrôle dans 1h"],
+     ok:1, hint:"engagement + HED > 30 mL + aggravation clinique = chirurgie urgente sans délai",
+     fb_ok:"// correct — urgence chirurgicale absolue. Délai < 60 min entre décision et incision. Toute minute perdue = neurones perdus.",
+     fb_no:"// HED 45 mL + mydriase + engagement + GCS 9 = chirurgie immédiate. Plus de place pour l'attente.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"cas · technique opératoire", type:"qcm",
+     code:`<span class="cm">// volet temporal droit</span>
+Installation : décubitus dorsal, tête en légère extension,
+rotation 45° vers la gauche.
+<span class="hl">Incision</span> en point d'interrogation temporal.
+<span class="hl">Volet osseux</span> 6×6 cm temporopariétal.
+<span class="hl">Durotomie</span> et évacuation de l'hématome en gelée de groseille.
+<span class="hl">Hémostase</span> de l'AMM par clips et coagulation bipolaire.`,
+     q:"L'hématome est évacué mais le cerveau reste tendu et pulsatile sous la dure-mère. Que faites-vous ?",
+     ch:["refermer immédiatement — la tension est normale","chercher un saignement persistant + TDM per-opératoire ou peropératoire si doute","PL lombaire per-opératoire","augmenter la sédation seulement"],
+     ok:1, hint:"cerveau tendu après évacuation HED = contusion sous-jacente ? saignement persistant ? HTIC résiduelle ?",
+     fb_ok:"// correct — cerveau tendu après évacuation = chercher une contusion sous-jacente, un hématome résiduel. TDM si disponible ou exploration prudente.",
+     fb_no:"// cerveau tendu post-évacuation → contusion sous-jacente probable, saignement résiduel, ou HTIC. Ne pas refermer sans chercher la cause.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 11 : cas clinique 2 ────────────────────────────
+{
+  id:11, section:"cas cliniques", num:11,
+  name:"cas clinique 2 — tumeur cérébrale",
+  level:"avancé",
+  takeaway:[
+    "première crise épileptique à 40 ans → toujours éliminer une lésion structurelle",
+    "IRM avec et sans gadolinium = examen de référence pour les tumeurs cérébrales",
+    "décision thérapeutique en RCP neuro-oncologique (résection, biopsie, RT, CT)",
+    "chirurgie éveillée = gold standard pour les tumeurs en zone éloquente",
+    "MGMT méthylé dans GBM → meilleure réponse à la témozolomide"
+  ],
+  questions:[
+    {c:"cas · présentation", type:"qcm",
+     code:`<span class="cm">// cas clinique 2 — présentation</span>
+Marie, 42 ans, première crise tonicoclonique généralisée.
+Pas d'antécédents. Examen neurologique normal.
+<span class="hl">IRM cérébrale</span> :
+  lésion frontale gauche 4 cm, intra-axiale
+  hypersignal T2/FLAIR, pas de rehaussement
+  pas d'effet de masse significatif`,
+     q:"Absence de rehaussement dans une tumeur intra-axiale de l'adulte suggère :",
+     ch:["une tumeur de bas grade (grade 1-2) — frontière BHE préservée","une métastase typique","un GBM non actif","un méningiome frontal"],
+     ok:0, hint:"le rehaussement traduit la rupture de la barrière hémato-encéphalique — absence = bas grade probable",
+     fb_ok:"// correct — pas de rehaussement = BHE intacte = bas grade probable (oligodendrogliome, astrocytome IDH-muté). GBM rehausse (nécrose/angiogenèse).",
+     fb_no:"// absence de rehaussement = BHE intacte = gliome de bas grade probable. Le GBM présente presque toujours un rehaussement.",
+     mv:{dx:1,dy:0}},
+
+    {c:"cas · biopsie et moléculaire", type:"qcm",
+     code:`<span class="cm">// résultat anatomopathologique</span>
+<span class="hl">Histologie</span> : gliome diffus, astrocytes atypiques, grade 2 OMS
+<span class="hl">IDH1</span> : muté (R132H)
+<span class="hl">1p19q</span> : non codélété
+<span class="hl">MGMT</span> : méthylé
+<span class="hl">TERT</span> : non muté
+Classification OMS 2021 :
+→ <span class="hl">Astrocytome IDH-muté, grade 2</span>`,
+     q:"Pour une Marie de 42 ans avec astrocytome IDH-muté grade 2 frontal gauche, quelle stratégie est recommandée en 2024 ?",
+     ch:["surveillance seule — bas grade, pas urgent","résection maximale sûre (chirurgie éveillée car zone éloquente) puis discuter RT/CT adjuvante en RCP","radiothérapie seule sans chirurgie","chimiothérapie seule par témozolomide"],
+     ok:1, hint:"gliome bas grade en zone éloquente → chirurgie éveillée pour maximiser résection sans déficit",
+     fb_ok:"// correct — résection maximale + chirurgie éveillée (zone de langage) + RCP pour RT/CT adjuvante (surtout si haut risque).",
+     fb_no:"// résection maximale améliore la survie même dans les bas grades. Chirurgie éveillée pour zones éloquentes.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"cas · chirurgie éveillée", type:"qcm",
+     code:`<span class="cm">// chirurgie éveillée — principes</span>
+Anesthésie <span class="hl">asleep–awake–asleep</span>
+Cartographie corticale par <span class="hl">stimulation directe</span> :
+  • test de dénomination d'images (aire de Broca)
+  • test de compréhension (Wernicke)
+  • test moteur (cortex moteur)
+Résection s'arrête si <span class="hl">trouble neurologique</span> apparaît.
+<span class="why">// objectif : enlever le maximum de tumeur sans déficit permanent
+// marge fonctionnelle plutôt que marge oncologique seule</span>`,
+     q:"En cours de résection, la stimulation d'une zone entraîne un arrêt de la dénomination (anomie transitoire). Que faites-vous ?",
+     ch:["continuer la résection — c'est transitoire","marquer la zone comme éloquente et ne pas réséquer au-delà","augmenter l'anesthésie","coaguler rapidement cette zone"],
+     ok:1, hint:"anomie à la stimulation = zone de langage → ne pas réséquer = principe fondamental",
+     fb_ok:"// correct — marquage + respect de la zone éloquente. La résection s'arrête là. Marge fonctionnelle = priorité.",
+     fb_no:"// stimulation provoquant un déficit = zone fonctionnelle à respecter. On marque et on ne dépasse pas.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 12 : cas clinique 3 ────────────────────────────
+{
+  id:12, section:"cas cliniques", num:12,
+  name:"cas clinique 3 — hémorragie sous-arachnoïdienne",
+  level:"avancé",
+  takeaway:[
+    "HSA = urgence — transfert immédiat en centre neurochirurgical",
+    "angioscanner d'abord, artériographie si doute ou planification endovasculaire",
+    "traitement de l'anévrisme : clippage ou coiling selon morphologie et localisation",
+    "complications à surveiller : resaignement (J0-J1), vasospasme (J4-J14), hydrocéphalie",
+    "nimodipine systématique 21 jours + euvolémie + surveillance neurologique intensive"
+  ],
+  questions:[
+    {c:"cas · présentation", type:"qcm",
+     code:`<span class="cm">// cas clinique 3 — présentation</span>
+Sophie, 51 ans. Céphalée soudaine cataclysmique
+au décours d'un effort physique.
+  GCS 13 (E4V3M6) · raideur de nuque
+  Légère désorientation temporo-spatiale
+Scanner : hyperdensité des citernes de la base
+  et scissure interhémisphérique
+<span class="hl">Hunt & Hess II · Fisher 3</span>`,
+     q:"Quelle est l'investigation vasculaire de première intention ?",
+     ch:["artériographie cérébrale conventionnelle (4 axes)","angioscanner cérébral (ARM-CT)","doppler transcrânien seul","PL pour confirmer puis artério"],
+     ok:1, hint:"angioscanner = rapide, disponible, sensibilité > 95% pour anévrisme > 3 mm",
+     fb_ok:"// correct — angioscanner cérébral en urgence. Sensibilité > 95% pour anévrismes ≥ 3 mm. Si négatif → artériographie conventionnelle.",
+     fb_no:"// angioscanner en première intention (rapide, accessible). Artériographie si doute ou planification endovasculaire.",
+     mv:{dx:1,dy:0}},
+
+    {c:"cas · résultat vasculaire", type:"qcm",
+     code:`<span class="cm">// angioscanner — résultat</span>
+Anévrisme de l'<span class="hl">artère communicante antérieure</span> (ACoA)
+Taille : <span class="hl">8 mm</span>, collet : <span class="hl">4 mm</span>
+Ratio dôme/collet : 2
+Localisation : complexe ACA/ACoA
+Pas d'autres anévrismes.
+<span class="cm">// RCP endovasculaire / neurochirurgicale</span>`,
+     q:"Pour cet anévrisme de l'ACoA de 8 mm avec collet 4 mm (rapport D/C = 2), quelle option favoriser ?",
+     ch:["clippage chirurgical systématiquement — meilleure durabilité","coiling endovasculaire simple — rapport D/C favorable","flow diverter en urgence","surveillance — petite taille"],
+     ok:1, hint:"rapport D/C = 2 = favorable au coiling · anévrisme ACoA accessible par voie endovasculaire",
+     fb_ok:"// correct — D/C > 1.5 favorable au coiling. ACoA accessible en endovasculaire. ISAT : coiling préféré si possible.",
+     fb_no:"// rapport dôme/collet > 1.5 = favorable au coiling. L'étude ISAT montre avantage endovasculaire à court terme.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"cas · complication J8", type:"qcm",
+     code:`<span class="cm">// évolution à J8 post-embolisation</span>
+Coiling réussi. Nimodipine en cours.
+À J8, l'infirmière signale que Sophie
+est <span class="hl">moins bien éveillée</span>, a du <span class="hl">mal à trouver ses mots</span>
+et qu'elle a une <span class="hl">légère hémiplégie droite</span>.
+Doppler transcrânien : ACM gauche <span class="hl">180 cm/s</span>.`,
+     q:"Quel est le diagnostic et la conduite à tenir immédiate ?",
+     ch:["resaignement de l'anévrisme — artériographie d'urgence","vasospasme symptomatique ACM gauche — TDM perfusion puis triple H et/ou angioplastie","hydrocéphalie — DVE urgente","méningite chimique — PL et antibiotiques"],
+     ok:1, hint:"J8 + déficit focalisé + doppler ACM > 150 cm/s = vasospasme",
+     fb_ok:"// correct — vasospasme symptomatique ACM gauche. TDM perfusion pour confirmer ischémie. Triple H ± angioplastie si réfractaire.",
+     fb_no:"// J8 + hémiplégie + aphasie + doppler ACM > 150 cm/s = vasospasme ACM gauche symptomatique. Urgence thérapeutique.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+// ── CHAPITRE 13 : cas clinique 4 ────────────────────────────
+{
+  id:13, section:"cas cliniques", num:13,
+  name:"cas clinique 4 — compression médullaire",
+  level:"avancé",
+  takeaway:[
+    "toute compression médullaire aiguë = urgence chirurgicale ou radiothérapique",
+    "délai < 24h pour décompression médullaire : meilleure récupération fonctionnelle",
+    "métastase rachidienne : décision multidisciplinaire (score Tokuhashi, SINS)",
+    "IRM médullaire urgente dès suspicion de compression",
+    "corticoïdes (dexaméthasone) en urgence dès suspicion compressive"
+  ],
+  questions:[
+    {c:"cas · présentation", type:"qcm",
+     code:`<span class="cm">// cas clinique 4 — présentation</span>
+Robert, 65 ans, cancer bronchique connu (NSCLC stade IV).
+Depuis 48h : <span class="hl">douleur dorsale D7</span> aggravée,
+  <span class="hl">faiblesse des membres inférieurs progressive</span>,
+  <span class="hl">rétention urinaire</span> depuis 6h.
+Examen : paraparésie 3/5 bilatérale, hypoesthésie sous D8,
+  globe urinaire.`,
+     q:"Quelle est l'urgence diagnostique numéro 1 ?",
+     ch:["scanner abdominopelvien pour bilan d'extension","IRM médullaire en urgence (colonne entière)","EMG des membres inférieurs","bilan biologique complet"],
+     ok:1, hint:"paraparésie + rétention + contexte néoplasique = compression médullaire jusqu'à preuve du contraire → IRM urgente",
+     fb_ok:"// correct — IRM médullaire urgente (rachis entier). Compression médullaire sur métastase = urgence thérapeutique.",
+     fb_no:"// IRM médullaire en urgence = premier réflexe. Paraparésie + rétention + néoplasie = compression médullaire.",
+     mv:{dx:1,dy:0}},
+
+    {c:"cas · résultat IRM", type:"qcm",
+     code:`<span class="cm">// IRM médullaire — résultat</span>
+Métastase épidurale <span class="hl">D6–D7</span> comprimant la moelle.
+Érosion du corps vertébral D7.
+<span class="hl">SINS score = 13</span> (instabilité chirurgicale)
+Pas d'autres lésions compressives.
+Statut général : OMS 1, PD-L1 60%,
+  traitement par immunothérapie en cours.`,
+     q:"Quelle est la décision optimale, sachant que le patient peut marcher encore quelques pas ?",
+     ch:["radiothérapie seule — NSCLC radiosensible","chirurgie décompressive + stabilisation (D6-D7) puis radiothérapie adjuvante","corticoïdes seuls en attendant","immunothérapie à doses augmentées"],
+     ok:1, hint:"SINS > 12 = instabilité chirurgicale + compression + patient opérable = chirurgie",
+     fb_ok:"// correct — SINS ≥ 13 = instabilité chirurgicale → chirurgie décompressive + ostéosynthèse → RT adjuvante. Étude Patchell : chirurgie > RT seule si ambulant.",
+     fb_no:"// SINS ≥ 13 = instable → chirurgie. Étude Patchell 2005 : chirurgie + RT > RT seule si compression épidurales.",
+     mv:{dx:0,dy:-1}},
+
+    {c:"cas · gestion per-opératoire", type:"qcm",
+     code:`<span class="cm">// chirurgie — décision technique</span>
+Abord : <span class="hl">postérieur</span> (laminectomie D6-D7)
++ décompression épidurale
++ <span class="hl">ostéosynthèse pédicul.</span> D5–D8 (4 vis-tiges)
+Durée prévue : 2–3h. Pertes sanguines prévisibles : 500–1500 mL.
+<span class="cm">// Position : décubitus ventral, table de neurochirurgie</span>`,
+     q:"En per-opératoire, quelle mesure neuromonitorage est recommandée lors de la décompression ?",
+     ch:["EEG seul","potentiels évoqués somesthésiques (PES) et potentiels évoqués moteurs (PEM) en continu","Doppler transcrânien","oxymétrie cérébrale seule"],
+     ok:1, hint:"décompression médullaire = risque de lésion iatrogène → PES + PEM pour détection précoce",
+     fb_ok:"// correct — PES + PEM per-opératoires : détection précoce d'une lésion médullaire iatrogène (alerte en temps réel).",
+     fb_no:"// PES (voies sensitives) + PEM (voies motrices) = monitoring standard lors de chirurgie médullaire.",
+     mv:{dx:1,dy:0}},
+  ]
+},
+
+];
+
+const SECTIONS = {};
+CHAPTERS.forEach(ch => {
+  if(!SECTIONS[ch.section]) SECTIONS[ch.section] = [];
+  SECTIONS[ch.section].push(ch);
+});
+
+// ═══════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════
+let curChap=null, curQ=0, score=0, answered=false;
+let rX=0, rY=5;
+const GOAL={x:5,y:0};
+let traces=new Set();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){
+  document.getElementById('win').classList.remove('show');
+  show('s-home');
+}
+
+function buildHome(){
+  const list=document.getElementById('chap-list');
+  list.innerHTML='';
+  Object.entries(SECTIONS).forEach(([sec, chaps])=>{
+    const sec_div=document.createElement('div');
+    sec_div.className='chap-section';
+    const lbl=document.createElement('div');
+    lbl.className='chap-section-lbl';
+    lbl.textContent=sec;
+    sec_div.appendChild(lbl);
+    chaps.forEach(ch=>{
+      const row=document.createElement('div');
+      row.className='chap-row';
+      row.innerHTML=`
+        <span class="chap-num">${ch.num}.</span>
+        <span class="chap-name">${ch.name}</span>
+        <span class="chap-level">${ch.level}</span>
+        <span class="chap-count">${ch.questions.length} qs</span>`;
+      row.onclick=()=>startChap(ch);
+      sec_div.appendChild(row);
+    });
+    list.appendChild(sec_div);
+  });
+}
+
+function startChap(ch){
+  curChap=ch; curQ=0; score=0; answered=false;
+  rX=0; rY=5; traces=new Set();
+  document.getElementById('win').classList.remove('show');
+  buildGrid(); loadQ(); show('s-game');
+}
+
+function loadQ(){
+  answered=false;
+  const q=curChap.questions[curQ];
+  document.getElementById('g-title').textContent=curChap.name;
+  document.getElementById('g-pts').textContent=score+' pts';
+  document.getElementById('g-ctag').textContent=q.c;
+  document.getElementById('g-concept').innerHTML=q.code;
+  document.getElementById('g-q').textContent=q.q;
+  document.getElementById('g-fb').className='fb';
+  document.getElementById('g-next').className='btnext';
+
+  const badge=document.getElementById('g-qbadge');
+  badge.textContent=q.type==='qcm'?'QCM':'question ouverte';
+  badge.className='qbadge '+(q.type==='qcm'?'qcm':'open');
+
+  const dr=document.getElementById('dots-row');
+  dr.innerHTML='';
+  curChap.questions.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i<curQ?' done':i===curQ?' cur':'');
+    dr.appendChild(d);
+  });
+
+  const cc=document.getElementById('g-choices');
+  const ow=document.getElementById('g-open');
+  const inp=document.getElementById('g-input');
+  cc.innerHTML='';
+
+  if(q.type==='qcm'){
+    ow.style.display='none';
+    q.ch.forEach((t,i)=>{
+      const b=document.createElement('button');
+      b.className='choice'; b.textContent=t;
+      b.onclick=()=>answerQcm(i);
+      cc.appendChild(b);
+    });
+  } else {
+    ow.style.display='flex';
+    inp.value=''; inp.disabled=false;
+    document.querySelector('.open-btn').disabled=false;
+    setTimeout(()=>inp.focus(),100);
+  }
+}
+
+function answerQcm(idx){
+  if(answered) return;
+  answered=true;
+  const q=curChap.questions[curQ];
+  const ok=idx===q.ok;
+  document.querySelectorAll('.choice').forEach((b,i)=>{
+    if(i===q.ok) b.classList.add('ok');
+    else if(i===idx&&!ok) b.classList.add('no');
+    else b.classList.add('dim');
+    b.onclick=null;
+  });
+  showFb(ok,q);
+}
+
+function checkOpen(){
+  if(answered) return;
+  const q=curChap.questions[curQ];
+  const val=document.getElementById('g-input').value.trim().toLowerCase();
+  if(!val) return;
+  const ok=q.keys.some(k=>val.includes(k.toLowerCase())||k.toLowerCase()===val);
+  answered=true;
+  document.getElementById('g-input').disabled=true;
+  document.querySelector('.open-btn').disabled=true;
+  showFb(ok,q);
+}
+
+function showFb(ok,q){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show '+(ok?'ok':'no');
+  fb.textContent=ok?q.fb_ok:q.fb_no;
+  if(ok){score+=10;document.getElementById('g-pts').textContent=score+' pts';sparks();}
+  moveRobot(q.mv.dx,q.mv.dy);
+  document.getElementById('g-next').className='btnext show';
+}
+
+function doHint(){
+  const fb=document.getElementById('g-fb');
+  fb.className='fb show hint';
+  fb.textContent='? '+curChap.questions[curQ].hint;
+}
+
+function nextQ(){
+  curQ++;
+  if(curQ>=curChap.questions.length){showWin();return;}
+  loadQ();
+}
+
+function showWin(){
+  document.getElementById('win-title').textContent=`// ${curChap.name} · maîtrisé`;
+  const ul=document.getElementById('win-list');
+  ul.innerHTML='';
+  curChap.takeaway.forEach(t=>{
+    const li=document.createElement('li');li.textContent=t;ul.appendChild(li);
+  });
+  document.getElementById('win').classList.add('show');
+}
+
+function restartChap(){
+  document.getElementById('win').classList.remove('show');
+  startChap(curChap);
+}
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.createElement('div');
+    d.id=`gc${x}${y}`;d.className='gcell';
+    if(x===GOAL.x&&y===GOAL.y) d.textContent='🏁';
+    g.appendChild(d);
+  }
+  renderGrid();
+}
+
+function renderGrid(){
+  for(let y=0;y<6;y++) for(let x=0;x<6;x++){
+    const d=document.getElementById(`gc${x}${y}`);
+    if(!d) continue;
+    d.className='gcell';d.textContent='';d.innerHTML='';
+    if(x===GOAL.x&&y===GOAL.y){d.classList.add('goal');d.textContent='🏁';continue;}
+    if(traces.has(`${x},${y}`)) d.classList.add('trace');
+    if(x===rX&&y===rY){
+      d.classList.add('robot');
+      d.innerHTML=`<svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+        <rect x="8" y="12" width="16" height="14" rx="4" fill="#1a1814"/>
+        <rect x="11" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="17" y="15" width="4" height="4" rx="1.5" fill="#faf8f4"/>
+        <rect x="13" y="21" width="6" height="2" rx="1" fill="#7a9e87"/>
+        <rect x="14" y="8" width="4" height="5" rx="2" fill="#1a1814"/>
+        <circle cx="16" cy="7" r="2" fill="#c8a870"/>
+        <rect x="5" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="24" y="16" width="3" height="6" rx="1.5" fill="#1a1814"/>
+        <rect x="10" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+        <rect x="18" y="26" width="4" height="3" rx="1.5" fill="#1a1814"/>
+      </svg>`;
+    }
+  }
+}
+
+function moveRobot(dx,dy){
+  traces.add(`${rX},${rY}`);
+  rX=Math.max(0,Math.min(5,rX+dx));
+  rY=Math.max(0,Math.min(5,rY+dy));
+  renderGrid();
+  const dir=dx>0?'droite':dx<0?'gauche':dy<0?'haut':'bas';
+  document.getElementById('g-mlog').textContent=`${curQ+1}/${curChap.questions.length} → ${dir}`;
+}
+
+function sparks(){
+  const cell=document.getElementById(`gc${rX}${rY}`);
+  if(!cell) return;
+  const r=cell.getBoundingClientRect();
+  ['#c8a870','#e8a598','#7a9e87','#a89ec8'].forEach((c,i)=>{
+    const p=document.createElement('div');p.className='pt';
+    const s=3+Math.random()*5;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${c};left:${r.left+r.width/2+(-15+Math.random()*30)}px;top:${r.top+r.height/2}px;animation-delay:${i*0.05}s`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1000);
+  });
+}
+
+buildHome();
+</script>
+</body>
+</html>
