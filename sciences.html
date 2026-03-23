@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · Sciences</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --bg2: #f0ebe2;
+  --ink: #1a1814;
+  --ink2: #6b6760;
+  --ink3: #b5b2ac;
+  --sage: #7a9e87;
+  --sky: #8fb4c8;
+  --amber: #c8a870;
+  --lavender: #a89ec8;
+  --line: rgba(26,24,20,0.08);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.65rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.tback {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.tback:hover { color: var(--ink); }
+.tsep { color: var(--ink3); font-size: 11px; }
+.ttitle { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); }
+
+/* ── HERO ANIMATION ── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem 3rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+}
+
+/* Orbital animation */
+.orbital-stage {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin-bottom: 2rem;
+}
+.nucleus {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px; height: 44px;
+  background: var(--ink);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  z-index: 5;
+  box-shadow: 0 0 0 8px rgba(26,24,20,0.06);
+}
+.orbit {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(26,24,20,0.12);
+  transform-origin: center;
+  animation: spin linear infinite;
+}
+.orbit-1 { width: 90px; height: 90px; margin: -45px 0 0 -45px; animation-duration: 4s; }
+.orbit-2 { width: 140px; height: 140px; margin: -70px 0 0 -70px; animation-duration: 7s; animation-direction: reverse; }
+.orbit-3 { width: 200px; height: 200px; margin: -100px 0 0 -100px; animation-duration: 11s; }
+
+.electron {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  top: 50%; left: 0;
+  margin-top: -5px; margin-left: -5px;
+  transform-origin: calc(50% + 45px) 50%;
+}
+.orbit-1 .electron { background: var(--sky); transform-origin: calc(50% + 45px) 50%; }
+.orbit-2 .electron { background: var(--amber); transform-origin: calc(50% + 70px) 50%; }
+.orbit-3 .electron { background: var(--lavender); transform-origin: calc(50% + 100px) 50%; }
+/* second electrons */
+.orbit-2 .electron:nth-child(2) { top: 50%; left: 100%; margin-left: -5px; transform-origin: calc(50% - 65px) 50%; }
+.orbit-3 .electron:nth-child(2) { top: 0; left: 50%; margin-left: -5px; transform-origin: 50% calc(50% + 95px); }
+
+/* floating formulas */
+.formula {
+  position: absolute;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink3);
+  opacity: 0;
+  animation: floatIn 8s ease-in-out infinite;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.formula:nth-child(1) { top: 12%; left: 4%; animation-delay: 0s; }
+.formula:nth-child(2) { top: 20%; right: 5%; animation-delay: 2s; }
+.formula:nth-child(3) { bottom: 22%; left: 6%; animation-delay: 4s; }
+.formula:nth-child(4) { bottom: 15%; right: 4%; animation-delay: 6s; }
+.formula:nth-child(5) { top: 50%; left: 2%; animation-delay: 1s; }
+.formula:nth-child(6) { top: 40%; right: 2%; animation-delay: 3s; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes floatIn {
+  0%, 100% { opacity: 0; transform: translateY(6px); }
+  20%, 80% { opacity: 0.55; transform: translateY(0); }
+}
+
+.hero-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+.hero-sub {
+  font-size: 13px;
+  color: var(--ink2);
+  font-weight: 300;
+  text-align: center;
+}
+
+/* ── SUBJECT CARDS ── */
+.subjects {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  width: 100%;
+}
+@media(max-width:560px) {
+  .subjects { grid-template-columns: 1fr; }
+}
+
+.subject-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: inherit;
+}
+.subject-card:hover {
+  border-color: var(--ink3);
+  background: var(--bg2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(26,24,20,0.06);
+}
+.subject-icon {
+  font-size: 24px;
+  margin-bottom: 0.2rem;
+}
+.subject-color-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-bottom: 0.3rem;
+}
+.subject-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.subject-desc {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.subject-modules {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink3);
+  margin-top: 0.25rem;
+}
+
+/* ── ALSO IN SCIENCES ── */
+.also-section {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  width: 100%;
+}
+.also-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.also-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: opacity 0.13s;
+  text-decoration: none;
+  color: inherit;
+}
+.also-row:last-child { border-bottom: none; }
+.also-row:hover { opacity: 0.6; }
+.also-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.also-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  flex: 1;
+}
+.also-desc { font-size: 11px; color: var(--ink2); }
+.also-arrow { font-size: 11px; color: var(--ink3); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="tback">← denis</a>
+  <span class="tsep">/</span>
+  <span class="ttitle">sciences</span>
+</div>
+
+<div class="hero">
+  <!-- floating formulas -->
+  <div class="formula">E = mc²</div>
+  <div class="formula">∫f(x)dx</div>
+  <div class="formula">∇²ψ = 0</div>
+  <div class="formula">pH = -log[H⁺]</div>
+  <div class="formula">F = ma</div>
+  <div class="formula">∑nᵢ = N</div>
+
+  <div class="orbital-stage">
+    <div class="nucleus">⚛</div>
+    <div class="orbit orbit-1">
+      <div class="electron"></div>
+    </div>
+    <div class="orbit orbit-2">
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+    <div class="orbit orbit-3">
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+
+  <div class="hero-title">sciences</div>
+  <div class="hero-sub">choisis ta branche</div>
+</div>
+
+<div class="subjects">
+  <a href="denis_physique.html" class="subject-card">
+    <div class="subject-color-dot" style="background:#8fb4c8"></div>
+    <div class="subject-name">physique</div>
+    <div class="subject-desc">mécanique · énergie · ondes · relativité · quantique</div>
+    <div class="subject-modules">→ ouvrir</div>
+  </a>
+
+  <a href="denis_chimie_generale.html" class="subject-card">
+    <div class="subject-color-dot" style="background:#a89ec8"></div>
+    <div class="subject-name">chimie</div>
+    <div class="subject-desc">atomes · liaisons · thermo · équilibres · organique</div>
+    <div class="subject-modules">→ ouvrir</div>
+  </a>
+
+  <a href="denis_maths.html" class="subject-card">
+    <div class="subject-color-dot" style="background:#c8a870"></div>
+    <div class="subject-name">maths</div>
+    <div class="subject-desc">algèbre · analyse · géométrie · statistiques</div>
+    <div class="subject-modules">→ ouvrir</div>
+  </a>
+</div>
+
+<div class="also-section">
+  <div class="also-title">aussi dans les sciences</div>
+
+  <a href="denis_chimie_organique.html" class="also-row">
+    <div class="also-dot" style="background:#c8a870"></div>
+    <span class="also-name">chimie organique</span>
+    <span class="also-desc">nomenclature · réactivité · stéréochimie</span>
+    <span class="also-arrow">›</span>
+  </a>
+
+  <a href="denis_biochimie.html" class="also-row">
+    <div class="also-dot" style="background:#7a9e87"></div>
+    <span class="also-name">biochimie</span>
+    <span class="also-desc">protéines · ADN · enzymes · métabolisme</span>
+    <span class="also-arrow">›</span>
+  </a>
+
+  <a href="quantum_robot.html" class="also-row">
+    <div class="also-dot" style="background:#7c3aed"></div>
+    <span class="also-name">quantum · Qiskit</span>
+    <span class="also-desc">qubits · portes · superposition</span>
+    <span class="also-arrow">›</span>
+  </a>
+</div>
+
+</body>
+</html>

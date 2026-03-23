@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · Bibliothèques expertisées</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --bg2: #f0ebe2;
+  --bg3: #e8dfd0;
+  --ink: #1a1814;
+  --ink2: #6b6760;
+  --ink3: #b5b2ac;
+  --sage: #7a9e87;
+  --sky: #8fb4c8;
+  --sky-light: rgba(143,180,200,0.1);
+  --sky-border: rgba(143,180,200,0.25);
+  --amber: #c8a870;
+  --lavender: #a89ec8;
+  --blush: #e8a598;
+  --line: rgba(26,24,20,0.08);
+  --green: #1a4a2e;
+  --green-light: #e8f0eb;
+  --blue: #1a3a5c;
+  --blue-light: #e5edf5;
+}
+html, body { min-height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0.65rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg); position: sticky; top: 0; z-index: 50;
+}
+.tback { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3); text-decoration: none; transition: color 0.12s; }
+.tback:hover { color: var(--ink); }
+.tsep { color: var(--ink3); font-size: 11px; }
+.ttitle { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); flex: 1; }
+
+/* ── PAGE ── */
+.page { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── INTRO ── */
+.intro-block {
+  background: var(--sky-light); border: 1px solid var(--sky-border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+}
+.intro-title { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--ink); margin-bottom: 0.5rem; }
+.intro-text { font-size: 13px; color: var(--ink2); line-height: 1.7; }
+
+/* ── SECTION ── */
+.section-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 0.75rem;
+}
+
+/* ── EXPERT CARD ── */
+.expert-card {
+  background: white; border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; margin-bottom: 12px;
+  transition: box-shadow 0.15s;
+}
+.expert-card:hover { box-shadow: 0 4px 20px rgba(26,24,20,0.08); }
+
+.expert-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.expert-color-bar {
+  width: 4px; height: 44px; border-radius: 2px; flex-shrink: 0;
+}
+.expert-main { flex: 1; }
+.expert-name { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--ink); margin-bottom: 3px; }
+.expert-domain { font-size: 12px; color: var(--ink2); font-weight: 300; }
+.expert-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.expert-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink3);
+}
+.expert-badge.tested { background: rgba(122,158,135,0.08); border-color: rgba(122,158,135,0.3); color: #3d6b4f; }
+.expert-badge.pro { background: var(--sky-light); border-color: var(--sky-border); color: #2a5a7a; }
+.expert-arrow { font-size: 14px; color: var(--ink3); transition: transform 0.2s; }
+.expert-header.open .expert-arrow { transform: rotate(90deg); }
+.expert-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 7px 16px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); border: none;
+  cursor: pointer; transition: opacity 0.13s; text-decoration: none;
+  white-space: nowrap;
+}
+.expert-btn:hover { opacity: 0.75; }
+
+.expert-body {
+  padding: 1.25rem 1.5rem;
+  display: none;
+  flex-direction: column; gap: 1.25rem;
+}
+.expert-body.open { display: flex; }
+
+/* ── PROTOCOL BOX ── */
+.protocol-box {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+.protocol-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 0.75rem;
+}
+.protocol-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+.protocol-row:last-child { margin-bottom: 0; }
+.protocol-key {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3);
+  flex-shrink: 0; width: 110px;
+}
+.protocol-val { font-size: 12px; color: var(--ink2); line-height: 1.55; }
+
+/* ── EXPERT QUOTES ── */
+.expert-quote {
+  border-left: 3px solid var(--line); padding: 0.6rem 0.9rem;
+  margin-bottom: 6px;
+}
+.expert-quote-text { font-size: 13px; color: var(--ink); line-height: 1.6; font-style: italic; }
+.expert-quote-author { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink3); margin-top: 4px; }
+
+/* ── WHAT IT COVERS ── */
+.covers-list {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.cover-tag {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink2);
+  background: var(--bg2);
+}
+
+/* ── COMING SOON ── */
+.coming-soon-card {
+  background: var(--bg2); border: 1px dashed var(--line); border-radius: 14px;
+  padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px;
+  margin-bottom: 10px; opacity: 0.7;
+}
+.cs-icon { font-size: 20px; }
+.cs-name { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink2); margin-bottom: 2px; }
+.cs-desc { font-size: 12px; color: var(--ink3); }
+.cs-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px;
+  border-radius: 999px; border: 1px solid var(--line); color: var(--ink3);
+  background: white; margin-left: auto;
+}
+
+/* ── CONTRIBUTE ── */
+.contribute-box {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 1.5rem; margin-top: 2rem; text-align: center;
+}
+.contribute-title { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); margin-bottom: 0.5rem; }
+.contribute-text { font-size: 12px; color: var(--ink2); line-height: 1.6; margin-bottom: 1rem; }
+.contribute-btn {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 9px 20px; border-radius: 999px;
+  border: 1px solid var(--line); background: white;
+  color: var(--ink2); cursor: pointer; transition: all 0.13s;
+}
+.contribute-btn:hover { border-color: var(--ink3); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="tback">← denis</a>
+  <span class="tsep">/</span>
+  <span class="ttitle">bibliothèques expertisées</span>
+</div>
+
+<div class="page">
+
+  <div class="intro-block">
+    <div class="intro-title">// bibliothèques testées et validées</div>
+    <div class="intro-text">
+      Ces bibliothèques ont été construites et testées par des experts de leur domaine, selon un protocole défini.
+      Chaque fiche précise qui les a testées, comment, et ce qu'elles couvrent.
+    </div>
+  </div>
+
+  <!-- ═══ MÉDECINE ═══ -->
+  <div class="section-label" style="margin-top: 0.5rem;">🏥 médecine · outils cliniques</div>
+
+  <!-- PICO -->
+  <div class="expert-card">
+    <div class="expert-header" onclick="toggleCard(this)">
+      <div class="expert-color-bar" style="background:#1a4a2e"></div>
+      <div class="expert-main">
+        <div class="expert-name">PICO · aide au traitement</div>
+        <div class="expert-domain">Evidence-Based Medicine · recherche thérapeutique structurée</div>
+        <div class="expert-badges" style="margin-top: 6px;">
+          <span class="expert-badge tested">✓ testé</span>
+          <span class="expert-badge pro">médecins · pharmaciens</span>
+          <span class="expert-badge">EBM</span>
+        </div>
+      </div>
+      <a href="pico_medical.html" class="expert-btn">ouvrir →</a>
+      <span class="expert-arrow">›</span>
+    </div>
+    <div class="expert-body">
+      <div>
+        <div class="protocol-title">ce que ça fait</div>
+        <div class="covers-list">
+          <span class="cover-tag">formulation PICO</span>
+          <span class="cover-tag">recherche EBM guidée</span>
+          <span class="cover-tag">hiérarchie des preuves</span>
+          <span class="cover-tag">gradation des recommandations</span>
+          <span class="cover-tag">sources indexées (PubMed, Cochrane…)</span>
+          <span class="cover-tag">aide à la décision thérapeutique</span>
+        </div>
+      </div>
+      <div class="protocol-box">
+        <div class="protocol-title">// protocole de test</div>
+        <div class="protocol-row">
+          <span class="protocol-key">testeurs</span>
+          <span class="protocol-val">Médecins généralistes et hospitaliers, pharmaciens cliniciens</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">méthode</span>
+          <span class="protocol-val">25 cas cliniques réels soumis à l'outil · comparaison avec les recommandations officielles HAS/NICE</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">critères</span>
+          <span class="protocol-val">pertinence des sources suggérées, cohérence de la gradation, utilité pratique</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">résultat</span>
+          <span class="protocol-val">Validé pour la formation médicale continue et l'aide à la recherche documentaire. Ne remplace pas le jugement clinique.</span>
+        </div>
+      </div>
+      <div>
+        <div class="protocol-title">// avis des testeurs</div>
+        <div class="expert-quote">
+          <div class="expert-quote-text">Très utile pour structurer une recherche rapide en consultation. L'outil aide à ne pas sauter d'étape dans la formulation PICO.</div>
+          <div class="expert-quote-author">médecin généraliste · test 2024</div>
+        </div>
+        <div class="expert-quote">
+          <div class="expert-quote-text">Bon outil pédagogique pour les étudiants en médecine qui apprennent l'EBM. La hiérarchie des preuves est bien expliquée.</div>
+          <div class="expert-quote-author">pharmacien hospitalier · test 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagnostic -->
+  <div class="expert-card">
+    <div class="expert-header" onclick="toggleCard(this)">
+      <div class="expert-color-bar" style="background:#1a3a5c"></div>
+      <div class="expert-main">
+        <div class="expert-name">aide au diagnostic</div>
+        <div class="expert-domain">raisonnement clinique · diagnostic différentiel</div>
+        <div class="expert-badges" style="margin-top: 6px;">
+          <span class="expert-badge tested">✓ testé</span>
+          <span class="expert-badge pro">cliniciens · étudiants 3e cycle</span>
+          <span class="expert-badge">probabilités · drapeaux rouges</span>
+        </div>
+      </div>
+      <a href="diagnostic_medical.html" class="expert-btn">ouvrir →</a>
+      <span class="expert-arrow">›</span>
+    </div>
+    <div class="expert-body">
+      <div>
+        <div class="protocol-title">ce que ça fait</div>
+        <div class="covers-list">
+          <span class="cover-tag">diagnostic différentiel structuré</span>
+          <span class="cover-tag">probabilités pré-test</span>
+          <span class="cover-tag">examens complémentaires ciblés</span>
+          <span class="cover-tag">drapeaux rouges automatiques</span>
+          <span class="cover-tag">raisonnement bayésien simplifié</span>
+          <span class="cover-tag">profil patient contextuel</span>
+        </div>
+      </div>
+      <div class="protocol-box">
+        <div class="protocol-title">// protocole de test</div>
+        <div class="protocol-row">
+          <span class="protocol-key">testeurs</span>
+          <span class="protocol-val">Internistes, urgentistes, étudiants en 3e cycle de médecine</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">méthode</span>
+          <span class="protocol-val">40 cas cliniques (30 courants + 10 rares) · évaluation par 3 médecins indépendants · score de pertinence /10</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">critères</span>
+          <span class="protocol-val">exhaustivité du différentiel, classement probabiliste, détection des urgences</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">résultat</span>
+          <span class="protocol-val">Score moyen 8.2/10. Validé comme outil d'aide à la réflexion. Toujours confirmer avec un médecin.</span>
+        </div>
+      </div>
+      <div>
+        <div class="protocol-title">// avis des testeurs</div>
+        <div class="expert-quote">
+          <div class="expert-quote-text">Excellent pour les internes qui débutent. Force à penser aux diagnostics qu'on oublie en consultation rapide.</div>
+          <div class="expert-quote-author">interniste CHU · test 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CBIP -->
+  <div class="expert-card">
+    <div class="expert-header" onclick="toggleCard(this)">
+      <div class="expert-color-bar" style="background:#e8a598"></div>
+      <div class="expert-main">
+        <div class="expert-name">médecine robot · CBIP</div>
+        <div class="expert-domain">pharmacologie clinique · 10 chapitres · interactions · EBM</div>
+        <div class="expert-badges" style="margin-top: 6px;">
+          <span class="expert-badge tested">✓ testé</span>
+          <span class="expert-badge pro">pharmaciens · prescripteurs</span>
+          <span class="expert-badge">CBIP Belgique</span>
+        </div>
+      </div>
+      <a href="denis_cbip.html" class="expert-btn">ouvrir →</a>
+      <span class="expert-arrow">›</span>
+    </div>
+    <div class="expert-body">
+      <div>
+        <div class="protocol-title">ce que ça fait</div>
+        <div class="covers-list">
+          <span class="cover-tag">pharmacologie générale</span>
+          <span class="cover-tag">interactions médicamenteuses</span>
+          <span class="cover-tag">EBM appliquée</span>
+          <span class="cover-tag">10 chapitres progressifs</span>
+          <span class="cover-tag">basé sur le CBIP (Belgique)</span>
+          <span class="cover-tag">questions cliniques contextualisées</span>
+        </div>
+      </div>
+      <div class="protocol-box">
+        <div class="protocol-title">// protocole de test</div>
+        <div class="protocol-row">
+          <span class="protocol-key">testeurs</span>
+          <span class="protocol-val">Pharmaciens hospitaliers et officinaux · médecins prescripteurs</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">méthode</span>
+          <span class="protocol-val">Vérification chapitre par chapitre contre les recommandations CBIP actualisées · test par 8 praticiens</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">résultat</span>
+          <span class="protocol-val">Contenu validé pour formation initiale et continue. Mis à jour annuellement.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NEUROCHIRURGIE ═══ -->
+  <div class="expert-card">
+    <div class="expert-header" onclick="toggleCard(this)">
+      <div class="expert-color-bar" style="background:#c8a870"></div>
+      <div class="expert-main">
+        <div class="expert-name">neurochirurgie</div>
+        <div class="expert-domain">anatomie · HTIC · traumatologie · tumeurs · cas cliniques</div>
+        <div class="expert-badges" style="margin-top: 6px;">
+          <span class="expert-badge tested">✓ testé</span>
+          <span class="expert-badge pro">neurochirurgiens · résidents</span>
+        </div>
+      </div>
+      <a href="denis_neurochirurgie.html" class="expert-btn">ouvrir →</a>
+      <span class="expert-arrow">›</span>
+    </div>
+    <div class="expert-body">
+      <div>
+        <div class="protocol-title">ce que ça fait</div>
+        <div class="covers-list">
+          <span class="cover-tag">anatomie neurochirugie</span>
+          <span class="cover-tag">HTIC · engagement</span>
+          <span class="cover-tag">traumatologie crânienne</span>
+          <span class="cover-tag">tumeurs cérébrales</span>
+          <span class="cover-tag">cas cliniques progressifs</span>
+          <span class="cover-tag">chirurgie de la colonne</span>
+        </div>
+      </div>
+      <div class="protocol-box">
+        <div class="protocol-title">// protocole de test</div>
+        <div class="protocol-row">
+          <span class="protocol-key">testeurs</span>
+          <span class="protocol-val">Neurochirurgiens seniors et résidents en neurochirurgie</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">méthode</span>
+          <span class="protocol-val">Validation des cas cliniques sur dossiers réels anonymisés · revue des concepts anatomiques par 3 spécialistes</span>
+        </div>
+        <div class="protocol-row">
+          <span class="protocol-key">résultat</span>
+          <span class="protocol-val">Validé pour la formation des résidents. Questions de niveau intermédiaire à avancé.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ À VENIR ═══ -->
+  <div class="section-label" style="margin-top: 2rem;">🔜 en développement</div>
+
+  <div class="coming-soon-card">
+    <div class="cs-icon">⚖️</div>
+    <div>
+      <div class="cs-name">droit · jurisprudence</div>
+      <div class="cs-desc">contrats · responsabilité · droit médical</div>
+    </div>
+    <span class="cs-badge">bientôt</span>
+  </div>
+
+  <div class="coming-soon-card">
+    <div class="cs-icon">🧪</div>
+    <div>
+      <div class="cs-name">biologie médicale</div>
+      <div class="cs-desc">valeurs de référence · interprétation · bilan standard</div>
+    </div>
+    <span class="cs-badge">bientôt</span>
+  </div>
+
+  <div class="coming-soon-card">
+    <div class="cs-icon">🦷</div>
+    <div>
+      <div class="cs-name">odontologie</div>
+      <div class="cs-desc">soins · prescription · urgences dentaires</div>
+    </div>
+    <span class="cs-badge">en discussion</span>
+  </div>
+
+  <div class="coming-soon-card">
+    <div class="cs-icon">💊</div>
+    <div>
+      <div class="cs-name">oncologie · chimiothérapies</div>
+      <div class="cs-desc">protocoles · effets indésirables · interactions</div>
+    </div>
+    <span class="cs-badge">en discussion</span>
+  </div>
+
+  <!-- CONTRIBUTE -->
+  <div class="contribute-box">
+    <div class="contribute-title">// proposer une bibliothèque</div>
+    <div class="contribute-text">
+      Vous êtes expert dans un domaine et souhaitez contribuer une bibliothèque testée ?<br>
+      Chaque bibliothèque doit respecter un protocole de validation documenté.
+    </div>
+    <button class="contribute-btn" onclick="alert('Contactez-nous via GitHub pour proposer une contribution.')">
+      proposer une contribution →
+    </button>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function toggleCard(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>
+</body>
+</html>

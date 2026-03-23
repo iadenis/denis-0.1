@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis · Ma bibliothèque perso</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #faf8f4;
+  --bg2: #f0ebe2;
+  --bg3: #e8dfd0;
+  --ink: #1a1814;
+  --ink2: #6b6760;
+  --ink3: #b5b2ac;
+  --sage: #7a9e87;
+  --sage-light: rgba(122,158,135,0.1);
+  --sage-border: rgba(122,158,135,0.25);
+  --sky: #8fb4c8;
+  --amber: #c8a870;
+  --lavender: #a89ec8;
+  --blush: #e8a598;
+  --line: rgba(26,24,20,0.08);
+}
+html, body { min-height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0.65rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg); position: sticky; top: 0; z-index: 50;
+}
+.tback { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3); text-decoration: none; transition: color 0.12s; }
+.tback:hover { color: var(--ink); }
+.tsep { color: var(--ink3); font-size: 11px; }
+.ttitle { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); flex: 1; }
+.tbadge {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--sage-light); border: 1px solid var(--sage-border); color: var(--sage);
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--line); margin-bottom: 2rem;
+}
+.tab {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 8px 16px; border: none; background: none;
+  color: var(--ink3); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.13s; margin-bottom: -1px;
+}
+.tab:hover { color: var(--ink2); }
+.tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.25rem;
+}
+.section-title {
+  font-family: 'DM Mono', monospace; font-size: 14px; color: var(--ink);
+}
+.section-sub { font-size: 12px; color: var(--ink3); }
+
+/* ── PROFILE PICKER ── */
+.profile-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.profile-card {
+  border: 2px solid var(--line); border-radius: 12px;
+  padding: 1.25rem; cursor: pointer; transition: all 0.13s;
+  background: white;
+}
+.profile-card:hover { border-color: var(--ink3); }
+.profile-card.selected { border-color: var(--sage); background: var(--sage-light); }
+.profile-icon { font-size: 24px; margin-bottom: 0.5rem; }
+.profile-name { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); margin-bottom: 3px; }
+.profile-desc { font-size: 11px; color: var(--ink2); line-height: 1.5; }
+
+/* ── SOURCE ENTRY ── */
+.source-block {
+  background: white; border: 1px solid var(--line); border-radius: 12px;
+  overflow: hidden; margin-bottom: 10px;
+}
+.source-block-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+}
+.source-block-icon { font-size: 16px; }
+.source-block-title { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); flex: 1; }
+.source-block-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.field-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 4px;
+}
+textarea, input[type=text] {
+  width: 100%; border: 1px solid var(--line); border-radius: 6px;
+  padding: 8px 10px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--ink); background: var(--bg); transition: border-color 0.12s; resize: vertical;
+}
+textarea:focus, input[type=text]:focus { outline: none; border-color: var(--sage); }
+textarea { min-height: 80px; }
+
+/* ── QR ZONE ── */
+.qr-zone {
+  border: 2px dashed var(--line); border-radius: 10px;
+  padding: 1.25rem; text-align: center;
+  cursor: pointer; transition: all 0.13s;
+  background: var(--bg2);
+}
+.qr-zone:hover { border-color: var(--ink3); background: var(--bg3); }
+.qr-icon { font-size: 28px; margin-bottom: 0.5rem; }
+.qr-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3); }
+.qr-sub { font-size: 11px; color: var(--ink3); margin-top: 4px; }
+.qr-supported {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 0.75rem; justify-content: center;
+}
+.qr-tag {
+  font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px;
+  border-radius: 999px; border: 1px solid var(--line); color: var(--ink3);
+  background: white;
+}
+
+/* ── SETTINGS ── */
+.settings-section { margin-bottom: 1.75rem; }
+.settings-title {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--ink2); margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+.setting-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-info { flex: 1; }
+.setting-name { font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+.setting-desc { font-size: 11px; color: var(--ink3); line-height: 1.5; }
+
+/* Toggle */
+.toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--bg3); border-radius: 999px; transition: 0.2s;
+  border: 1px solid var(--line);
+}
+.toggle-slider::before {
+  content: ''; position: absolute; height: 14px; width: 14px;
+  left: 2px; top: 2px; background: white; border-radius: 50%; transition: 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle input:checked + .toggle-slider { background: var(--sage); border-color: var(--sage); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* Range */
+.setting-range {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.setting-range:last-child { border-bottom: none; }
+.range-info { flex: 1; }
+.range-control { display: flex; align-items: center; gap: 8px; }
+input[type=range] {
+  -webkit-appearance: none; width: 100px; height: 3px;
+  background: var(--bg3); border-radius: 2px; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--ink); cursor: pointer;
+}
+.range-val {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink2);
+  width: 24px; text-align: right;
+}
+
+/* Select */
+.setting-select {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--bg2); color: var(--ink); cursor: pointer;
+}
+.setting-select:focus { outline: none; border-color: var(--sage); }
+
+/* ── LIBRARY LIST ── */
+.lib-list { display: flex; flex-direction: column; gap: 8px; }
+.lib-item {
+  background: white; border: 1px solid var(--line); border-radius: 10px;
+  padding: 0.9rem 1rem; display: flex; align-items: center; gap: 12px;
+}
+.lib-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.lib-info { flex: 1; }
+.lib-name { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+.lib-meta { font-size: 11px; color: var(--ink3); }
+.lib-actions { display: flex; gap: 6px; }
+.lib-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: none; color: var(--ink3);
+  transition: all 0.12s;
+}
+.lib-btn:hover { border-color: var(--ink2); color: var(--ink2); }
+.lib-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.lib-btn.primary:hover { opacity: 0.75; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--ink3);
+}
+.empty-icon { font-size: 32px; margin-bottom: 0.75rem; opacity: 0.4; }
+.empty-text { font-family: 'DM Mono', monospace; font-size: 12px; }
+.empty-sub { font-size: 12px; color: var(--ink3); margin-top: 0.5rem; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+  padding: 10px 22px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); border: none;
+  cursor: pointer; transition: opacity 0.13s;
+}
+.btn-primary:hover { opacity: 0.75; }
+.btn-secondary {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 10px 18px; border-radius: 999px;
+  background: none; color: var(--ink3); border: 1px solid var(--line);
+  cursor: pointer; transition: all 0.12s;
+}
+.btn-secondary:hover { color: var(--ink2); border-color: var(--ink3); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.5rem; }
+
+/* ── STEP GUIDE ── */
+.steps {
+  display: flex; flex-direction: column; gap: 0;
+  margin-bottom: 1.5rem;
+}
+.step-row {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--line);
+}
+.step-row:last-child { border-bottom: none; }
+.step-num {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ink); color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-body { flex: 1; }
+.step-title { font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+.step-desc { font-size: 12px; color: var(--ink2); line-height: 1.55; }
+
+/* ── API KEY ── */
+.api-row {
+  display: flex; gap: 8px; align-items: center;
+  background: white; border: 1px solid var(--line); border-radius: 8px;
+  padding: 0.75rem 1rem; margin-bottom: 1rem;
+}
+.api-row input {
+  flex: 1; border: none; background: none; outline: none;
+  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink);
+}
+.api-status {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 2px 8px; border-radius: 999px;
+}
+.api-status.ok { background: var(--sage-light); border: 1px solid var(--sage-border); color: var(--sage); }
+.api-status.nok { background: rgba(232,165,152,0.12); border: 1px solid rgba(232,165,152,0.3); color: #8b4a3e; }
+.api-note { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink3); line-height: 1.6; }
+.api-note a { color: var(--sky); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="tback">← denis</a>
+  <span class="tsep">/</span>
+  <span class="ttitle">ma bibliothèque perso</span>
+  <span class="tbadge">beta</span>
+</div>
+
+<div class="page">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('creer')">créer</button>
+    <button class="tab" onclick="switchTab('entrainer')">entraîner</button>
+    <button class="tab" onclick="switchTab('parametres')">paramètres</button>
+    <button class="tab" onclick="switchTab('meslibs')">mes bibliothèques</button>
+  </div>
+
+  <!-- ═══ CRÉER ═══ -->
+  <div class="tab-pane active" id="tab-creer">
+
+    <div class="section-header">
+      <div>
+        <div class="section-title">créer une bibliothèque</div>
+        <div class="section-sub">ajoute tes cours, sources, et documents de référence</div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div style="margin-bottom: 1.5rem;">
+      <div class="field-label">profil</div>
+      <div class="profile-grid">
+        <div class="profile-card selected" onclick="selectProfile(this)">
+          <div class="profile-icon">🎓</div>
+          <div class="profile-name">étudiant</div>
+          <div class="profile-desc">cours · syllabus · manuels · articles · QCM de révision</div>
+        </div>
+        <div class="profile-card" onclick="selectProfile(this)">
+          <div class="profile-icon">💼</div>
+          <div class="profile-name">professionnel</div>
+          <div class="profile-desc">guidelines · protocoles · références spécialisées · formation continue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Library name -->
+    <div class="source-block">
+      <div class="source-block-header">
+        <span class="source-block-icon">📖</span>
+        <span class="source-block-title">nom de la bibliothèque</span>
+      </div>
+      <div class="source-block-body">
+        <div>
+          <div class="field-label">titre</div>
+          <input type="text" placeholder="ex. Pharmacologie BA3 · Cardiologie · Droit des contrats…">
+        </div>
+        <div>
+          <div class="field-label">description (optionnel)</div>
+          <textarea placeholder="Ce que cette bibliothèque couvre, le niveau, le contexte…" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source: texte -->
+    <div class="source-block">
+      <div class="source-block-header">
+        <span class="source-block-icon">📝</span>
+        <span class="source-block-title">ajouter du contenu texte</span>
+      </div>
+      <div class="source-block-body">
+        <div>
+          <div class="field-label">colle tes notes, cours, ou résumés ici</div>
+          <textarea placeholder="Colle tes notes de cours, résumés, définitions, schémas textuels…&#10;&#10;L'assistant va les lire et créer des questions adaptées à ton niveau." style="min-height:120px;"></textarea>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" style="font-size:10px; padding:6px 14px;">+ autre bloc</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source: QR / URL -->
+    <div class="source-block">
+      <div class="source-block-header">
+        <span class="source-block-icon">🔗</span>
+        <span class="source-block-title">ajouter via URL ou QR code</span>
+      </div>
+      <div class="source-block-body">
+        <div>
+          <div class="field-label">URL d'un article, chapitre ou ressource en ligne</div>
+          <input type="text" placeholder="https://…  (PubMed, revues, DynaMed, UpToDate, Cochrane…)">
+        </div>
+
+        <div class="qr-zone" onclick="scanQR()">
+          <div class="qr-icon">📷</div>
+          <div class="qr-text">scanner un QR code</div>
+          <div class="qr-sub">livre · syllabus · page d'un manuel avec votre abonnement</div>
+          <div class="qr-supported">
+            <span class="qr-tag">DynaMed</span>
+            <span class="qr-tag">UpToDate</span>
+            <span class="qr-tag">Cochrane</span>
+            <span class="qr-tag">BMJ Best Practice</span>
+            <span class="qr-tag">PubMed</span>
+            <span class="qr-tag">Vidal</span>
+            <span class="qr-tag">tout site web</span>
+          </div>
+        </div>
+        <div class="api-note">💡 Pour les sources avec abonnement (DynaMed, UpToDate…), l'accès se fait via votre session ouverte dans votre navigateur. Denis n'accède pas à vos identifiants.</div>
+      </div>
+    </div>
+
+    <!-- API Key -->
+    <div class="source-block">
+      <div class="source-block-header">
+        <span class="source-block-icon">🔑</span>
+        <span class="source-block-title">clé API (pour l'assistant IA)</span>
+      </div>
+      <div class="source-block-body">
+        <div class="api-row">
+          <input type="password" id="api-key-input" placeholder="sk-ant-…" oninput="checkKey(this)">
+          <span class="api-status nok" id="api-status">non configurée</span>
+        </div>
+        <div class="api-note">
+          Clé Anthropic Claude, utilisée uniquement dans votre navigateur.
+          Obtenez-en une gratuitement sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.
+          Elle n'est jamais envoyée à un serveur Denis.
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="createLibrary()">créer la bibliothèque →</button>
+      <button class="btn-secondary">prévisualiser</button>
+    </div>
+  </div>
+
+  <!-- ═══ ENTRAÎNER ═══ -->
+  <div class="tab-pane" id="tab-entrainer">
+
+    <div class="section-header">
+      <div>
+        <div class="section-title">entraîner avec l'assistant</div>
+        <div class="section-sub">l'IA génère des questions progressives à partir de tes sources</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">choisis une bibliothèque</div>
+          <div class="step-desc">Sélectionne la bibliothèque que tu veux réviser ou approfondir.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">l'assistant analyse ton niveau</div>
+          <div class="step-desc">Quelques questions de diagnostic pour calibrer la difficulté de départ.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">questions progressives</div>
+          <div class="step-desc">Définitions → exemples → application → cas complexes. Vitesse adaptée à tes réponses.</div>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">feedback et explication</div>
+          <div class="step-desc">Chaque réponse est corrigée avec l'explication issue de tes sources.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lib-list" id="train-lib-list">
+      <div class="empty">
+        <div class="empty-icon">📚</div>
+        <div class="empty-text">aucune bibliothèque créée</div>
+        <div class="empty-sub">crée d'abord une bibliothèque dans l'onglet "créer"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PARAMÈTRES ═══ -->
+  <div class="tab-pane" id="tab-parametres">
+
+    <div class="section-header">
+      <div>
+        <div class="section-title">paramètres de l'assistant</div>
+        <div class="section-sub">configure comment l'IA t'interroge et t'aide</div>
+      </div>
+    </div>
+
+    <!-- Progression -->
+    <div class="settings-section">
+      <div class="settings-title">// progression &amp; difficulté</div>
+
+      <div class="setting-range">
+        <div class="range-info">
+          <div class="setting-name">vitesse de progression</div>
+          <div class="setting-desc">lent = plus de questions par niveau · rapide = avance vite si tu réussis</div>
+        </div>
+        <div class="range-control">
+          <input type="range" min="1" max="5" value="3" oninput="document.getElementById('spd-val').textContent=this.value">
+          <span class="range-val" id="spd-val">3</span>
+        </div>
+      </div>
+
+      <div class="setting-range">
+        <div class="range-info">
+          <div class="setting-name">questions supplémentaires si notion difficile</div>
+          <div class="setting-desc">combien de questions en plus si tu rates 2 fois de suite</div>
+        </div>
+        <div class="range-control">
+          <input type="range" min="0" max="5" value="2" oninput="document.getElementById('retry-val').textContent=this.value">
+          <span class="range-val" id="retry-val">2</span>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">mode examen</div>
+          <div class="setting-desc">aucun indice, aucune explication avant la fin — comme un vrai examen</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="exam-mode"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <!-- Types de questions -->
+    <div class="settings-section">
+      <div class="settings-title">// types de questions</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">QCM (choix multiples)</div>
+          <div class="setting-desc">3–4 choix, 1 bonne réponse · format standard</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">vrai / faux</div>
+          <div class="setting-desc">affirmations à valider ou invalider</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">questions ouvertes courtes</div>
+          <div class="setting-desc">formule une réponse, l'IA l'évalue</div>
+        </div>
+        <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">cas cliniques / cas pratiques</div>
+          <div class="setting-desc">scénarios contextualisés avec ta spécialité</div>
+        </div>
+        <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="settings-section">
+      <div class="settings-title">// feedback &amp; explications</div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">explication après chaque question</div>
+          <div class="setting-desc">l'assistant explique la bonne réponse et cite ta source</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">indice sur demande</div>
+          <div class="setting-desc">bouton "? indice" visible avant de répondre</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">résumé en fin de session</div>
+          <div class="setting-desc">liste des notions maîtrisées et à retravailler</div>
+        </div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-name">langue de l'assistant</div>
+        </div>
+        <select class="setting-select">
+          <option>français</option>
+          <option>english</option>
+          <option>español</option>
+          <option>Nederlands</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary">enregistrer les paramètres</button>
+      <button class="btn-secondary">réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- ═══ MES BIBLIOTHÈQUES ═══ -->
+  <div class="tab-pane" id="tab-meslibs">
+
+    <div class="section-header">
+      <div>
+        <div class="section-title">mes bibliothèques</div>
+        <div class="section-sub">retrouve et gère tes bibliothèques créées</div>
+      </div>
+    </div>
+
+    <div class="lib-list">
+      <!-- Example items — in real use these come from localStorage -->
+      <div class="lib-item">
+        <div class="lib-dot" style="background:#7a9e87"></div>
+        <div class="lib-info">
+          <div class="lib-name">Pharmacologie · BA3</div>
+          <div class="lib-meta">étudiant · 3 sources · créé aujourd'hui</div>
+        </div>
+        <div class="lib-actions">
+          <button class="lib-btn primary" onclick="alert('Entraînement à venir !')">entraîner</button>
+          <button class="lib-btn">éditer</button>
+        </div>
+      </div>
+
+      <div class="empty" style="padding: 2rem 0;">
+        <div class="empty-icon">📂</div>
+        <div class="empty-text">crée ta première bibliothèque</div>
+        <div class="empty-sub">dans l'onglet "créer"</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectProfile(card) {
+  document.querySelectorAll('.profile-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+function checkKey(input) {
+  const status = document.getElementById('api-status');
+  if (input.value.startsWith('sk-ant-') && input.value.length > 20) {
+    status.textContent = 'configurée ✓';
+    status.className = 'api-status ok';
+    localStorage.setItem('denis_api_key', input.value);
+  } else {
+    status.textContent = 'non configurée';
+    status.className = 'api-status nok';
+  }
+}
+
+function scanQR() {
+  alert('Scanner QR — cette fonctionnalité sera disponible dans la prochaine version.\n\nEn attendant, colle l\'URL directement dans le champ au-dessus.');
+}
+
+function createLibrary() {
+  const name = document.querySelector('#tab-creer input[type=text]').value;
+  if (!name.trim()) { alert('Donne un nom à ta bibliothèque.'); return; }
+  alert(`Bibliothèque "${name}" créée !\n\nL'entraînement par l'assistant sera disponible dès que vous aurez configuré votre clé API.`);
+}
+
+// Load saved key
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('denis_api_key');
+  if (saved) {
+    const inp = document.getElementById('api-key-input');
+    inp.value = saved;
+    checkKey(inp);
+  }
+});
+</script>
+</body>
+</html>
